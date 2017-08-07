@@ -198,7 +198,7 @@ class Streamer():
 
 class LiveDisplay():
     """
-    Utility for the Streamer class that allows for easy display and modification of live streams.
+    Utility that allows for easy display and modification of live streams.
 
     Parameters
     ----------

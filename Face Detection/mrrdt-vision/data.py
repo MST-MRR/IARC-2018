@@ -34,7 +34,7 @@ import numpy as np
 import sqlite3
 
 from .util import static_vars
-from .task import DEBUG
+from .main import DEBUG
 
 # folder containing the SQL database for object annotations
 POSITIVE_IMAGE_DATABASE_FOLDER = 'aflw/data/'

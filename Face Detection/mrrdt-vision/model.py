@@ -47,7 +47,7 @@ from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 
 from .hyperopt_keras import HyperoptWrapper, get_best_params, DEFAULT_NUM_EVALS, tune
-from .task import DEBUG
+from .main import DEBUG
 from .preprocess import ImageNormalizer
 from .data import SCALES, DATASET_LABEL, DatasetManager
 from .util import TempH5pyFile
@@ -331,7 +331,7 @@ class ObjectClassifier():
         Parameters
         ----------
         debug: bool, optional
-            Controls whether or not to return the debug mode's save file path, default is `task.DEBUG`.
+            Controls whether or not to return the debug mode's save file path, default is `main.DEBUG`.
         
         Returns
         -------
@@ -504,7 +504,7 @@ class ObjectClassifier():
         verbose: bool, optional
             Controls whether or not to display training progress, default is True.
         debug: bool, optional
-            Controls whether or not to save the model's weights to `DEBUG_FILE_PATH`, default is `task.DEBUG`
+            Controls whether or not to save the model's weights to `DEBUG_FILE_PATH`, default is `main.DEBUG`
         
         Returns
         -------
