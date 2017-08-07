@@ -89,25 +89,25 @@ ENV/
 .ropeproject
 
 #Ignore image folders
-/Vision/Object Detection/Annotated Faces in the Wild/
-/Vision/Object Detection/Annotated Faces in the Wild/**
-/Vision/Object Detection/Negative Images/
-/Vision/Object Detection/Negative Images/**
-/Vision/Object Detection/aflw/**
-/Vision/Object Detection/aflw/
+/Object Detection/Annotated Faces in the Wild/
+/Object Detection/Annotated Faces in the Wild/**
+/Object Detection/Negative Images/
+/Object Detection/Negative Images/**
+/Object Detection/aflw/**
+/Object Detection/aflw/
 
-/Vision/Face Detection/Annotated Faces in the Wild/
-/Vision/Face Detection/Annotated Faces in the Wild/**
-/Vision/Face Detection/Negative Images/
-/Vision/Face Detection/Negative Images/**
-/Vision/Face Detection/aflw/**
-/Vision/Face Detection/aflw/
+/Face Detection/Annotated Faces in the Wild/
+/Face Detection/Annotated Faces in the Wild/**
+/Face Detection/Negative Images/
+/Face Detection/Negative Images/**
+/Face Detection/aflw/**
+/Face Detection/aflw/
 
-/Vision/Roombas/Roomba Dataset/**
-/Vision/Roombas/Roomba Dataset/
+/Roombas/Roomba Dataset/**
+/Roombas/Roomba Dataset/
 
 #Ignore dataset files
-/Vision/Face Detection/data/*.hdf
+/Face Detection/data/*.hdf
 Flight/Tests
 
-/Vision/Gridline Detection + Corner Detection/IARC 2016 Footage.mp4
+/Gridline Detection + Corner Detection/IARC 2016 Footage.mp4
