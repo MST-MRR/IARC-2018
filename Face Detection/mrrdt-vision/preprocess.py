@@ -17,7 +17,7 @@ import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 
 from .data import DATASET_LABEL, RANDOM_SEED
-from .task import DEBUG
+from .main import DEBUG
 
 # maximum number of images to sample from each image set
 DEFAULT_FIT_SAMPLE_SIZE = 100000

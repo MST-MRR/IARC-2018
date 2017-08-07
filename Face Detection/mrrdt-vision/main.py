@@ -9,10 +9,10 @@ Main module for this project.
 
 Usage
 ----------
-First ensure that you are in the same directory that the trainer folder is stored in. Then you may execute the module
+First ensure that you are in the same directory that the parent folder for this project is stored in. Then you may execute the module
 via a command analagous to the following one:
 
-username@username-pc-name:~$ python -m trainer.task --help
+username@username-pc-name:~$ python -m trainer.main --help
 
 The example above will display usage information for every currently available command-line option. --help may be
 replaced with any valid sequence of command-line options.
@@ -57,18 +57,18 @@ if __name__ == '__main__':
 
     # parse command-line arguments
     parser = OptionParser()
-    parser.add_option('-s', '--stage', dest='stageIdx', help='Cascade stage index', metavar = '[0-2]', default = 2)
-    parser.add_option('-c', '--calib', action='store_true', dest = 'trainCalib', help='Use to train the calibration net for the given stage', default = False)
-    parser.add_option('-v', '--visualize',  action='store_true', dest = 'testMode', help='View output of detector on different test images', default = False)
+    parser.add_option('-s', '--stage', dest='stageIdx', help='Cascade stage index', metavar = '[0, 2]', default = 2)
+    parser.add_option('-c', '--calib', action='store_true', dest = 'isCalib', help='Perform actions with the calibrator instead of the classifier.', default = False)
+    parser.add_option('-v', '--visualize',  action='store_true', dest = 'visualizeMode', help='View output of detector on different test images', default = False)
     parser.add_option('-l', '--live',  action='store_true', dest = 'liveMode', help='Test detector on a live Intel RealSense Stream', default = False)
-    parser.add_option('-e', '--eval', action='store_true', dest='evalMode', help="Plot preicison+recall vs. threshold for given stage", default = False)
+    parser.add_option('-e', '--eval', action='store_true', dest='evalMode', help="Summarize the performance of the specfiied model using plots and applicable metrics.", default = False)
     parser.add_option('-t', '--train', action='store_true', dest='trainMode', help='Train either the classifier or calibrator for the given stage', default = False)
 
     (options, args) = parser.parse_args()
 
     # get model for training or evaluation when one of those options are specified
     if options.trainMode or options.evalMode:
-        model = MODELS[options.trainCalib][int(options.stageIdx)]
+        model = MODELS[options.isCalib][int(options.stageIdx)]
         dataset_manager = DatasetManager(model)
 
     def prediction_callback(img):
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
         Notes
         ----------
-        If `task.PROFILE` is True, this function will display how many seconds it took to make predictions on `img`
+        If `main.PROFILE` is True, this function will display how many seconds it took to make predictions on `img`
         
         Returns
         -------
@@ -101,7 +101,7 @@ if __name__ == '__main__':
         for (x_min, y_min, x_max, y_max) in detections: 
             cv2.rectangle(img, (x_min, y_min), (x_max, y_max), GREEN, THICKNESS)
 
-    if options.testMode:
+    if options.visualizeMode:
         from .visualize import visualizer
         from .data import get_test_image_paths
         visualizer(get_test_image_paths(), prediction_callback, WINDOW_TITLE)
