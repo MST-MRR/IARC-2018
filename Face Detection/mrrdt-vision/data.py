@@ -176,31 +176,27 @@ def squash_coords(img, x, y, w, h):
     w = min(img.shape[1]-x, w)
     return (x, y, w, h)
 
-def create_positive_dataset(stage_idx, get_object_annotations=get_face_annotations, pos_img_folder=POSITIVE_IMAGE_FOLDER):
+def create_positive_dataset(file_path, resize_to, get_object_annotations=get_face_annotations, pos_img_folder=POSITIVE_IMAGE_FOLDER):
     """
     Creates a positive dataset file from a set of image annotations.
 
     Parameters
     ----------
-    stage_idx: int
-        Cascade stage index.
+    file_path: str
+        Full path to the positive dataset file.
+    resize_to: tuple
+        The dimensions to resize each positive image to.
     get_object_annotations: callable, optional
         Callable that returns a sequence of image annotations with entries in the form
         (<image path>, <x>, <y>, <width>, <height>), defaults to `data.get_face_annotations`. 
     pos_img_folder: str, optional
         Path to the folder which contains the images referenced by the image annotation sequence, defaults to `POSITIVE_IMAGE_FOLDER`.
-    
-    Notes
-    ----------
-    If this function succeeds, a file will be creeated in the current working directory with the name `OBJECT_DATABASE_PATHS[stage_idx]`.
 
     Returns
     -------
     None
     """
 
-    file_name = OBJECT_DATABASE_PATHS[stage_idx]
-    resize_to = SCALES[stage_idx]
     object_annotations = get_object_annotations(pos_img_folder=pos_img_folder)
     images = np.zeros((len(object_annotations), resize_to[1], resize_to[0], 3), dtype=np.uint8)
     cur_img = None
@@ -214,17 +210,19 @@ def create_positive_dataset(stage_idx, get_object_annotations=get_face_annotatio
         images[i] = cv2.resize(cur_img[y:y+h,x:x+w], resize_to)
         prev_img_path = img_path
 
-    with h5py.File(file_name, 'w') as out:
+    with h5py.File(file_path, 'w') as out:
         out.create_dataset(DATASET_LABEL, data=images, chunks=(CHUNK_SIZE,) + (images.shape[1:]))
 
-def create_negative_dataset(stage_idx, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negatives=TARGET_NUM_NEGATIVES, num_negatives_per_img=TARGET_NUM_NEGATIVES_PER_IMG):
+def create_negative_dataset(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negatives=TARGET_NUM_NEGATIVES, num_negatives_per_img=TARGET_NUM_NEGATIVES_PER_IMG):
     """
     Creates a negative dataset file from a set of non-object images.
 
     Parameters
     ----------
-    stage_idx: int
-        Cascade stage index.
+    file_path: str
+        Full path to the negative dataset file.
+    resize_to: tuple
+        The dimensions to resize each negative image to.
     neg_img_folder: str, optional
         Path to the folder which contains the non-object images, defaults to `NEGATIVE_IMAGE_FOLDER`.
     num_negatives: int, optional
@@ -241,8 +239,6 @@ def create_negative_dataset(stage_idx, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num
     None
     """
 
-    file_name = NEGATIVE_DATABASE_PATHS[stage_idx]
-    resize_to = SCALES[stage_idx]
     negative_image_paths = [os.path.join(neg_img_folder, file_name) for file_name in os.listdir(neg_img_folder)]
     images = np.zeros((num_negatives, resize_to[1], resize_to[0], 3), dtype=np.uint8)
     neg_idx = 0
@@ -269,17 +265,19 @@ def create_negative_dataset(stage_idx, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num
     if neg_idx < len(images)-1:
         images = np.delete(images, np.s_[neg_idx:], 0)
 
-    with h5py.File(file_name, 'w') as out:
+    with h5py.File(file_path, 'w') as out:
         out.create_dataset(DATASET_LABEL, data=images, chunks=(CHUNK_SIZE,) + (images.shape[1:]))
 
-def mine_negatives(stage_idx, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negatives=TARGET_NUM_NEGATIVES):
+def mine_negatives(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negatives=TARGET_NUM_NEGATIVES):
     """
     Creates a negative dataset file by mining samples from a set of non-object images.
 
     Parameters
     ----------
-    stage_idx: int
-        Cascade stage index.
+    file_path: str
+        Full path to the negative dataset file.
+    resize_to: tuple
+        The dimensions to resize each negative image to.
     neg_img_folder: str, optional
         Path to the folder which contains the non-object images, defaults to `NEGATIVE_IMAGE_FOLDER`.
     num_negatives: int, optional
@@ -298,8 +296,6 @@ def mine_negatives(stage_idx, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negative
 
     from .detect import detect_multiscale
 
-    file_name = NEGATIVE_DATABASE_PATHS[stage_idx]
-    resize_to = SCALES[stage_idx]
     negative_image_paths = [os.path.join(neg_img_folder, file_name) for file_name in os.listdir(neg_img_folder)]
     images = np.zeros((num_negatives, resize_to[1], resize_to[0], 3), dtype=np.uint8)
     neg_idx = 0
@@ -318,18 +314,20 @@ def mine_negatives(stage_idx, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negative
     if neg_idx < len(images)-1:
         images = np.delete(images, np.s_[neg_idx:], 0)
 
-    with h5py.File(file_name, 'w') as out:
+    with h5py.File(file_path, 'w') as out:
         out.create_dataset(DATASET_LABEL, data=images, chunks=(CHUNK_SIZE,) + (images.shape[1:]))
 
-def create_calibration_dataset(stage_idx, get_object_annotations=get_face_annotations, pos_img_folder=POSITIVE_IMAGE_FOLDER, 
+def create_calibration_dataset(file_path, resize_to, get_object_annotations=get_face_annotations, pos_img_folder=POSITIVE_IMAGE_FOLDER,
                                num_calibration_samples=TARGET_NUM_CALIBRATION_SAMPLES, calib_patterns=CALIB_PATTERNS):
     """
     Creates a calibration dataset file by perturbing a sequence of object annotations.
 
     Parameters
     ----------
-    stage_idx: int
-        Cascade stage index.
+    file_path: str
+        Full path to the calibration dataset file.
+    resize_to: tuple
+        The dimensions to resize each calibration sample to
     get_object_annotations: callable, optional
         Callable that returns a sequence of image annotations with entries in the form
         (<image path>, <x>, <y>, <width>, <height>), defaults to `data.get_face_annotations`. 
@@ -352,7 +350,6 @@ def create_calibration_dataset(stage_idx, get_object_annotations=get_face_annota
     num_calibration_samples = math.inf if num_calibration_samples is None else num_calibration_samples
     object_annotations = get_object_annotations(pos_img_folder=pos_img_folder)
 
-    resize_to = SCALES[stage_idx]
     dataset_len = len(object_annotations)*len(calib_patterns) if num_calibration_samples == math.inf else num_calibration_samples
     dataset = np.zeros((dataset_len, resize_to[1], resize_to[0], 3), np.uint8)
     labels = np.zeros((dataset_len, 1))
@@ -383,7 +380,7 @@ def create_calibration_dataset(stage_idx, get_object_annotations=get_face_annota
         labels = np.delete(labels, np.s_[sample_idx:], 0)
         dataset = np.delete(dataset, np.s_[sample_idx:], 0)
 
-    with h5py.File(file_name, 'w') as out:
+    with h5py.File(file_path, 'w') as out:
         out.create_dataset(LABELS_LABEL, data=labels, chunks=(CHUNK_SIZE, 1))
         out.create_dataset(DATASET_LABEL, data=dataset, chunks=(CHUNK_SIZE, resize_to[1], resize_to[0], 3))
 
@@ -408,8 +405,8 @@ def get_test_image_paths(test_img_db_folder=TEST_IMAGE_DATABASE_FOLDER, test_img
 
     for file_name in os.listdir(test_img_db_folder):
         if 'ellipse' not in file_name:
-            with open(os.path.join(test_img_db_folder, file_name)) as inFile:
-                img_paths.extend(inFile.read().splitlines())
+            with open(os.path.join(test_img_db_folder, file_name)) as in_file:
+                img_paths.extend(in_file.read().splitlines())
 
     return [os.path.join(test_imgs_folder, img_path) + '.jpg' for img_path in img_paths]
 
@@ -424,29 +421,34 @@ class DatasetManager():
     get_object_annotations: callable, optional
         Callable that returns a sequence of image annotations with entries in the form
         (<image path>, <x>, <y>, <width>, <height>), defaults to `data.get_face_annotations`.
+    base_folder: str, optional
+        Path to the folder to base the dataset files in, defaults to using the current working directory.
     pos_img_folder: str, optional
         Path to the folder which contains the images referenced by the image annotation sequence, defaults to `POSITIVE_IMAGE_FOLDER`.
     neg_img_folder: str, optional
         Path to the folder which contains the non-object images, defaults to `NEGATIVE_IMAGE_FOLDER`.
     """
 
-    def __init__(self, model, get_object_annotations=get_face_annotations, pos_img_folder=POSITIVE_IMAGE_FOLDER, neg_img_folder=NEGATIVE_IMAGE_FOLDER):
+    def __init__(self, model, get_object_annotations=get_face_annotations, base_folder = '', pos_img_folder=POSITIVE_IMAGE_FOLDER, neg_img_folder=NEGATIVE_IMAGE_FOLDER):
         """
         Retrieves the relevant dataset paths for `model` and fills in any internal attributes.
         """
 
         from .model import ObjectCalibrator
+        from .persistence import GLOBAL_STORAGE_FILE_PATH
         self.model = model
         self.is_calib = isinstance(self.model, ObjectCalibrator)
         self.stage_idx = model.get_stage_idx()
-        self.pos_dataset_file_path = OBJECT_DATABASE_PATHS[self.stage_idx]
-        self.neg_dataset_file_path = NEGATIVE_DATABASE_PATHS[self.stage_idx]
-        self.calib_dataset_file_path = CALIBRATION_DATABASE_PATHS[SCALES[self.stage_idx][0]]
+        self.base_folder = base_folder
+        self.model.set_base_folder(self.base_folder)
+        self.pos_dataset_file_path = os.path.join(self.base_folder, OBJECT_DATABASE_PATHS[self.stage_idx])
+        self.neg_dataset_file_path = os.path.join(self.base_folder, NEGATIVE_DATABASE_PATHS[self.stage_idx])
+        self.calib_dataset_file_path = os.path.join(self.base_folder, CALIBRATION_DATABASE_PATHS[SCALES[self.stage_idx][0]])
         self.pos_img_folder = pos_img_folder
         self.neg_img_folder = neg_img_folder
         self.update_normalizer = False
 
-        self.g_storage = GlobalStorage()
+        self.g_storage = GlobalStorage(os.path.join(self.base_folder, GLOBAL_STORAGE_FILE_PATH))
         self.get_object_annotations = get_object_annotations
 
     def get_params(self):
@@ -463,7 +465,8 @@ class DatasetManager():
         Returns the keyword parameters for `DatasetManager.__init__` as a dictionary of name-value pairs.
         """
 
-        return {'get_object_annotations': self.get_object_annotations, 'pos_img_folder': self.pos_img_folder, 'neg_img_folder': self.neg_img_folder}
+        return {'get_object_annotations': self.get_object_annotations, 'pos_img_folder': self.pos_img_folder,
+                'neg_img_folder': self.neg_img_folder, 'base_folder': self.base_folder}
 
     def _create_file(self, file_name, **kwargs):
         """

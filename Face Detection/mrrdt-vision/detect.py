@@ -231,8 +231,6 @@ def _get_network_inputs(img, cur_scale, coords):
 
 # cached calibrator and classifier objects for each stage of the cascade
 MODELS = [(MODELS[False][stage_idx], MODELS[True][stage_idx]) for stage_idx in np.arange(len(SCALES))]
-# cached input normalizers for each stage's classifier and calibrator
-NORMALIZERS = []
 # cached threshold values for each stage
 THRESHOLDS = (NET_12_THRESH, NET_24_THRESH, NET_48_THRESH)
 
@@ -260,13 +258,14 @@ def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJ
 
     classifier_inputs = []
     calibrator_inputs = []
+    normalizers = []
 
     for stage_idx in np.arange(0, max_stage_idx + 1):
         cur_scale = SCALES[stage_idx][0]
         classifier, calibrator = MODELS[stage_idx]
 
-        if os.path.isfile(OBJECT_DATABASE_PATHS[stage_idx]) and os.path.isfile(NEGATIVE_DATABASE_PATHS[stage_idx]) and len(NORMALIZERS) == stage_idx:
-            NORMALIZERS.append(tuple((DatasetManager(MODELS[stage_idx][is_calib], **dataset_manager_params).get_normalizer() for is_calib in (0, 1))))
+        if os.path.isfile(OBJECT_DATABASE_PATHS[stage_idx]) and os.path.isfile(NEGATIVE_DATABASE_PATHS[stage_idx]) and len(normalizers) == stage_idx:
+            normalizers.append(tuple((DatasetManager(MODELS[stage_idx][is_calib], **dataset_manager_params).get_normalizer() for is_calib in (0, 1))))
 
         if stage_idx == 0:
             detection_window_generator = _get_detection_windows(img, cur_scale)
@@ -289,9 +288,9 @@ def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJ
             coords *= min_object_scale/cur_scale
         else:
             for i in np.arange(0, stage_idx):
-                classifier_inputs[i] = NORMALIZERS[i][0].preprocess(_get_network_inputs(img, classifier_inputs[i].shape[1], coords).astype(np.float))
+                classifier_inputs[i] = normalizers[i][0].preprocess(_get_network_inputs(img, classifier_inputs[i].shape[1], coords).astype(np.float))
 
-        classifier_normalizer, calib_normalizer = NORMALIZERS[stage_idx]
+        classifier_normalizer, calib_normalizer = normalizers[stage_idx]
 
         detection_windows = detection_windows if stage_idx == 0 else _get_network_inputs(img, cur_scale, coords).astype(np.float)
         classifier_inputs.insert(0 if stage_idx < 2 else stage_idx, classifier_normalizer.preprocess(detection_windows))
