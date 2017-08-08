@@ -33,8 +33,6 @@ class DroneAttitude():
     self.quaternion = self.get_quaternion()
 
   def get_quaternion(self):
-    q = []
-
     t0 = math.cos(self.yaw * 0.5)
     t1 = math.sin(self.yaw * 0.5)
     t2 = math.cos(self.roll * 0.5)
@@ -47,12 +45,7 @@ class DroneAttitude():
     y = t0 * t2 * t5 + t1 * t3 * t4
     z = t1 * t2 * t4 - t0 * t3 * t5
 
-    q.append(w)
-    q.append(x)
-    q.append(y)
-    q.append(z)
-
-    return q
+    return [w, x, y, z]
 
 class StandardAttitudes(object):
   level = DroneAttitude(0,0,0)
