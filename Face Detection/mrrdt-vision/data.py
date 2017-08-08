@@ -34,6 +34,7 @@ import numpy as np
 import sqlite3
 
 from .util import static_vars
+from .persistence import GlobalStorage
 from .main import DEBUG
 
 # folder containing the SQL database for object annotations
@@ -429,8 +430,6 @@ class DatasetManager():
         Path to the folder which contains the non-object images, defaults to `NEGATIVE_IMAGE_FOLDER`.
     """
 
-    normalizers = {}
-
     def __init__(self, model, get_object_annotations=get_face_annotations, pos_img_folder=POSITIVE_IMAGE_FOLDER, neg_img_folder=NEGATIVE_IMAGE_FOLDER):
         """
         Retrieves the relevant dataset paths for `model` and fills in any internal attributes.
@@ -445,7 +444,9 @@ class DatasetManager():
         self.calib_dataset_file_path = CALIBRATION_DATABASE_PATHS[SCALES[self.stage_idx][0]]
         self.pos_img_folder = pos_img_folder
         self.neg_img_folder = neg_img_folder
+        self.update_normalizer = False
 
+        self.g_storage = GlobalStorage()
         self.get_object_annotations = get_object_annotations
 
     def get_params(self):
@@ -485,6 +486,8 @@ class DatasetManager():
         """
 
         if not os.path.isfile(file_name):
+            self.update_normalizer = True
+
             if file_name in OBJECT_DATABASE_PATHS:
                 create_positive_dataset(self.stage_idx, **kwargs)
             elif file_name in  NEGATIVE_DATABASE_PATHS:
@@ -582,13 +585,14 @@ class DatasetManager():
         """
 
         from .preprocess import ImageNormalizer
+        model_name = type(self.model).__name__
 
-        if DatasetManager.normalizers.get(self.model) is None:
+        if not self.g_storage.has(model_name) or self.update_normalizer:
             normalizer = ImageNormalizer(self.get_pos_dataset_file_path(), self.get_neg_dataset_file_path(), self.model.get_normalization_method())
             normalizer.add_data_augmentation_params(self.model.get_normalization_params())
-            DatasetManager.normalizers[self.model] = normalizer
+            self.g_storage.store(model_name, normalizer)
 
-        return DatasetManager.normalizers[self.model]
+        return self.g_storage.get(model_name)
 
     def get_paths(self):
         """

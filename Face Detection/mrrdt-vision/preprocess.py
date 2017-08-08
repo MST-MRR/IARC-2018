@@ -88,6 +88,15 @@ class ImageNormalizer():
             self.preprocess_params['zca_whitening'] = True
 
         self.normalization_params.update(self.preprocess_params)
+        
+        self.image_preprocessor = ImageDataGenerator(**self.preprocess_params)
+        self.no_augmentation_image_preprocessor = ImageDataGenerator(**self.normalization_params)
+
+        if self._is_fit_necessary():
+            self.image_preprocessor.fit(self.X)
+            self.no_augmentation_image_preprocessor.fit(self.X)
+
+            del self.X
 
     def _is_fit_necessary(self):
         """
@@ -157,17 +166,7 @@ class ImageNormalizer():
 
         if len(images) == 0:
             return images
-
-        if self.image_preprocessor is None:
-            self.image_preprocessor = ImageDataGenerator(**self.preprocess_params)
-            self.no_augmentation_image_preprocessor = ImageDataGenerator(**self.normalization_params)
-
-            if self._is_fit_necessary():
-                self.image_preprocessor.fit(self.X)
-                self.no_augmentation_image_preprocessor.fit(self.X)
-
-                del self.X
-
+        
         return_generator = batch_size is not None
         preprocessor = self.image_preprocessor if use_data_augmentation else self.no_augmentation_image_preprocessor
         labels = np.zeros(len(images)) if labels is None else labels
