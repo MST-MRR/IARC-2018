@@ -362,9 +362,9 @@ class ObjectClassifier():
         """
 
         if self.was_tuned():
-            with open(self.get_param_file_path(), 'rb') as paramFile:
+            with open(self.get_param_file_path(), 'rb') as param_file:
                 loadArgs = {} if six.PY2 else {'encoding': 'bytes'}
-                trials = pickle.load(paramFile, **loadArgs)
+                trials = pickle.load(param_file, **loadArgs)
                 trials.__dict__  = _convert(trials.__dict__)
                 best = _convert(trials.best_trial['misc']['vals'])
                 self.best_params = get_best_params(self.get_param_space(), best)

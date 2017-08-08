@@ -24,15 +24,16 @@ import numpy as np
 
 from .model import MODELS
 
-from .data import num_detection_windows_along_axis, squash_coords, MIN_OBJECT_SCALE, OFFSET, SCALES, CALIB_PATTERNS_ARR, OBJECT_DATABASE_PATHS, NEGATIVE_DATABASE_PATHS
-from .preprocess import ImageNormalizer
+from .data import DatasetManager, num_detection_windows_along_axis, squash_coords, MIN_OBJECT_SCALE, OFFSET, SCALES, CALIB_PATTERNS_ARR, OBJECT_DATABASE_PATHS, NEGATIVE_DATABASE_PATHS
 
 # default IoU threshold for non-maximum suppression
 IOU_THRESH = .5
+# iou threshold to use for the 3rd stage of the cascade
+LAST_STAGE_IOU_THRESH = .2
 # minimum score for 12-net to classify a region as positive
 NET_12_THRESH = .009
 # minimum score for 24-net to classify a region as positive
-NET_24_THRESH = .3
+NET_24_THRESH = .2
 # minimum score for 48-net to classify a region as positive
 NET_48_THRESH = .5
 
@@ -230,19 +231,12 @@ def _get_network_inputs(img, cur_scale, coords):
 
 # cached calibrator and classifier objects for each stage of the cascade
 MODELS = [(MODELS[False][stage_idx], MODELS[True][stage_idx]) for stage_idx in np.arange(len(SCALES))]
-# cached positive and negative dataset file paths
-PATHS = []
 # cached input normalizers for each stage's classifier and calibrator
 NORMALIZERS = []
 # cached threshold values for each stage
 THRESHOLDS = (NET_12_THRESH, NET_24_THRESH, NET_48_THRESH)
 
-for stage_idx in np.arange(len(SCALES)):
-    if os.path.isfile(OBJECT_DATABASE_PATHS[stage_idx]) and os.path.isfile(NEGATIVE_DATABASE_PATHS[stage_idx]):
-        PATHS.append((OBJECT_DATABASE_PATHS[stage_idx], NEGATIVE_DATABASE_PATHS[stage_idx]))
-        NORMALIZERS.append(tuple((ImageNormalizer(*PATHS[-1], MODELS[stage_idx][is_calib].get_normalization_method()) for is_calib in (0, 1))))
-
-def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJECT_SCALE):
+def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJECT_SCALE, **dataset_manager_params):
     """
     Detect objects at multiple scales
     
@@ -255,6 +249,8 @@ def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJ
     min_object_scale : int, optional
            `min_object_scale`x`min_object_scale` is the smallest region for which the detector will be effective. However,
            good results may still be acheived with slightly smaller regions due to bounding box calibration. Default is `MIN_OBJECT_SCALE`.
+    dataset_manager_params: dict, optional
+            Optionally specify a dataset to use in place of default one.
 
     Returns
     -------
@@ -262,14 +258,15 @@ def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJ
     Returns the coordinates for each detected object's bounding box. Each coordinate set is of the form (x_min, y_min, x_max, y_max) 
     """
 
-    # iou threshold to use for the 3rd stage of the cascade
-    LAST_STAGE_IOU_THRESH = .3
-
     classifier_inputs = []
     calibrator_inputs = []
 
     for stage_idx in np.arange(0, max_stage_idx + 1):
         cur_scale = SCALES[stage_idx][0]
+        classifier, calibrator = MODELS[stage_idx]
+
+        if os.path.isfile(OBJECT_DATABASE_PATHS[stage_idx]) and os.path.isfile(NEGATIVE_DATABASE_PATHS[stage_idx]) and len(NORMALIZERS) == stage_idx:
+            NORMALIZERS.append(tuple((DatasetManager(MODELS[stage_idx][is_calib], **dataset_manager_params).get_normalizer() for is_calib in (0, 1))))
 
         if stage_idx == 0:
             detection_window_generator = _get_detection_windows(img, cur_scale)
@@ -295,7 +292,6 @@ def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJ
                 classifier_inputs[i] = NORMALIZERS[i][0].preprocess(_get_network_inputs(img, classifier_inputs[i].shape[1], coords).astype(np.float))
 
         classifier_normalizer, calib_normalizer = NORMALIZERS[stage_idx]
-        classifier, calibrator = MODELS[stage_idx]
 
         detection_windows = detection_windows if stage_idx == 0 else _get_network_inputs(img, cur_scale, coords).astype(np.float)
         classifier_inputs.insert(0 if stage_idx < 2 else stage_idx, classifier_normalizer.preprocess(detection_windows))
