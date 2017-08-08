@@ -93,7 +93,7 @@ if __name__ == '__main__':
         import cv2
         from .detect import detect_multiscale
         start = timer()
-        detections = detect_multiscale(img, int(options.stageIdx))
+        detections = detect_multiscale(img, int(options.stageIdx), base_folder='face')
 
         if PROFILE:
             print('Prediction took %fs' % (timer() - start,))

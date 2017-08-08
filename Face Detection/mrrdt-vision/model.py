@@ -156,6 +156,7 @@ class ObjectClassifier():
         self.additional_normalizers = []
         self.trained_model = None
         self.best_params = None
+        self.base_folder = ''
 
         if stage_idx == 2:
             self.PARAM_SPACE = copy.deepcopy(self.PARAM_SPACE)
@@ -199,7 +200,7 @@ class ObjectClassifier():
         """
 
         param_file_path = PARAM_FILE_NAME_FORMAT_STR % (os.path.splitext(self.get_weights_file_path())[0],)
-        return param_file_path
+        return os.path.join(self.base_folder, param_file_path)
 
     def get_param_space(self):
         """
@@ -224,7 +225,7 @@ class ObjectClassifier():
         """
 
         weights_file_path = NET_FILE_NAMES[isinstance(self, ObjectCalibrator)][SCALES[self.stage_idx][0]]
-        return weights_file_path
+        return os.path.join(self.base_folder, weights_file_path)
 
     def get_normalization_method(self):
         """
@@ -339,7 +340,23 @@ class ObjectClassifier():
         Returns the model's save file path
         """
 
-        return self.get_weights_file_path() if not debug else DEBUG_FILE_PATH
+        return os.path.join(self.base_folder, self.get_weights_file_path()) if not debug else DEBUG_FILE_PATH
+
+    def set_base_folder(self, base_folder):
+        """
+        Set the folder that this model's files are based in.
+
+        Parameters
+        ----------
+        base_folder: str
+            Path to the folder to base the model's files in.
+        
+        Returns
+        -------
+        None
+        """
+
+        self.base_folder = base_folder
 
     def was_tuned(self):
         """
