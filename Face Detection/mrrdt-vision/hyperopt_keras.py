@@ -18,19 +18,19 @@ References
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
+import atexit
 import sys
 import os
 import numpy as np
-import atexit
 
-from hyperopt import hp, fmin, tpe, STATUS_OK, STATUS_FAIL, Trials, space_eval
+from hyperopt import hp, fmin, tpe, STATUS_OK, Trials, space_eval
 
 # default number of folds for model cross-validation
 DEFAULT_NUM_FOLDS = 3
 # default number of epochs per parameter set evaluation
-DEFAULT_NUM_EPOCHS = 30
+DEFAULT_NUM_EPOCHS = 50
 # default number of parameter sets tried
-DEFAULT_NUM_EVALS = 30
+DEFAULT_NUM_EVALS = 40
 # a temporary weights file used to evaluate each parameter set fold
 WEIGHTS_FILE_NAME = 'tune.hdf'
 

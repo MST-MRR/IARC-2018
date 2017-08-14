@@ -248,10 +248,10 @@ def create_negative_dataset(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_
         if neg_idx >= num_negatives: break
         img = cv2.resize(cv2.imread(negative_image_paths[i]), None, fx=resize_to[0]/MIN_OBJECT_SCALE, fy=resize_to[1]/MIN_OBJECT_SCALE)
 
-        for x_offset in np.random.permutation(num_detection_windows_along_axis(img.shape[1], stage_idx)):
+        for x_offset in np.random.permutation(num_detection_windows_along_axis(img.shape[1])):
             if neg_idx >= num_negatives or num_negatives_retrieved_from_img >= num_negatives_per_img: break
 
-            for y_offset in np.random.permutation(num_detection_windows_along_axis(img.shape[0], stage_idx)):
+            for y_offset in np.random.permutation(num_detection_windows_along_axis(img.shape[0])):
                 if neg_idx >= num_negatives or num_negatives_retrieved_from_img >= num_negatives_per_img: break
                 x, y, w, h = squash_coords(img, resize_to[0]*x_offset, resize_to[1]*y_offset, *resize_to)
 
@@ -268,7 +268,7 @@ def create_negative_dataset(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_
     with h5py.File(file_path, 'w') as out:
         out.create_dataset(DATASET_LABEL, data=images, chunks=(CHUNK_SIZE,) + (images.shape[1:]))
 
-def mine_negatives(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negatives=TARGET_NUM_NEGATIVES):
+def mine_negatives(detect, file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_FOLDER, num_negatives=TARGET_NUM_NEGATIVES):
     """
     Creates a negative dataset file by mining samples from a set of non-object images.
 
@@ -294,8 +294,6 @@ def mine_negatives(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_FOLDER, n
     None
     """
 
-    from .detect import detect_multiscale
-
     negative_image_paths = [os.path.join(neg_img_folder, file_name) for file_name in os.listdir(neg_img_folder)]
     images = np.zeros((num_negatives, resize_to[1], resize_to[0], 3), dtype=np.uint8)
     neg_idx = 0
@@ -303,7 +301,7 @@ def mine_negatives(file_path, resize_to, neg_img_folder=NEGATIVE_IMAGE_FOLDER, n
     for i in np.random.permutation(len(negative_image_paths)):
         if neg_idx >= num_negatives: break
         img = cv2.imread(negative_image_paths[i])
-        coords = detect_multiscale(img, stage_idx-1)
+        coords = detect(img)
 
         for x_min, y_min, x_max, y_max in coords:
             if neg_idx >= num_negatives: break
@@ -441,9 +439,9 @@ class DatasetManager():
         self.stage_idx = model.get_stage_idx()
         self.base_folder = base_folder
         self.model.set_base_folder(self.base_folder)
-        self.pos_dataset_file_path = os.path.join(self.base_folder, OBJECT_DATABASE_PATHS[self.stage_idx])
-        self.neg_dataset_file_path = os.path.join(self.base_folder, NEGATIVE_DATABASE_PATHS[self.stage_idx])
-        self.calib_dataset_file_path = os.path.join(self.base_folder, CALIBRATION_DATABASE_PATHS[SCALES[self.stage_idx][0]])
+        self.pos_dataset_file_path = OBJECT_DATABASE_PATHS[self.stage_idx]
+        self.neg_dataset_file_path = NEGATIVE_DATABASE_PATHS[self.stage_idx]
+        self.calib_dataset_file_path = CALIBRATION_DATABASE_PATHS[SCALES[self.stage_idx][0]]
         self.pos_img_folder = pos_img_folder
         self.neg_img_folder = neg_img_folder
         self.update_normalizer = False
@@ -488,15 +486,20 @@ class DatasetManager():
         None
         """
 
+        from .detect import detect_multiscale
+
         if not os.path.isfile(file_name):
             self.update_normalizer = True
 
             if file_name in OBJECT_DATABASE_PATHS:
-                create_positive_dataset(self.stage_idx, **kwargs)
+                create_positive_dataset(self.pos_dataset_file_path, SCALES[self.stage_idx], **kwargs)
             elif file_name in  NEGATIVE_DATABASE_PATHS:
-                (create_negative_dataset if self.stage_idx == 0 else mine_negatives)(self.stage_idx, **kwargs)
+                if self.stage_idx == 0:
+                    create_negative_dataset(self.neg_dataset_file_path, SCALES[self.stage_idx])
+                else:
+                    mine_negatives(lambda img: detect_multiscale(img, self.stage_idx-1, **self.get_params()), self.neg_dataset_file_path, SCALES[self.stage_idx])
             elif file_name in CALIBRATION_DATABASE_PATHS.values():
-                create_calibration_dataset(self.stage_idx, **kwargs)
+                create_calibration_dataset(self.calib_dataset_file_path, SCALES[self.stage_idx], **kwargs)
 
     def get_pos_dataset_file_path(self):
         """

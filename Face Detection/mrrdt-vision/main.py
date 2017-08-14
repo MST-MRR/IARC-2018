@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # get model for training or evaluation when one of those options are specified
     if options.trainMode or options.evalMode:
         model = MODELS[options.isCalib][int(options.stageIdx)]
-        dataset_manager = DatasetManager(model)
+        dataset_manager = DatasetManager(model, base_folder='face')
 
     def prediction_callback(img):
         """
@@ -109,8 +109,8 @@ if __name__ == '__main__':
         from .train import train
         train(model, dataset_manager)
     elif options.liveMode:
-        from visualize import cv2Window
-        from RealSense import Streamer, LiveDisplay
+        from .visualize import cv2Window
+        from .RealSense import Streamer, LiveDisplay
 
         with cv2Window(LIVE_WINDOW_TITLE) as win, Streamer() as stream:
             live_stream = LiveDisplay(stream, win)

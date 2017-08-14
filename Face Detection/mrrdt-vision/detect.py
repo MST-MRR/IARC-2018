@@ -31,9 +31,9 @@ IOU_THRESH = .5
 # iou threshold to use for the 3rd stage of the cascade
 LAST_STAGE_IOU_THRESH = .2
 # minimum score for 12-net to classify a region as positive
-NET_12_THRESH = .009
+NET_12_THRESH = .006
 # minimum score for 24-net to classify a region as positive
-NET_24_THRESH = .2
+NET_24_THRESH = .044
 # minimum score for 48-net to classify a region as positive
 NET_48_THRESH = .5
 
@@ -231,6 +231,8 @@ def _get_network_inputs(img, cur_scale, coords):
 
 # cached calibrator and classifier objects for each stage of the cascade
 MODELS = [(MODELS[False][stage_idx], MODELS[True][stage_idx]) for stage_idx in np.arange(len(SCALES))]
+# cached normalizers for each stage of the cascade
+NORMALIZERS = {}
 # cached threshold values for each stage
 THRESHOLDS = (NET_12_THRESH, NET_24_THRESH, NET_48_THRESH)
 
@@ -259,14 +261,22 @@ def detect_multiscale(img, max_stage_idx=len(SCALES)-1, min_object_scale=MIN_OBJ
     classifier_inputs = []
     calibrator_inputs = []
     normalizers = []
+    hash_value = hash(frozenset(dataset_manager_params))
+
+    if hash_value not in NORMALIZERS: 
+        NORMALIZERS[hash_value] = []
 
     for stage_idx in np.arange(0, max_stage_idx + 1):
         cur_scale = SCALES[stage_idx][0]
         classifier, calibrator = MODELS[stage_idx]
 
-        if os.path.isfile(OBJECT_DATABASE_PATHS[stage_idx]) and os.path.isfile(NEGATIVE_DATABASE_PATHS[stage_idx]) and len(normalizers) == stage_idx:
-            normalizers.append(tuple((DatasetManager(MODELS[stage_idx][is_calib], **dataset_manager_params).get_normalizer() for is_calib in (0, 1))))
-
+        if len(normalizers) == stage_idx:
+            if len(NORMALIZERS[hash_value]) <= len(normalizers):
+                normalizers.append(tuple((DatasetManager(MODELS[stage_idx][is_calib], **dataset_manager_params).get_normalizer() for is_calib in (0, 1))))
+                NORMALIZERS[hash_value].append(normalizers[-1])
+            elif not normalizers:
+                normalizers = NORMALIZERS[hash_value]
+ 
         if stage_idx == 0:
             detection_window_generator = _get_detection_windows(img, cur_scale)
             total_num_detection_windows = next(detection_window_generator)

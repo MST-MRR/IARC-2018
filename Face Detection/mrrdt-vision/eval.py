@@ -27,7 +27,7 @@ class ModelEvaluator():
     model: subclass of `model.ObjectClassifier` or `model.ObjectCalibrator`
         Model to evaluate.
     dataset_manager: data.DatasetManager
-        DatasetManager for the given model
+        DatasetManager for the evaluation dataset.
 
     Notes
     ----------
