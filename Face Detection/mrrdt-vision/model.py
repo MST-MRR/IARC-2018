@@ -200,7 +200,7 @@ class ObjectClassifier():
         """
 
         param_file_path = PARAM_FILE_NAME_FORMAT_STR % (os.path.splitext(self.get_weights_file_path())[0],)
-        return os.path.join(self.base_folder, param_file_path)
+        return param_file_path
 
     def get_param_space(self):
         """
@@ -340,7 +340,7 @@ class ObjectClassifier():
         Returns the model's save file path
         """
 
-        return os.path.join(self.base_folder, self.get_weights_file_path()) if not debug else DEBUG_FILE_PATH
+        return self.get_weights_file_path() if not debug else DEBUG_FILE_PATH
 
     def set_base_folder(self, base_folder):
         """
@@ -357,6 +357,7 @@ class ObjectClassifier():
         """
 
         self.base_folder = base_folder
+        self.update()
 
     def was_tuned(self):
         """
@@ -741,7 +742,7 @@ class StageOneClassifier(ObjectClassifier):
         'dropout0': HP.uniform(0, .75),
         'dropout1': HP.uniform(0, .75),
         'lr': HP.loguniform(1e-4, 1),
-        'batchSize': HP.choice(512),
+        'batch_size': HP.choice(512),
         'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION),
         'flip': HP.choice(ImageNormalizer.FLIP_HORIZONTAL),
         'momentum': HP.choice(.9),
@@ -868,6 +869,7 @@ class StageTwoClassifier(ObjectClassifier):
         fully_connected_layer = Dense(128, activation='relu')(flattened)
 
         stage_one = StageOneClassifier()
+        stage_one.set_base_folder(self.base_folder)
         assert os.path.isfile(stage_one.get_weights_file_path()), STAGE_ONE_NOT_TRAINED_ERROR
         stage_one_model = stage_one(dataset_manager_params=dataset_manager_params, include_top=False, compile=False)
         trained_stage_one = stage_one.load_model()
@@ -959,6 +961,7 @@ class StageThreeClassifier(ObjectClassifier):
         fully_connected_layer = Dense(256, activation='relu')(flattened)
 
         stage_two = StageTwoClassifier()
+        stage_two.set_base_folder(self.base_folder)
         assert os.path.isfile(stage_two.get_weights_file_path()), STAGE_TWO_NOT_TRAINED_ERROR
         trained_stage_two = stage_two.load_model()
         stage_two_model = stage_two(dataset_manager_params=dataset_manager_params, include_top=False, compile=False)
