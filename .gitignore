@@ -96,18 +96,20 @@ ENV/
 /Object Detection/aflw/**
 /Object Detection/aflw/
 
-/Face Detection/Annotated Faces in the Wild/
-/Face Detection/Annotated Faces in the Wild/**
-/Face Detection/Negative Images/
-/Face Detection/Negative Images/**
-/Face Detection/aflw/**
-/Face Detection/aflw/
+/mrrdt-vision/Annotated Faces in the Wild/
+/mrrdt-vision/Annotated Faces in the Wild/**
+/mrrdt-vision/Negative Images/
+/mrrdt-vision/Negative Images/**
+/mrrdt-vision/aflw/**
+/mrrdt-vision/aflw/
 
 /Roombas/Roomba Dataset/**
 /Roombas/Roomba Dataset/
 
 #Ignore dataset files
 /Face Detection/data/*.hdf
-Flight/Tests
 
+#Ignore flight footage
 /Gridline Detection + Corner Detection/IARC 2016 Footage.mp4
+
+Flight/Tests
