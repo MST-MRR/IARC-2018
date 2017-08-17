@@ -155,20 +155,33 @@ class VideoReader():
         self.cap = cv2.VideoCapture(self.file_path)
         return self
 
-    def next(self):
+    def __iter__(self):
+        '''VideoReader is its own iterator, so this method simply returns a reference to its calling object.'''
+        return self
+
+    def __next__(self):
         '''
         Gets the next frame from the video.
 
         Returns
         -------
-        out: numpy.ndarray or None
-        Returns the next frame, or None if the video is finished playing.
+        out: numpy.ndarray
+        Returns the next frame.
+
+        Raises
+        ------
+        StopIteration
+            If the end of the video has been reached.
         '''
 
         if not self.cap.isOpened():
-            return None
+            raise StopIteration
 
         return self.cap.read()[1]
+
+    def next(self):
+        '''See `VideoReader.next` for this function's documentation'''
+        return self.__next__()
 
     def __exit__(self, *args):
         '''Stop streaming from the video on disk once the context manager's scope ends or an exception is hit'''

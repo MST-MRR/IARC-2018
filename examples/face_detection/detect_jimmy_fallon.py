@@ -27,10 +27,12 @@ def main():
 
     with mrrdt_vision.VideoReader(JIMMY_FALLON_VIDEO) as video, mrrdt_vision.Window(JIMMY_FALLON_VIDEO) as window:
         try:
-            frame = video.next()
             should_quit = False
 
-            while frame is not None and not should_quit:
+            for frame in video:
+                if should_quit:
+                    break
+                
                 frame = cv2.resize(frame, RESIZE_TO)
                 detections = mrrdt_vision.detect_object(frame, mrrdt_vision.ObjectTypes.FACE, num_pyramid_levels=NUM_PYRAMID_LEVELS)
                 mrrdt_vision.draw_bounding_boxes(frame, detections)
@@ -38,7 +40,6 @@ def main():
                 window.show(frame)
 
                 should_quit = window.is_key_down(QUIT_KEY)
-                frame = video.next()
         except KeyboardInterrupt as e:
             pass
 
