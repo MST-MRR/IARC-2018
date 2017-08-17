@@ -7,6 +7,7 @@
 'Initializes the mrrdt-vision module'
 
 import sys
-from .detect import detect_object, ObjectTypes
+from .detect import detect_object, draw_bounding_boxes, iou, nms, ObjectTypes
+from .visualize import visualizer, VideoReader, Window
 
 sys.modules['mrrdt-vision'] = sys.modules[__name__]

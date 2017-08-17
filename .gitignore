@@ -89,19 +89,12 @@ ENV/
 .ropeproject
 
 #Ignore image folders
-/Object Detection/Annotated Faces in the Wild/
-/Object Detection/Annotated Faces in the Wild/**
-/Object Detection/Negative Images/
-/Object Detection/Negative Images/**
-/Object Detection/aflw/**
-/Object Detection/aflw/
-
-/mrrdt-vision/Annotated Faces in the Wild/
-/mrrdt-vision/Annotated Faces in the Wild/**
-/mrrdt-vision/Negative Images/
-/mrrdt-vision/Negative Images/**
-/mrrdt-vision/aflw/**
-/mrrdt-vision/aflw/
+/examples/face_detection/Annotated Faces in the Wild/
+/examples/face_detection/Annotated Faces in the Wild/**
+/examples/face_detection/Negative Images/
+/examples/face_detection/Negative Images/**
+/examples/face_detection/aflw/**
+/examples/face_detection/aflw/
 
 /Roombas/Roomba Dataset/**
 /Roombas/Roomba Dataset/
