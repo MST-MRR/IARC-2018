@@ -38,7 +38,12 @@ PYRAMID_DOWNSCALE = 1.25
 # folder for the face detector files
 FACE_BASE_FOLDER = 'face'
 
-def _iou(boxes, box, area=None):
+# default bounding box color (green)
+DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
+# default bounding box thickness
+DEFAULT_BOUNDING_BOX_THICKNESS = 3
+
+def iou(boxes, box, area=None):
     """
     Computes the intersection over union ratio between box and each box in boxes.
     
@@ -64,7 +69,7 @@ def _iou(boxes, box, area=None):
     int_over_union = int_area/union_area
     return int_over_union
 
-def _nms(boxes, predictions, iou_thresh=IOU_THRESH):
+def nms(boxes, predictions, iou_thresh=IOU_THRESH):
     """
     Non-maximum suppression algorithm which suppresses overlapping boxes that the detector is less confident in.
     
@@ -90,7 +95,7 @@ def _nms(boxes, predictions, iou_thresh=IOU_THRESH):
         pick = boxes[idxs[-1]]
         picked.append(idxs[-1])
 
-        int_over_union = _iou(boxes[idxs[:-1]], pick)
+        int_over_union = iou(boxes[idxs[:-1]], pick)
         idxs = np.delete(idxs, np.concatenate(([len(idxs)-1],np.where(int_over_union > iou_thresh)[0])))
     
     return boxes[picked], picked
@@ -120,13 +125,13 @@ def _local_nms(boxes, predictions, pyr_idxs, iou_thresh=IOU_THRESH):
     `detect._nms`
     """
 
-    suppressed_boxes = np.zeros((0, *boxes.shape[1:]))
+    suppressed_boxes = np.zeros(((0,)+boxes.shape[1:]))
     prev_idx = 0
     new_pyr_idxs = []
     picked = []
 
     for cur_idx in pyr_idxs:
-        local_suppressed_boxes, local_picked = _nms(boxes[prev_idx:cur_idx], predictions[prev_idx:cur_idx], iou_thresh)
+        local_suppressed_boxes, local_picked = nms(boxes[prev_idx:cur_idx], predictions[prev_idx:cur_idx], iou_thresh)
         suppressed_boxes = np.vstack((suppressed_boxes, local_suppressed_boxes))
         picked.extend(local_picked)
         prev_idx = cur_idx
@@ -413,7 +418,7 @@ class CNNCascadeObjectDetector():
             coords = _calibrate_coordinates(coords[pos_detection_indices], calib_predictions)
 
             if stage_idx == len(SCALES)-1:
-                coords, picked = _nms(coords, predictions[pos_detection_indices], iou_thresh=self._last_stage_iou_thresh)
+                coords, picked = nms(coords, predictions[pos_detection_indices], iou_thresh=self._last_stage_iou_thresh)
             else:
                 coords, picked, pyr_idxs = _local_nms(coords, predictions[pos_detection_indices], pyr_idxs)
 
@@ -442,3 +447,25 @@ def detect_object(img, object_type, **kwargs):
 
     cnn_cascade_detector = CNNCascadeObjectDetector(object_type, **kwargs)
     return cnn_cascade_detector.detect_multiscale(img)
+
+
+def draw_bounding_boxes(img, boxes, color=DEFAULT_BOUNDING_BOX_COLOR, thickness=DEFAULT_BOUNDING_BOX_THICKNESS):
+    """
+    Draws bounding boxes on an image.
+    
+    Parameters
+    ----------
+    boxes : numpy.ndarray
+        Array of bounding boxes. Each row should have the format (x_min, y_min, x_max, y_max)
+    color: tuple, optional
+        BGR color to draw the bounding boxes with. Default color is bright green.
+    thickness: int, optional
+        Thickness in pixels of each drawn bounding box's border, defaults to 3.
+    
+    Returns
+    -------
+    None
+    """
+
+    for (x_min, y_min, x_max, y_max) in boxes:
+        cv2.rectangle(img, (x_min, y_min), (x_max, y_max), color, thickness)

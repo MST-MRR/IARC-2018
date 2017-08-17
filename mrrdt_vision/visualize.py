@@ -5,18 +5,19 @@
 # Christopher O'Toole
 
 """
-Tools for visualizing the results of object detection and computer vision algorithms on a set of images.
+Tools for visualizing the results of object detection and computer vision algorithms on a sequence of images.
 """
+
+import errno
+import os
 
 import numpy as np
 import cv2
 
-from .data import SCALES
-
 # default title for the visualizer function's window
 DEFAULT_VISUALIZER_WINDOW_TITLE = 'Visualizer'
 
-class cv2Window( ):
+class Window():
     """
     Lightweight wrapper for named OpenCV windows.
 
@@ -126,6 +127,53 @@ class cv2Window( ):
 
         cv2.imshow(self.name, mat)
 
+class VideoReader():
+    '''
+    Utility class for reading a video file with OpenCV
+
+    Parameters
+    ----------
+    file_path: str
+        Path to the video file.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file referred to by `file_path` could not be found.
+
+    '''
+
+    def __init__(self, file_path):
+        '''Intialize internal attributes'''
+        self.file_path = file_path
+
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+
+    def __enter__(self):
+        '''Begin streaming from the video on disk once instantiated by a context manager'''
+        self.cap = cv2.VideoCapture(self.file_path)
+        return self
+
+    def next(self):
+        '''
+        Gets the next frame from the video.
+
+        Returns
+        -------
+        out: numpy.ndarray or None
+        Returns the next frame, or None if the video is finished playing.
+        '''
+
+        if not self.cap.isOpened():
+            return None
+
+        return self.cap.read()[1]
+
+    def __exit__(self, *args):
+        '''Stop streaming from the video on disk once the context manager's scope ends or an exception is hit'''
+        self.cap.release()
+
 def visualizer(images, callback=None, win_title=DEFAULT_VISUALIZER_WINDOW_TITLE):
     """
     Helper function for traversing and displaying a set of images.
@@ -150,16 +198,16 @@ def visualizer(images, callback=None, win_title=DEFAULT_VISUALIZER_WINDOW_TITLE)
     """
 
 
-    quit = False
+    should_quit = False
     length = len(images)
     i = 0
     img = None
 
-    with cv2Window( win_title ) as window:
-        while not quit:
-            if type(images[i]) is np.ndarray:
+    with Window( win_title ) as window:
+        while not should_quit:
+            if isinstance(images[i], np.ndarray):
                 img = images[i]
-            elif type(images[i]) is str:
+            elif isinstance(images[i], str):
                 img = cv2.imread(images[i])
 
             if callback:
@@ -176,4 +224,4 @@ def visualizer(images, callback=None, win_title=DEFAULT_VISUALIZER_WINDOW_TITLE)
             elif key == 'p':
                 i = i - 1 if i > 0 else length-1
             elif key == 'q':
-                quit = True
+                should_quit = True
