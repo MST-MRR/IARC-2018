@@ -37,7 +37,6 @@ def main():
 
                 window.show(frame)
 
-                # the & 0xFF is necessary for getting the correct character on 64-bit machines
                 should_quit = window.is_key_down(QUIT_KEY)
                 frame = video.next()
         except KeyboardInterrupt as e:
