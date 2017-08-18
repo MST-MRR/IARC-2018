@@ -179,6 +179,7 @@ class VideoReader():
 
         return self.cap.read()[1]
 
+    # here for compatibility with Python 2
     def next(self):
         '''See `VideoReader.next` for this function's documentation'''
         return self.__next__()

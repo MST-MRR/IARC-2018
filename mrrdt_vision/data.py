@@ -414,7 +414,8 @@ class DatasetManager():
         None
         """
 
-        from .detect import detect_multiscale
+        from .detect import CNNCascadeObjectDetector
+        cascade = CNNCascadeObjectDetector(self.get_params(), max_stage_idx=self.stage_idx-1)
 
         if not os.path.isfile(file_name):
             self.update_normalizer = True
@@ -425,7 +426,7 @@ class DatasetManager():
                 if self.stage_idx == 0:
                     create_negative_dataset(self.neg_dataset_file_path, SCALES[self.stage_idx])
                 else:
-                    mine_negatives(lambda img: detect_multiscale(img, self.stage_idx-1, **self.get_params()), self.neg_dataset_file_path, SCALES[self.stage_idx])
+                    mine_negatives(lambda img: cascade.detect_multiscale(img), self.neg_dataset_file_path, SCALES[self.stage_idx], self.neg_img_folder)
             elif file_name in CALIBRATION_DATABASE_PATHS.values():
                 create_calibration_dataset(self.calib_dataset_file_path, SCALES[self.stage_idx], **kwargs)
 
