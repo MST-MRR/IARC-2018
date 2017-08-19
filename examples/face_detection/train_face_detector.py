@@ -14,11 +14,10 @@ import sqlite3
 import datetime
 
 import h5py
-import mrrdt_vision
 import cv2
 import numpy as np
+import mrrdt_vision
 from mrrdt_vision.util import static_vars
-from mrrdt_vision.model import MODELS
 
 # number of pyramid levels to use for object detection
 NUM_PYRAMID_LEVELS = 1
@@ -38,6 +37,8 @@ TEST_IMAGES_FOLDER = 'Annotated Faces in the Wild/originalPics'
 
 # path to folder containing negative images
 NEGATIVE_IMG_FOLDER = '/home/christopher/IARC-2018/examples/face_detection/Negative Images/images'
+# image file extension to use for negative images
+NEGATIVE_IMG_FILE_EXT = '.jpg'
 # base folder for face detection cascade files
 BASE_FOLDER = 'face'
 
@@ -151,7 +152,7 @@ def expand_negative_dataset_with_negatives_from_alfw(negative_img_folder=NEGATIV
                 for detected_face in detected_faces:
                     if np.allclose(mrrdt_vision.iou(face_bounding_boxes_for_cur_img, detected_face), 0):
                         timestamp = str(datetime.datetime.now().time())
-                        cv2.imwrite(os.path.join(negative_img_folder, timestamp + '.jpg'), extract_region(cur_img, detected_face))
+                        cv2.imwrite(os.path.join(negative_img_folder, timestamp + NEGATIVE_IMG_FILE_EXT), extract_region(cur_img, detected_face))
 
                 face_bounding_boxes_for_cur_img = []
             
@@ -162,6 +163,6 @@ def expand_negative_dataset_with_negatives_from_alfw(negative_img_folder=NEGATIV
         face_bounding_boxes_for_cur_img.append((x, y, x+w, y+h))
 
 if __name__ == '__main__':
-    classifier = MODELS[False][2]
+    classifier = mrrdt_vision.ModelTypes.STAGE_THREE_CLASSIFIER
     dataset_manager = mrrdt_vision.DatasetManager(classifier, get_face_annotations, BASE_FOLDER, POSITIVE_IMAGE_FOLDER, NEGATIVE_IMG_FOLDER)
     mrrdt_vision.train(classifier, dataset_manager)

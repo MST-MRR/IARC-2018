@@ -43,6 +43,10 @@ DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
 # default bounding box thickness
 DEFAULT_BOUNDING_BOX_THICKNESS = 3
 
+# Parameters used to simplify access to built-in object detectors.
+_ObjectTypes = namedtuple('ObjectTypes', ['FACE'])
+ObjectTypes = _ObjectTypes(FACE={'base_folder': FACE_BASE_FOLDER})
+
 def iou(boxes, box, area=None):
     """
     Computes the intersection over union ratio between box and each box in boxes.
@@ -229,9 +233,6 @@ def _get_network_inputs(img, cur_scale, coords):
         inputs[i] = cv2.resize(img[y_min:y_min+h, x_min:x_min+w], (cur_scale, cur_scale))
 
     return inputs
-
-_ObjectTypes = namedtuple('ObjectTypes', ['FACE'])
-ObjectTypes = _ObjectTypes(FACE={'base_folder': FACE_BASE_FOLDER})
 
 class CNNCascadeObjectDetector():
     """

@@ -35,7 +35,7 @@ import six
 import gc
 import abc
 from abc import abstractmethod
-from collections import Iterable
+from collections import namedtuple, Iterable
 
 import keras
 from keras.models import Sequential, Model, load_model
@@ -1182,3 +1182,8 @@ class StageThreeCalibrator(ObjectCalibrator):
 
 # cached classifiers and calibrators (meant to be used globally for better performance since model initialization can be expensive)
 MODELS = {False: [StageOneClassifier(), StageTwoClassifier(), StageThreeClassifier()], True: [StageOneCalibrator(), StageTwoCalibrator(), StageThreeCalibrator()]}
+
+# parameters used to simplify access to cached classifier and calibrator instances.
+_ModelTypes = namedtuple('ObjectTypes', ['STAGE_ONE_CLASSIFIER', 'STAGE_TWO_CLASSIFIER', 'STAGE_THREE_CLASSIFIER', 'STAGE_ONE_CALIBRATOR', 'STAGE_TWO_CALIBRATOR', 'STAGE_THREE_CALIBRATOR'])
+ModelTypes = _ModelTypes(STAGE_ONE_CLASSIFIER=MODELS[False][0], STAGE_TWO_CLASSIFIER=MODELS[False][1], STAGE_THREE_CLASSIFIER=MODELS[False][2],
+                         STAGE_ONE_CALIBRATOR=MODELS[True][0], STAGE_TWO_CALIBRATOR=MODELS[True][1], STAGE_THREE_CALIBRATOR=MODELS[True][2])
