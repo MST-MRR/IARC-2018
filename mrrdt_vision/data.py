@@ -358,10 +358,16 @@ class DatasetManager():
     def __init__(self, model, get_object_annotations=None, base_folder = '', pos_img_folder=None, neg_img_folder=None):
         """
         Retrieves the relevant dataset paths for `model` and fills in any internal attributes.
+
+        Notes
+        ----------
+        The constructor for this class will create any non-existent directories specified by the parameters as long as there are no
+        non-existent directories in the path which are nested in other non-existent directories.
         """
 
         from .model import ObjectCalibrator
         from .persistence import GLOBAL_STORAGE_FILE_PATH
+        
         self.model = model
         self.is_calib = isinstance(self.model, ObjectCalibrator)
         self.stage_idx = model.get_stage_idx()
@@ -373,6 +379,15 @@ class DatasetManager():
         self.pos_img_folder = pos_img_folder
         self.neg_img_folder = neg_img_folder
         self.update_normalizer = False
+
+        for dir_path in [os.path.dirname(path) for path in (self.pos_dataset_file_path, self.neg_dataset_file_path, self.calib_dataset_file_path)]:
+            if not os.path.isdir(dir_path):
+                os.mkdir(dir_path)
+
+        base_folder_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), base_folder)
+        
+        if not os.path.isdir(base_folder_dir):
+            os.path.mkdir(base_folder_dir)
 
         self.g_storage = GlobalStorage(os.path.join(self.base_folder, GLOBAL_STORAGE_FILE_PATH))
         self.get_object_annotations = get_object_annotations
@@ -424,7 +439,7 @@ class DatasetManager():
                 create_positive_dataset(self.pos_dataset_file_path, SCALES[self.stage_idx], **kwargs)
             elif file_name in  NEGATIVE_DATABASE_PATHS:
                 if self.stage_idx == 0:
-                    create_negative_dataset(self.neg_dataset_file_path, SCALES[self.stage_idx])
+                    create_negative_dataset(self.neg_dataset_file_path, SCALES[self.stage_idx], self.neg_img_folder)
                 else:
                     mine_negatives(lambda img: cascade.detect_multiscale(img), self.neg_dataset_file_path, SCALES[self.stage_idx], self.neg_img_folder)
             elif file_name in CALIBRATION_DATABASE_PATHS.values():

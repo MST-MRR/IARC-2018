@@ -96,8 +96,10 @@ ENV/
 /examples/face_detection/aflw/**
 /examples/face_detection/aflw/
 
-/Roombas/Roomba Dataset/**
-/Roombas/Roomba Dataset/
+/examples/roomba_detection/Negatives/**
+/examples/roomba_detection/Negatives/
+/examples/roomba_detection/Positives/**
+/examples/roomba_detection/Positives/
 
 #Ignore dataset files
 /Face Detection/data/*.hdf
