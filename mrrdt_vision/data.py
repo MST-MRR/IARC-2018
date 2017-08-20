@@ -387,7 +387,7 @@ class DatasetManager():
         base_folder_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), base_folder)
         
         if not os.path.isdir(base_folder_dir):
-            os.path.mkdir(base_folder_dir)
+            os.mkdir(base_folder_dir)
 
         self.g_storage = GlobalStorage(os.path.join(self.base_folder, GLOBAL_STORAGE_FILE_PATH))
         self.get_object_annotations = get_object_annotations
