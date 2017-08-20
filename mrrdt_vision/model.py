@@ -389,7 +389,7 @@ class ObjectClassifier():
                 best = _convert(trials.best_trial['misc']['vals'])
                 self.best_params = get_best_params(self.get_param_space(), best)
 
-    def compile(self, params = {}, loss = LOSS, metrics = METRICS):
+    def compile(self, params={}, loss=LOSS, metrics=METRICS):
         """
         Compile self.model with the given parameters
 
@@ -744,8 +744,8 @@ class StageOneClassifier(ObjectClassifier):
         'dropout0': HP.uniform(0, .75),
         'dropout1': HP.uniform(0, .75),
         'lr': HP.loguniform(1e-4, 1),
-        'batch_size': HP.choice(512),
-        'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION),
+        'batch_size': HP.choice(32, 64, 128, 512),
+        'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION, ImageNormalizer.MIN_MAX_SCALING, ImageNormalizer.ZCA_WHITENING),
         'flip': HP.choice(ImageNormalizer.FLIP_HORIZONTAL),
         'momentum': HP.choice(.9),
         'decay': HP.choice(1e-4),
@@ -998,9 +998,9 @@ class StageOneCalibrator(ObjectCalibrator):
         'dropout0': HP.uniform(0, .75),
         'dropout1': HP.uniform(0, .75),
         'lr': HP.loguniform(1e-4, 1),
-        'batchSize': HP.choice(512),
-        'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION),
-        'flip': HP.choice(None),
+        'batch_size': HP.choice(32, 64, 128, 512),
+        'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION, ImageNormalizer.MIN_MAX_SCALING, ImageNormalizer.ZCA_WHITENING),
+        'flip': HP.choice(ImageNormalizer.FLIP_HORIZONTAL),
         'momentum': HP.choice(.9),
         'decay': HP.choice(1e-4),
         'nesterov': HP.choice(True)

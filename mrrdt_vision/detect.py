@@ -35,17 +35,27 @@ NUM_PYRAMID_LEVELS = 5
 # amount to shrink the previous pyramid level's image by
 PYRAMID_DOWNSCALE = 1.25
 
+# default number of calibration steps to use for the fast_detect function
+NUM_CALIBRATION_STEPS = 1
+
 # folder for the face detector files
 FACE_BASE_FOLDER = 'face'
+# folder for the roomba detector files
+ROOMA_BASE_FOLDER = 'roomba'
+
+# base folder field name for ObjectTypes
+BASE_FOLDER_FIELD_NAME = 'base_folder'
+# fast detect parameters field name for ObjectTypes
+FAST_DETECT_PARAMS_FIELD_NAME = 'fast_detect_params'
 
 # default bounding box color (green)
 DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
 # default bounding box thickness
 DEFAULT_BOUNDING_BOX_THICKNESS = 3
 
-# Parameters used to simplify access to built-in object detectors.
-_ObjectTypes = namedtuple('ObjectTypes', ['FACE'])
-ObjectTypes = _ObjectTypes(FACE={'base_folder': FACE_BASE_FOLDER})
+THRESHOLD_MIN = 130
+THRESHOLD_MAX = 255
+MIN_AREA = 50
 
 def iou(boxes, box, area=None):
     """
@@ -287,6 +297,7 @@ class CNNCascadeObjectDetector():
         self._min_object_scale = MIN_OBJECT_SCALE # minimum scale to scan the image at when using sliding window.
         self._pyramid_downscale = PYRAMID_DOWNSCALE
         self._num_pyramid_levels = NUM_PYRAMID_LEVELS
+        self._num_calibration_steps = NUM_CALIBRATION_STEPS
 
         for attr, value in kwargs.items():
             attr = '_' + attr
@@ -426,6 +437,80 @@ class CNNCascadeObjectDetector():
             if stage_idx == self._max_stage_idx:
                 return coords.astype(np.int32, copy=False)
 
+    def fast_detect(self, img, get_detection_windows):
+        stage_idx = 0
+        num_calib_steps = self._num_calibration_steps
+        cur_scale = self._get_cur_scale(stage_idx)
+        
+        object_proposals, centers = get_detection_windows(img)
+        centers = np.asarray(centers)
+        total_num_detection_windows = len(object_proposals)
+        detection_windows = np.zeros((total_num_detection_windows, cur_scale, cur_scale, 3))
+        coords = np.zeros((total_num_detection_windows, 4))
+
+        for i, (x_min, y_min, x_max, y_max) in enumerate(object_proposals):
+            x_min, y_min, w, h = squash_coords(img, x_min, y_min, x_max-x_min, y_max-y_min)
+            coords[i] = (x_min, y_min, x_min + w, y_min + h)
+            detection_windows[i] = cv2.resize(img[y_min:y_min+h, x_min:x_min+w], (cur_scale, cur_scale))
+
+        classifier, calibrator = self._get_models(stage_idx)
+
+        if len(self._normalizers) <= stage_idx:
+            self._normalizers.append(list())
+
+            for model in (classifier, calibrator):
+                self._normalizers[-1].append(DatasetManager(model, **self._dataset_manager_params).get_normalizer())
+
+        classifier_normalizer, calib_normalizer = self._normalizers[stage_idx]
+
+        predictions = classifier.predict([classifier_normalizer.preprocess(detection_windows)])[:,1]
+        pos_detection_indices = np.where(predictions>=self._thresholds[stage_idx])
+        coords, centers = coords[pos_detection_indices], centers[pos_detection_indices]
+        predictions, detection_windows = predictions[pos_detection_indices], detection_windows[pos_detection_indices]
+
+        for i in np.arange(num_calib_steps-1):
+            detection_windows = _get_network_inputs(img, cur_scale, coords).astype(np.float)
+            predictions = classifier.predict([classifier_normalizer.preprocess(detection_windows)])[:,1]
+            
+            calib_predictions = calibrator.predict([calib_normalizer.preprocess(detection_windows)])
+            coords = _calibrate_coordinates(coords, calib_predictions)
+
+            coords, picked = nms(coords, predictions)
+            centers = centers[picked]
+
+        return coords.astype(np.int32, copy=False), centers
+
+def _get_roomba_proposals(img):
+    proposals = []
+    centers = []
+
+    hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    ret, thresholded = cv2.threshold(hsv_img[:, :, 1], THRESHOLD_MIN, THRESHOLD_MAX, cv2.THRESH_BINARY)
+    erosion = cv2.erode(thresholded, np.ones((11, 11), np.uint8))
+    closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8), iterations=5)
+
+    modified_img, contours, hierarchy = cv2.findContours(closing, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area >= MIN_AREA:
+            moments = cv2.moments(contour)
+            centers.append((int(moments['m10'] / moments['m00']), int(moments['m01'] / moments['m00'])))
+            x, y, w, h = cv2.boundingRect(contour)
+            dimensions = np.array([w, h])
+            top_left = np.array([x, y]) - MIN_AREA
+            bottom_right = np.array([x, y]) + dimensions + MIN_AREA
+            x_min, y_min = top_left.astype(int)
+            x_max, y_max = bottom_right.astype(int)
+            proposals.append((x_min, y_min, x_max, y_max))
+    draw_bounding_boxes(img, np.asarray(proposals), (255, 0, 255))
+    return proposals, centers
+
+# Parameters used to simplify access to built-in object detectors.
+_ObjectTypes = namedtuple('ObjectTypes', ['FACE', 'ROOMBA'])
+ObjectTypes = _ObjectTypes(FACE={BASE_FOLDER_FIELD_NAME: FACE_BASE_FOLDER}, 
+                           ROOMBA={BASE_FOLDER_FIELD_NAME: ROOMA_BASE_FOLDER, FAST_DETECT_PARAMS_FIELD_NAME:[_get_roomba_proposals]})
+
 def detect_object(img, object_type, **kwargs):
     """
     Detects objects at multiple scales
@@ -442,12 +527,30 @@ def detect_object(img, object_type, **kwargs):
     
     Returns
     -------
-    out: numpy.ndarray
-    Returns the coordinates for each detected object's bounding box. Each coordinate set is of the form (x_min, y_min, x_max, y_max) 
+    out: numpy.ndarray or a sequence of numpy.ndarray objects
+    Returns the coordinates for each detected object's bounding box. Each coordinate set is of the form (x_min, y_min, x_max, y_max).
+
+    If fast detect is supported for `object_type`, then a numpy.ndarray containing the estimated centroid for each object
+    might also be available. 
     """
 
-    cnn_cascade_detector = CNNCascadeObjectDetector(object_type, **kwargs)
-    return cnn_cascade_detector.detect_multiscale(img)
+    fast_detect_params = None
+    params = object_type
+
+    if FAST_DETECT_PARAMS_FIELD_NAME in object_type:
+        fast_detect_params = object_type[FAST_DETECT_PARAMS_FIELD_NAME]
+        params = object_type.copy()
+        del params[FAST_DETECT_PARAMS_FIELD_NAME]
+
+    cnn_cascade_detector = CNNCascadeObjectDetector(params, **kwargs)
+    ret = None
+
+    if fast_detect_params is None:
+        ret = cnn_cascade_detector.detect_multiscale(img)
+    else:
+        ret = cnn_cascade_detector.fast_detect(img, *fast_detect_params)
+
+    return ret
 
 
 def draw_bounding_boxes(img, boxes, color=DEFAULT_BOUNDING_BOX_COLOR, thickness=DEFAULT_BOUNDING_BOX_THICKNESS):

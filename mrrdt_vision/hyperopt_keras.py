@@ -30,7 +30,7 @@ DEFAULT_NUM_FOLDS = 3
 # default number of epochs per parameter set evaluation
 DEFAULT_NUM_EPOCHS = 50
 # default number of parameter sets tried
-DEFAULT_NUM_EVALS = 30
+DEFAULT_NUM_EVALS = 50
 # a temporary weights file used to evaluate each parameter set fold
 WEIGHTS_FILE_NAME = 'tune.hdf'
 
