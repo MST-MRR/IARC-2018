@@ -4,6 +4,10 @@ chmod 700 ~/.ssh/
 chmod 600 ~/.ssh/authorized_keys
 chown -R vagrant:vagrant ~/.ssh/
 
+printf "\nDownloading apt-wait script...\n\n"
+sudo wget -q https://raw.githubusercontent.com/MST-MRR/IARC-2018/master/Control/Configuration/apt-get-wait.sh -O /usr/local/sbin/apt-get
+sudo chmod +x /usr/local/sbin/apt-get
+
 printf "\nAdding MRR user.\n\n"
 sleep 5s
 sudo adduser mrr
