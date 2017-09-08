@@ -12,7 +12,7 @@ sudo adduser mrr dialout
 
 printf "\nRemove unnecessary packages...\n\n"
 sleep 5s
-sudo apt-get install nano
+sudo apt-get install nano curl cmake automake autoconf
 sudo apt-get remove -y --purge libreoffice*
 sudo apt-get clean
 sudo apt-get autoremove -y
