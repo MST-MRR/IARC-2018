@@ -36,7 +36,6 @@ printf "\nInstalling required packages.\n\n"
 sleep 5s
 sudo apt-get install -y python-matplotlib python-serial python-wxgtk3.0 python-wxtools python-lxml
 sudo apt-get install -y python-scipy python-opencv ccache gawk git python-pip python-pexpect
-sudo apt-get install -y curl cmake automake autoconf
 sudo apt-get remove  -y --purge *modemmanager*
 
 printf "\nInstalling required Python modules.\n\n"
@@ -60,7 +59,7 @@ cd gazebo_ws
 printf "\nInstalling Gazebo...\n\n"
 sleep 5s
 curl -ssL http://get.gazebosim.org | sh
-sudo apt-get install libgazebo8-dev
+sudo apt-get install -y libgazebo8-dev
 
 printf "\nCreating startup script.\n\n"
 echo "source ~/.bashrc
