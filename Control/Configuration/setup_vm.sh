@@ -34,11 +34,10 @@ git submodule update --init --recursive &> /dev/null
 
 printf "\nInstalling required packages.\n\n"
 sleep 5s
-yes | sudo aptdcon --safe-upgrade
-yes | sudo aptdcon --install python-matplotlib python-serial python-wxgtk3.0 python-wxtools python-lxml python
-yes | sudo aptdcon --install python-scipy python-opencv ccache gawk git python-pip python-pexpect
-yes | sudo aptdcon --install curl cmake automake autoconf
-yes | sudo aptdcon --remove --purge *modemmanager*
+sudo apt-get install -y python-matplotlib python-serial python-wxgtk3.0 python-wxtools python-lxml
+sudo apt-get install -y python-scipy python-opencv ccache gawk git python-pip python-pexpect
+sudo apt-get install -y curl cmake automake autoconf
+sudo apt-get remove  -y --purge *modemmanager*
 
 printf "\nInstalling required Python modules.\n\n"
 sleep 5s
@@ -61,7 +60,7 @@ cd gazebo_ws
 printf "\nInstalling Gazebo...\n\n"
 sleep 5s
 curl -ssL http://get.gazebosim.org | sh
-yes | sudo aptdcon --install libgazebo8-dev
+sudo apt-get install libgazebo8-dev
 
 printf "\nCreating startup script.\n\n"
 echo "source ~/.bashrc
@@ -114,7 +113,7 @@ sleep 5s
 cd ../../sweeppy
 sudo python2 setup.py install
 
-sudo aptdcon clean
+sudo apt-get clean
 sudo apt-get autoremove -y
 source ~/.bashrc
 printf "\n\nDone.\n\n"
