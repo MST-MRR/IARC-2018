@@ -22,7 +22,7 @@ sleep 1s
 sudo sed -i 's/SystemAccount=false/SystemAccount=true/g' /var/lib/AccountsService/users/vagrant
 
 printf "\nDownloading provisioning script...\n\n"
-wget -q /home/mrr/Desktop/setup_vm.sh
+wget -q https://raw.githubusercontent.com/MST-MRR/IARC-2018/master/Control/Configuration/setup_vm.sh -O /home/mrr/Desktop/setup_vm.sh
 chmod +x /home/mrr/Desktop/setup_vm.sh
 
 printf "\nDone.\n\n"
