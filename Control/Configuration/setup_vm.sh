@@ -63,7 +63,7 @@ sudo apt-get install -y libgazebo8-dev
 
 printf "\nCreating startup script.\n\n"
 echo "source ~/.bashrc
-gazebo --verbose worlds/iris_arducopter_demo.world &> /dev/null &
+gazebo --verbose worlds/iris_irlock_demo.world &> /dev/null &
 cd ~/Desktop/Development/ardupilot/ArduCopter
 sim_vehicle.py -f gazebo-iris -D
 kill \$!
