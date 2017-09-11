@@ -24,6 +24,9 @@ chmod +x QGroundControl.AppImage
 printf "\nQGroundControl has been installed.\n\n"
 cd ~/Desktop/Development
 
+printf "\nInstalling some required packages.\n\n"
+sudo apt-get install -y nano curl cmake automake autoconf
+
 printf "\nCloning ArduPilot.\n\n"
 git clone git://github.com/ArduPilot/ardupilot.git &> /dev/null
 cd ardupilot
