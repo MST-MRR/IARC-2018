@@ -53,9 +53,24 @@ DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
 # default bounding box thickness
 DEFAULT_BOUNDING_BOX_THICKNESS = 3
 
-THRESHOLD_MIN = 130
-THRESHOLD_MAX = 255
-MIN_AREA = 50
+# lower bound for the hue of the red roomba's flap
+RED_ROOMBA_HUE_MIN = 0
+# upper bound for the hue of the red roomba's flap
+RED_ROOMBA_HUE_MAX = 179
+# lower bound for the saturation of the red roomba's flap
+RED_ROOMBA_SATURATION_MIN = 130
+# upper bound for the saturation of the red roomba's flap
+RED_ROOMBA_SATURATION_MAX = 255
+# lower bound for the hue of the green roomba's flap
+GREEN_ROOMBA_HUE_MIN = 46
+# upper bound for the hue of the green roomba's flap
+GREEN_ROOMBA_HUE_MAX = 66
+# lower bound for the saturation of the green roomba's flap
+GREEN_ROOMBA_SATURATION_MIN = 60
+# upper bound for the saturation of the green roomba's flap
+GREEN_ROOMBA_SATURATION_MAX = 255
+# minimum area for a region to have a chance at being considered a roomba
+MIN_ROOMBA_AREA = 50
 
 def iou(boxes, box, area=None):
     """
@@ -475,7 +490,7 @@ class CNNCascadeObjectDetector():
             calib_predictions = calibrator.predict([calib_normalizer.preprocess(detection_windows)])
             coords = _calibrate_coordinates(coords, calib_predictions)
 
-            coords, picked = nms(coords, predictions)
+            coords, picked = nms(coords, predictions, self._last_stage_iou_thresh)
             centers = centers[picked]
 
         return coords.astype(np.int32, copy=False), centers
@@ -485,25 +500,27 @@ def _get_roomba_proposals(img):
     centers = []
 
     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    ret, thresholded = cv2.threshold(hsv_img[:, :, 1], THRESHOLD_MIN, THRESHOLD_MAX, cv2.THRESH_BINARY)
-    erosion = cv2.erode(thresholded, np.ones((11, 11), np.uint8))
-    closing = cv2.morphologyEx(erosion, cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8), iterations=5)
+    ret, red_hue_threshold = cv2.threshold(hsv_img[:, :, 0], RED_ROOMBA_HUE_MIN, RED_ROOMBA_HUE_MAX, cv2.THRESH_BINARY)
+    ret, red_saturation_threshold = cv2.threshold(hsv_img[:, :, 1], RED_ROOMBA_SATURATION_MIN, RED_ROOMBA_SATURATION_MAX, cv2.THRESH_BINARY)
+    ret, green_hue_threshold = cv2.threshold(hsv_img[:, :, 0], GREEN_ROOMBA_HUE_MIN, GREEN_ROOMBA_HUE_MAX, cv2.THRESH_BINARY)
+    ret, green_saturation_threshold = cv2.threshold(hsv_img[:, :, 1], GREEN_ROOMBA_SATURATION_MIN, GREEN_ROOMBA_SATURATION_MAX, cv2.THRESH_BINARY)
+    binary = np.bitwise_or(np.bitwise_and(red_saturation_threshold, red_hue_threshold), np.bitwise_and(green_saturation_threshold, green_hue_threshold))
 
-    modified_img, contours, hierarchy = cv2.findContours(closing, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    modified_img, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:
         area = cv2.contourArea(contour)
-        if area >= MIN_AREA:
+        if area >= MIN_ROOMBA_AREA:
             moments = cv2.moments(contour)
             centers.append((int(moments['m10'] / moments['m00']), int(moments['m01'] / moments['m00'])))
             x, y, w, h = cv2.boundingRect(contour)
             dimensions = np.array([w, h])
-            top_left = np.array([x, y]) - MIN_AREA
-            bottom_right = np.array([x, y]) + dimensions + MIN_AREA
+            top_left = np.array([x, y]) - MIN_ROOMBA_AREA
+            bottom_right = np.array([x, y]) + dimensions + MIN_ROOMBA_AREA
             x_min, y_min = top_left.astype(int)
             x_max, y_max = bottom_right.astype(int)
             proposals.append((x_min, y_min, x_max, y_max))
-    draw_bounding_boxes(img, np.asarray(proposals), (255, 0, 255))
+
     return proposals, centers
 
 # Parameters used to simplify access to built-in object detectors.

@@ -17,6 +17,10 @@ import cv2
 POSITIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/examples/roomba_detection/Positives'
 # title of the window which displays the detection results.
 WINDOW_TITLE = 'Roomba Detector Test'
+# condifidence threshold for the roomba detector's classifier
+STAGE_ONE_THRESH = .1
+# number of times to apply the calibrator to the bounding box proposals
+NUM_CALIB_STEPS = 1
 
 def get_roomba_image_paths(pos_img_folder=POSITIVE_IMAGE_FOLDER):
     """
@@ -54,7 +58,7 @@ def callback(img):
     -------
     None
     """
-    detections, centers = mrrdt_vision.detect_object(img, mrrdt_vision.ObjectTypes.ROOMBA)
+    detections, centers = mrrdt_vision.detect_object(img, mrrdt_vision.ObjectTypes.ROOMBA, stage_one_thresh=STAGE_ONE_THRESH, num_calibration_steps=NUM_CALIB_STEPS)
     mrrdt_vision.draw_bounding_boxes(img, detections)
     
 def main():
