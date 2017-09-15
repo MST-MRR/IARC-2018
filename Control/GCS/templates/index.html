@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  
+  <title>MRR-GLADIS</title>
+
+  <!-- Google Fonts -->
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+  <!-- CSS  -->
+  <link rel="stylesheet" href="static/css/turretcss.min.css">
+  <link rel="stylesheet" href="static/css/nprogress.css">
+  <link rel="stylesheet" href="static/css/notie.min.css">
+  <link rel="stylesheet" href="static/css/base.css">
+
+</head>
+
+{% raw %}
+
+<body>
+
+
+  <div id="app" class="flex-container page column">
+
+    <div id="loading_screen" class="centered" style="max-width: 1000px; min-width: 300px; display:block;">
+
+      <div style="margin-bottom: 25px;">
+        <div class="huge-header">gladIS </div>
+
+        <p>{{ loading_message }}</p>
+
+        <select id="vehicle_selector" class="minimal" v-model="vehicle" v-on:change="setVehicle()">
+          <option v-for="option in available_vehicles" v-bind:value="option.name">
+            {{ option.name }}
+          </option>
+        </select>
+        
+      </div>
+    </div>
+
+    <div id="information_view" style="display: none;">
+
+      <div id="important_info" class="centered flex-container" style="text-align: left; justify-content: space-around;" v-if="vehicle_data != null">
+
+          <div class="card important">
+
+            <h3 style="margin: 5px;">Battery</h3>
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+            <div style="text-align: left; margin: 5px;">
+
+               Remaining: {{ (vehicle_data.battery.percent_remaining * 100).toFixed(0) }}%
+              <br>
+              Current Voltage: {{ vehicle_data.battery.voltage.toFixed(2) }}(v) 
+
+            </div>
+
+          </div>
+
+          <div class="card important">
+
+            <h3 style="margin: 5px;">IMU</h3>
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+            <div style="text-align: left; margin: 5px;">
+
+              Altitude: {{ vehicle_data.altitude.toFixed(2) }} (m)
+              <br>
+              Attitude: 
+              Roll: {{ vehicle_data.attitude.roll.toFixed(1) }} &deg; 
+              Pitch: {{ vehicle_data.attitude.pitch.toFixed(1) }} &deg;
+              Yaw: {{ vehicle_data.attitude.yaw.toFixed(1) }} &deg;
+
+            </div>
+            
+          </div>
+
+          <div class="card important">
+
+            <h3 style="margin: 5px;">Position and Maneuvers</h3>
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+            <div style="text-align: left; margin: 5px;">
+              Mode: {{ vehicle_data.mode }}
+              <br> State: {{ vehicle_data.state }}
+              <br>Localized Position: X: 0.00 (m) Y: 0.00 (m)
+
+            </div>
+            
+          </div>
+
+      </div>
+
+      <div id="secondary_info" class="centered flex-container row" style="flex-wrap: row wrap;justify-content: space-around;" v-if="vehicle_data != null">
+
+          <div class="card important">
+
+            <h3 style="margin: 5px;">Gimbal</h3>
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+            <!-- <div style="text-align: left; margin: 5px;">
+              Current Mode: Scanning
+            </div> -->
+
+            <button>Switch Mode</button>
+
+            
+          </div>
+
+          <div class="card important">
+
+            <h3 style="margin: 5px;">Velocity</h3>
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+            <div style="text-align: left; margin: 5px;">
+
+              X: {{ vehicle_data.velocity.x }} (m/s)  <br> Y: {{ vehicle_data.velocity.y }} (m/s) <br> Z: {{ vehicle_data.velocity.z }} (m/s) 
+              <br>
+              Airspeed: {{ vehicle_data.airspeed.toFixed(2) }} m/s
+
+            </div>
+            
+          </div>
+
+          <div class="card important">
+
+            <h3 style="margin: 5px;">Misc.</h3>
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+            <div style="text-align: left; margin: 5px;">
+
+              Vehicle Name: {{ vehicle }}
+              <br>
+
+              Armed: {{ vehicle_data.armed }}
+              <br>
+
+              Runtime: {{ (vehicle_data.uptime % 60).toFixed(2) }} (min)
+
+            </div>
+            
+          </div>
+
+      </div>
+    </div>
+
+
+
+  </div>
+  
+
+  <div class="footer">
+    Missouri University of Science and Technology &copy; 
+    
+    <script type="text/javascript">
+      document.write(new Date().getFullYear());
+    </script>
+  
+  </div>
+
+  <script src="static/js/moment.min.js"></script>    
+
+  <script src="static/js/notie.min.js"></script>    
+
+  <script src="static/js/socket.io.js"></script>    
+
+  <script src="static/js/nprogress.js"></script>    
+
+  <script src="static/js/vue.js"></script>    
+   
+  <script src="static/js/app.js"></script>    
+
+</body>
+
+{% endraw %}
+</html>
