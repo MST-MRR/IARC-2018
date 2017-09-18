@@ -53,22 +53,14 @@ DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
 # default bounding box thickness
 DEFAULT_BOUNDING_BOX_THICKNESS = 3
 
-# lower bound for the hue of the red roomba's flap
-RED_ROOMBA_HUE_MIN = 0
-# upper bound for the hue of the red roomba's flap
-RED_ROOMBA_HUE_MAX = 179
-# lower bound for the saturation of the red roomba's flap
-RED_ROOMBA_SATURATION_MIN = 130
-# upper bound for the saturation of the red roomba's flap
-RED_ROOMBA_SATURATION_MAX = 255
-# lower bound for the hue of the green roomba's flap
-GREEN_ROOMBA_HUE_MIN = 46
-# upper bound for the hue of the green roomba's flap
-GREEN_ROOMBA_HUE_MAX = 66
-# lower bound for the saturation of the green roomba's flap
-GREEN_ROOMBA_SATURATION_MIN = 60
-# upper bound for the saturation of the green roomba's flap
-GREEN_ROOMBA_SATURATION_MAX = 255
+# lower bound for the red roomba's flap in YCrCb space
+RED_ROOMBA_YCRCB_LOWER_BOUND = np.array([0, 156, 107])
+# upper bound for the red roomba's flap in YCrCb space
+RED_ROOMBA_YCRCB_UPPER_BOUND = np.array([255, 255, 255])
+# lower bound for the green roomba's flap in LAB space
+GREEN_ROOMBA_LAB_LOWER_BOUND = np.array([0, 0, 127])
+# upper bound for the green roomba's flap in LAB space
+GREEN_ROOMBA_LAB_UPPER_BOUND = np.array([94, 123, 250])
 # minimum area for a region to have a chance at being considered a roomba
 MIN_ROOMBA_AREA = 50
 
@@ -499,14 +491,16 @@ def _get_roomba_proposals(img):
     proposals = []
     centers = []
 
-    hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    ret, red_hue_threshold = cv2.threshold(hsv_img[:, :, 0], RED_ROOMBA_HUE_MIN, RED_ROOMBA_HUE_MAX, cv2.THRESH_BINARY)
-    ret, red_saturation_threshold = cv2.threshold(hsv_img[:, :, 1], RED_ROOMBA_SATURATION_MIN, RED_ROOMBA_SATURATION_MAX, cv2.THRESH_BINARY)
-    ret, green_hue_threshold = cv2.threshold(hsv_img[:, :, 0], GREEN_ROOMBA_HUE_MIN, GREEN_ROOMBA_HUE_MAX, cv2.THRESH_BINARY)
-    ret, green_saturation_threshold = cv2.threshold(hsv_img[:, :, 1], GREEN_ROOMBA_SATURATION_MIN, GREEN_ROOMBA_SATURATION_MAX, cv2.THRESH_BINARY)
-    binary = np.bitwise_or(np.bitwise_and(red_saturation_threshold, red_hue_threshold), np.bitwise_and(green_saturation_threshold, green_hue_threshold))
+    lab_img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    ycrcb_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    red_roomba_mask = cv2.inRange(ycrcb_img, RED_ROOMBA_YCRCB_LOWER_BOUND, RED_ROOMBA_YCRCB_UPPER_BOUND)
+    green_romba_mask = cv2.inRange(lab_img, GREEN_ROOMBA_LAB_LOWER_BOUND, GREEN_ROOMBA_LAB_UPPER_BOUND)
+    
+    combined_mask = np.bitwise_or(red_roomba_mask, green_romba_mask)
+    opened_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_OPEN, np.ones((5, 5), dtype=np.uint8))
+    closed_mask = cv2.morphologyEx(opened_mask, cv2.MORPH_CLOSE, np.ones((11, 11), dtype=np.uint8))
 
-    modified_img, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    modified_img, contours, hierarchy = cv2.findContours(closed_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:
         area = cv2.contourArea(contour)
@@ -522,6 +516,7 @@ def _get_roomba_proposals(img):
             proposals.append((x_min, y_min, x_max, y_max))
 
     return proposals, centers
+
 
 # Parameters used to simplify access to built-in object detectors.
 _ObjectTypes = namedtuple('ObjectTypes', ['FACE', 'ROOMBA'])

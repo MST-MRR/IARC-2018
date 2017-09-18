@@ -4,6 +4,8 @@
 # Summer 2017
 # Christopher O'Toole
 
+'''Example which allows experimenting with different colorspaces and threshold ranges for color-based object detection.'''
+
 import os
 import pickle
 import sys
@@ -13,12 +15,29 @@ import mrrdt_vision
 import cv2
 import numpy as np
 
-# folder containing images of roombas.
-POSITIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/examples/roomba_detection/Positives'
+# color space to threshold the image with
+COLOR_SPACE = cv2.COLOR_BGR2LAB
+# number of color channels
+NUM_CHANNELS = 3
+# baseline labels for the trackbars in each colorspace
+TRACKBAR_LABELS = {
+    cv2.COLOR_BGR2LAB: ['L', 'A', 'B'],
+    cv2.COLOR_BGR2YCrCb: ['Y', 'Cr', 'Cb'],
+    cv2.COLOR_BGR2HSV: ['H', 'S', 'V']
+}
+# minimum slider value
+THRESHOLD_MIN = 0
+# maximum slider value
+THRESHOLD_MAX = 255
+# resolution to resize images to for better performance on large images
+RESIZE_TO = (640, 480)
+
+# folder containing images of the target object
+POSITIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/Vision/examples/roomba_detection/Positives'
 # title of the window which displays the detection results.
 WINDOW_TITLE = 'Roomba Detection Experimental'
 
-def get_roomba_image_paths(pos_img_folder=POSITIVE_IMAGE_FOLDER):
+def get_positive_image_paths(pos_img_folder=POSITIVE_IMAGE_FOLDER):
     """
     Retrieves the path of every image file in the directory described by `pos_img_folder`.
 
@@ -36,59 +55,82 @@ def get_roomba_image_paths(pos_img_folder=POSITIVE_IMAGE_FOLDER):
     return [os.path.join(pos_img_folder, file_name) for file_name in os.listdir(pos_img_folder)]
 
 
-class RegionSelector():
-    DEFAULT_SELECTION_BOX_COLOR = (0, 255, 0)
-    DEFAULT_SELECTION_BOX_THICKNESS = 3
+class ImageThresholder():
+    """
+    Utility class for displaying thresholded images with the colorspace given by `COLOR_SPACE`
 
-    def __init__(self, title=WINDOW_TITLE, img_paths=get_roomba_image_paths(), selection_color=DEFAULT_SELECTION_BOX_COLOR,
-                 selection_box_thickness=DEFAULT_SELECTION_BOX_THICKNESS):
+    Parameters
+    ----------
+    title: str
+        Used as both the title and the name of the created window.
+    img_paths: sequence of str, optional
+        Collection of file paths to each positive image instance in `POSITIVE_IMAGE_FOLDER`.
+    """
+
+    def __init__(self, title=WINDOW_TITLE, img_paths=get_positive_image_paths()):
+        """
+        Saves arguments for the window's construction and initializes internal attributes.
+        """
+
         self.title = title
         self.idx = 0
         self.img_paths = img_paths
-        self.selection_color = selection_color
-        self.selection_box_thickness = selection_box_thickness
         self.quit = False
-        self.mouse_button_down = False
+        self.trackbar_positions = np.zeros(NUM_CHANNELS*2)
 
         self.set_cur_img()
 
     def __enter__(self):
+        """
+        Creates a new window when this object is instantiated by a context manager.
+        """
+
         self.window = mrrdt_vision.Window(self.title).__enter__()
-        self.window.set_mouse_callback(self.set_selection)
+        def on_change(val, idx):
+            self.trackbar_positions[idx]=val
+        
+        for i, trackbar_label in enumerate(TRACKBAR_LABELS[COLOR_SPACE]):
+            self.window.create_trackbar(trackbar_label+'_min', THRESHOLD_MIN, THRESHOLD_MAX, on_change=lambda val, idx=i: on_change(val, idx))
+            self.window.create_trackbar(trackbar_label, THRESHOLD_MIN, THRESHOLD_MAX, on_change=lambda val, idx=len(self.trackbar_positions)//2+i: on_change(val, idx))
+
         return self
 
     def __exit__(self, *args):
+        """
+        Destroys the window created earlier whenever the context manager ends or encounters an exception.
+        """
+
         self.window.__exit__()
 
-    def set_selection(self, event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            self.region = [(x, y), (x, y)]
-            self.mouse_button_down = True
-        elif self.mouse_button_down and (event == cv2.EVENT_MOUSEMOVE or event == cv2.EVENT_LBUTTONUP):
-            self.region[1] = (x, y)
-            if event == cv2.EVENT_LBUTTONUP:
-                self.mouse_button_down = False
-
     def set_cur_img(self):
-        self.cur_img = cv2.imread(self.img_paths[self.idx])
-        self.region = [(0, 0), (0, 0)]
+        """
+        Select the image referred to by self.idx and display the original image in another window.
+        """
+
+        resized_img = cv2.resize(cv2.imread(self.img_paths[self.idx]), RESIZE_TO)
+        self.cur_img = cv2.cvtColor(resized_img, COLOR_SPACE)
+        cv2.imshow('original', resized_img)
     
     def update(self):
-        key_pressed = self.window.get_key()
+        """
+        Display the currently selected image with the user selected threshold values and respond
+        to keypresses.
+
+        Returns
+        -------
+        out: bool
+        Returns False if the user wants to quit, True otherwise.
+        """
+
         cur_img_copy = self.cur_img.copy()
-        x_min, y_min = self.region[0]
-        x_max, y_max = self.region[1]
+        lower_bound = np.array(self.trackbar_positions[:NUM_CHANNELS])
+        upper_bound = np.array(self.trackbar_positions[NUM_CHANNELS:])
 
-        if (x_min - x_max) and (y_min - y_max):
-            cv2.rectangle(cur_img_copy, self.region[0], self.region[1], self.selection_color, self.selection_box_thickness)
+        mask = cv2.inRange(cur_img_copy, lower_bound, upper_bound)
+        cur_img_copy = cv2.bitwise_and(cur_img_copy, cur_img_copy, mask=mask)
+        self.window.show(cur_img_copy)
 
-            text_pos = (x_min + (x_max - x_min)//2, y_min + (y_max - y_min)//2)
-            x, y, w, h = mrrdt_vision.squash_coords(self.cur_img, x_min, y_min, x_max - x_min, y_max - y_min)
-            hsv_img = cv2.cvtColor(cur_img_copy, cv2.COLOR_BGR2HSV)[y:y+h, x:x+w]
-            if w > 0 and h > 0:
-                hue, saturation = (hsv_img[:, :, 0], hsv_img[:, :, 1])
-                text = 'Hue [%d, %d], Saturation [%d, %d]' % (np.amin(hue), np.amax(hue), np.amin(saturation), np.amax(saturation))
-                cv2.putText(cur_img_copy, text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 2, cv2.LINE_AA)
+        key_pressed = self.window.get_key()
 
         if key_pressed == 'n':
             self.idx += 1
@@ -102,14 +144,9 @@ class RegionSelector():
         elif key_pressed == 'q':
             self.quit = True
 
-        self.window.show(cur_img_copy)
         return not self.quit
 
-
-def main():
-    with RegionSelector() as region_selector:
-        while region_selector.update():
-            pass
-
 if __name__ == '__main__':
-    main()
+    with ImageThresholder() as image_thresholder:
+        while image_thresholder.update():
+            pass

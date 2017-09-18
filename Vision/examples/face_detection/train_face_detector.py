@@ -36,7 +36,7 @@ TEST_IMAGE_DATABASE_FOLDER = 'Annotated Faces in the Wild/FDDB-folds/'
 TEST_IMAGES_FOLDER = 'Annotated Faces in the Wild/originalPics'
 
 # path to folder containing negative images
-NEGATIVE_IMG_FOLDER = '/home/christopher/IARC-2018/examples/face_detection/Negative Images/images'
+NEGATIVE_IMG_FOLDER = '/home/christopher/IARC-2018/Vision/examples/face_detection/Negative Images/images'
 # image file extension to use for negative images
 NEGATIVE_IMG_FILE_EXT = '.jpg'
 # base folder for face detection cascade files

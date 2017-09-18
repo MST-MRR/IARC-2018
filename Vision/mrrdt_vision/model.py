@@ -45,6 +45,7 @@ from keras.optimizers import SGD
 from keras.utils import np_utils
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
+from sklearn.utils import class_weight
 
 from .hyperopt_keras import HyperoptWrapper, get_best_params, DEFAULT_NUM_EVALS, tune
 from .preprocess import ImageNormalizer
@@ -544,6 +545,9 @@ class ObjectClassifier():
 
         if debug: print(params, save_file_path, batch_size, X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
+        unraveled_y_train = y_train.ravel()
+        class_weights = class_weight.compute_class_weight('balanced', np.unique(unraveled_y_train), unraveled_y_train)
+
         model.fit_generator(self.get_input_generator(X_train, y_train, normalizers, shuffle=True, batch_size=batch_size),
                             len(X_train)//batch_size,
                             epochs = num_epochs,
@@ -551,7 +555,8 @@ class ObjectClassifier():
                             callbacks = callbacks,
                             validation_data = self.get_input_generator(X_test, y_test, normalizers, batch_size=batch_size, use_data_augmentation=False, shuffle=False),
                             validation_steps = len(X_test)//batch_size,
-                            max_queue_size = DEFAULT_Q_SIZE)
+                            max_queue_size = DEFAULT_Q_SIZE,
+                            class_weight = class_weights)
 
         del self.trained_model
         self.trained_model = None
@@ -814,8 +819,8 @@ class StageTwoClassifier(ObjectClassifier):
         'dropout0': HP.uniform(0, .75),
         'dropout1': HP.uniform(0, .75),
         'lr': HP.loguniform(1e-4, 1),
-        'batch_size': HP.choice(512),
-        'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION),
+        'batch_size': HP.choice(32, 64, 128, 512),
+        'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION, ImageNormalizer.MIN_MAX_SCALING, ImageNormalizer.ZCA_WHITENING),
         'flip': HP.choice(ImageNormalizer.FLIP_HORIZONTAL),
         'momentum': HP.choice(.9),
         'decay': HP.choice(1e-4),
@@ -1060,7 +1065,7 @@ class StageTwoCalibrator(ObjectCalibrator):
         'dropout0': HP.uniform(0, .75),
         'dropout1': HP.uniform(0, .75),
         'lr': HP.loguniform(1e-4, 1),
-        'batchSize': HP.choice(512),
+        'batch_size': HP.choice(512),
         'norm':  HP.choice(ImageNormalizer.STANDARD_NORMALIZATION),
         'flip': HP.choice(None),
         'momentum': HP.choice(.9),
