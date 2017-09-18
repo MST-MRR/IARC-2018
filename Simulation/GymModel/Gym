@@ -294,8 +294,8 @@
           </geometry>
           <material>
             <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Wood</name>
+              <uri>model://Gym/IARC_material.material</uri>
+              <name>Gazebo/IARC</name>
             </script>
             <ambient>1 0.764706 0.305882 1</ambient>
           </material>
@@ -356,10 +356,10 @@
       <static>1</static>
     </model>
     <state world_name='default'>
-      <sim_time>58 65000000</sim_time>
-      <real_time>61 198784969</real_time>
-      <wall_time>1505592953 132363317</wall_time>
-      <iterations>58065</iterations>
+      <sim_time>300 932000000</sim_time>
+      <real_time>424 730540914</real_time>
+      <wall_time>1505703409 504931356</wall_time>
+      <iterations>242867</iterations>
       <model name='Untitled_0'>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -393,6 +393,12 @@
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
+        <link name='Wall_106'>
+          <pose frame=''>0 0.005 0 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
       </model>
       <model name='ground_plane'>
         <pose frame=''>0 0 0 0 -0 0</pose>
@@ -407,13 +413,45 @@
       <light name='sun'>
         <pose frame=''>0 0 10 0 -0 0</pose>
       </light>
+      <light name='user_point_light_0'>
+        <pose frame=''>-5.64563 0.094983 9.74242 0 -0 0</pose>
+      </light>
+      <light name='user_point_light_1'>
+        <pose frame=''>3.78787 -0.036533 9.80346 0 -0 0</pose>
+      </light>
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>37.2191 -2.01534 44.3197 0 0.839643 -3.1398</pose>
+        <pose frame=''>-0.341647 10.9927 2.85679 0 0.007642 -1.75177</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
+    <light name='user_point_light_0' type='point'>
+      <pose frame=''>-5.64563 0.094983 1 0 -0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.5</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>
+    <light name='user_point_light_1' type='point'>
+      <pose frame=''>3.78787 -0.036533 1 0 -0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>20</range>
+        <constant>0.5</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <cast_shadows>0</cast_shadows>
+      <direction>0 0 -1</direction>
+    </light>
   </world>
 </sdf>
