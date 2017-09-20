@@ -10,7 +10,7 @@ def test_PWN(setpoint, angle):
     print("Waiting for pre-arm checks")
 
     while not vehicle.is_armable:
-        print("Waititng...\n")
+        print("Waiting...\n")
         time.sleep(1.0)
 
     print("Arming motors\n")
@@ -19,8 +19,10 @@ def test_PWN(setpoint, angle):
 
     time.sleep(7.0)
     
-    pitchPID = PID.PID(0.5, 0.1 , .5)
+    pitchPID = PID.PID(.6, 0.00 , .2)
     pitchPID.SetPoint = angle
+    pitchPWM= getPitchPWM(angle)
+
     pid = PID.PID(0.5, 0.1, 0.1)
     pid.SetPoint = setpoint
 
@@ -30,32 +32,32 @@ def test_PWN(setpoint, angle):
     vehicle.channels.overrides['3'] = PWM
     while True:
         try:
-            print(vehicle.attitude.pitch)
             
-            time.sleep(1.0)
+            time.sleep(.1)
             currentAlt = vehicle.location.global_relative_frame.alt
             pid.update(currentAlt)
             updateThrot = getPWM(pid.output)
-            '''vehicle.channels.overrides['3'] = updateThrot
-            '''
-            time.sleep(1.0)
-            vehiclePitch = math.degrees(vehicle.attitude.pitch)
-            pitchPID.update(vehiclePitch)
-            updatePitch = getPitchPWM(pitchPID.output)
-            vehicle.channels.overrides['2'] = updatePitch
             vehicle.channels.overrides['3'] = updateThrot
-
-            '''
             print("Update throt: %s" % updateThrot)
             print("Alt: %s" % currentAlt)
-            '''
-            print("Update Pitch: %s" % updatePitch)
-            print("Vehicle Pitch: %s" % vehiclePitch)
+            
+
+        
+            if (currentAlt > setpoint / 2):
+                vehiclePitch = math.degrees(vehicle.attitude.pitch)
+                pitchPID.update(vehiclePitch)
+                pitchPWM += pitchPID.output
+                updatePitch = pitchPWM
+                vehicle.channels.overrides['2'] = updatePitch
+                print("Update Pitch: %s" % updatePitch)
+                print("Vehicle Pitch: %s" % vehiclePitch)
+                print("P: %s" % pitchPID.PTerm)
+                print("I: %s" % pitchPID.ITerm)
+                print("D: %s" % pitchPID.DTerm)
+                print("PID Output: %s" % pitchPID.output)
+            
             
         except KeyboardInterrupt:
-            PWMAngle = getPitchPWM(angle)
-            vehicle.channels.overrides['2'] = PWMAngle
-            time.sleep(1)
             break
 
     vehicle.mode = VehicleMode("LAND")
@@ -71,9 +73,9 @@ def getPWM(setpoint):
     return (0.6)*((512.0*setpoint)+1473.0)
 
 def getPitchPWM(angle):
-    return (((256*angle)/5) + 1494)
+    return  (((256*-1*angle)/45) + 1494)
 
 def getRollPWM(angle):
-    return (((256*angle)/5) + 1238)
+    return (((512*angle)/45) + 1494)
 
-test_PWN(3.0, 5.0)
+test_PWN(3.0, 0.4)
