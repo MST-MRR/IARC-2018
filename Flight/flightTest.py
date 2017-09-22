@@ -1,79 +1,77 @@
-import dronekit, PID, time, math
-from dronekit import VehicleMode
+import time
+from dronekit import VehicleMode, connect
+import os
+from PID import PID
 
-vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
+vehicle = connect("tcp:127.0.0.1:5763", wait_ready=True)
+
+MAX_THROTTLE = vehicle.parameters['RC3_MAX']
+MIN_THROTTLE = vehicle.parameters['RC3_MIN']
+MAX_ALT = 3
+MIN_ALT = 0
+
+vehicle.channels.overrides[3] = MIN_THROTTLE
+
+def convert_to_rc_safe(altitude):
+  rc_out =  340.0 * altitude + 986.0
+  if(rc_out < MIN_THROTTLE):
+    return MIN_THROTTLE
+  elif(rc_out > MAX_THROTTLE):
+    return MAX_THROTTLE
+  return rc_out
+
+def convert_to_rc(altitude):
+  rc_out =  340.0 * altitude + 986.0
+  return rc_out
+
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
 
 
-print("\n Connected")
+def land_vehicle():
+  print("Landing vehicle...")
+  vehicle.mode = VehicleMode("LAND")
+  vehicle.channels.overrides[3] = MIN_THROTTLE
+  print("Cleaning up...")
+  vehicle.close()
+  print("Done.")
 
-def test_PWN(setpoint, angle):
-    print("Waiting for pre-arm checks")
+P = 0.202
+I = 0.09
+D = 0.05
 
-    while not vehicle.is_armable:
-        print("Waititng...\n")
-        time.sleep(1.0)
+# Agressive No Oscillation
+# P = 1.25
+# I = 0.2329
+# D = 0.15
 
-    print("Arming motors\n")
-    vehicle.mode = VehicleMode("LOITER")
-    vehicle.armed = True
+pid_controller = PID(P, I, D)
 
-    time.sleep(7.0)
-    
-    pitchPID = PID.PID(0.5, 0.1 , .5)
-    pitchPID.SetPoint = angle
-    pid = PID.PID(0.5, 0.1, 0.1)
-    pid.SetPoint = setpoint
+pid_controller.SetPoint = 1.00
+pid_controller.setSampleTime(0.01)
 
-    PWM = getPWM(setpoint)
-    print(PWM)
+#This will make the vehicle compensate for any idiosynchracies.
+desired_mode = 'LOITER'
+while vehicle.mode != desired_mode:
+   vehicle.mode = VehicleMode(desired_mode)
+   time.sleep(0.5)
 
-    vehicle.channels.overrides['3'] = PWM
-    while True:
-        try:
-            print(vehicle.attitude.pitch)
-            
-            time.sleep(1.0)
-            currentAlt = vehicle.location.global_relative_frame.alt
-            pid.update(currentAlt)
-            updateThrot = getPWM(pid.output)
-            '''vehicle.channels.overrides['3'] = updateThrot
-            '''
-            time.sleep(1.0)
-            vehiclePitch = math.degrees(vehicle.attitude.pitch)
-            pitchPID.update(vehiclePitch)
-            updatePitch = getPitchPWM(pitchPID.output)
-            vehicle.channels.overrides['2'] = updatePitch
-            vehicle.channels.overrides['3'] = updateThrot
+#Arm the motors.
+while not vehicle.armed:
+     print("Arming motors...")
+     vehicle.armed = True
+     time.sleep(0.5)
 
-            '''
-            print("Update throt: %s" % updateThrot)
-            print("Alt: %s" % currentAlt)
-            '''
-            print("Update Pitch: %s" % updatePitch)
-            print("Vehicle Pitch: %s" % vehiclePitch)
-            
-        except KeyboardInterrupt:
-            PWMAngle = getPitchPWM(angle)
-            vehicle.channels.overrides['2'] = PWMAngle
-            time.sleep(1)
-            break
+while True:
+  try:
+    pid_controller.update(vehicle.location.global_relative_frame.alt)
+    output = pid_controller.output
+    rc_value = convert_to_rc(pid_controller.output)
+    print("Controller Out: " + str(output) + "\nRC Out: " + str(rc_value) + "\nVehicle Altitude: " + str(vehicle.location.global_relative_frame.alt) + "\nTarget Alt: " + str(pid_controller.SetPoint))
+    vehicle.channels.overrides[3] = rc_value
+    time.sleep(0.02)
+    cls()
+  except KeyboardInterrupt:
+    break
 
-    vehicle.mode = VehicleMode("LAND")
-    
-    time.sleep(10.0)
-
-    vehicle.channels.overrides['3'] = 986.0
-    vehicle.close()
-
-    return
-
-def getPWM(setpoint):
-    return (0.6)*((512.0*setpoint)+1473.0)
-
-def getPitchPWM(angle):
-    return (((256*angle)/5) + 1494)
-
-def getRollPWM(angle):
-    return (((256*angle)/5) + 1238)
-
-test_PWN(3.0, 5.0)
+land_vehicle()
