@@ -85,6 +85,57 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
+    <state world_name='default'>
+      <sim_time>144 313000000</sim_time>
+      <real_time>42 1635000</real_time>
+      <wall_time>1506200730 139170000</wall_time>
+      <iterations>40912</iterations>
+      <model name='create'>
+        <pose frame=''>1.60327 1.378 0.000938 -7.4e-05 -0.000613 -0.005846</pose>
+        <scale>1 1 1</scale>
+        <link name='base'>
+          <pose frame=''>1.60327 1.378 0.000938 -7.4e-05 -0.000613 -0.005846</pose>
+          <velocity>-0.003527 7.2e-05 -0.005081 -0.001377 0.011384 -8.7e-05</velocity>
+          <acceleration>-9.7e-05 -0.000668 -9.58092 0.039428 0.011793 3e-05</acceleration>
+          <wrench>-0.000217 -0.001493 -21.4038 0 -0 0</wrench>
+        </link>
+        <link name='left_wheel'>
+          <pose frame=''>1.60401 1.508 0.032987 -3.14144 -1.00596 3.13562</pose>
+          <velocity>-0.003145 0.000193 -0.020061 -0.0003 -0.095701 -7.8e-05</velocity>
+          <acceleration>0.011312 0.074487 -37.5689 -3.0322 -0.019006 0.001292</acceleration>
+          <wrench>0.000113 0.000745 -0.375689 0 -0 0</wrench>
+        </link>
+        <link name='right_wheel'>
+          <pose frame=''>1.60249 1.24801 0.03299 -3.14145 -0.960068 3.13563</pose>
+          <velocity>-0.003168 0.000196 -0.015469 -0.000391 -0.096367 -7.8e-05</velocity>
+          <acceleration>0.010362 0.074765 -30.9733 -3.04149 -0.018952 0.001326</acceleration>
+          <wrench>0.000104 0.000748 -0.309733 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='ground_plane'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose frame=''>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <light name='sun'>
+        <pose frame=''>0 0 10 0 -0 0</pose>
+      </light>
+      <light name='user_directional_light_0'>
+        <pose frame=''>-0.049306 0.028235 1 0 -0 0</pose>
+      </light>
+    </state>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>2.94151 -1.09117 0.722859 -0 0.207643 2.34019</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
     <model name='create'>
       <link name='base'>
         <inertial>
@@ -125,7 +176,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>model://create/meshes/create_body.dae</uri>
+              <uri>model://createT/meshes/create_body.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -157,14 +208,6 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='front_wheel_visual'>
-          <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
-          <geometry>
-            <sphere>
-              <radius>0.009</radius>
-            </sphere>
-          </geometry>
-        </visual>
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -192,14 +235,6 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='rear_wheel_visual'>
-          <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
-          <geometry>
-            <sphere>
-              <radius>0.0075</radius>
-            </sphere>
-          </geometry>
-        </visual>
         <sensor name='left_cliff_sensor' type='ray'>
           <pose frame=''>0.07 0.14 0.027 0 1.57079 0</pose>
           <ray>
@@ -360,15 +395,6 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='visual'>
-          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.033</radius>
-              <length>0.023</length>
-            </cylinder>
-          </geometry>
-        </visual>
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -414,15 +440,6 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        <visual name='visual'>
-          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.033</radius>
-              <length>0.023</length>
-            </cylinder>
-          </geometry>
-        </visual>
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -459,55 +476,20 @@
           </dynamics>
         </axis>
       </joint>
-      <pose frame=''>1.41149 1.03944 0 0 -0 0</pose>
+      <pose frame=''>1.46695 1.37143 0 0 -0 0</pose>
     </model>
-    <state world_name='default'>
-      <sim_time>56 305000000</sim_time>
-      <real_time>58 49508000</real_time>
-      <wall_time>1505589019 251327000</wall_time>
-      <iterations>56305</iterations>
-      <model name='create'>
-        <pose frame=''>1.55444 1.04316 0.00094 -6.9e-05 -0.000527 -0.003142</pose>
-        <scale>1 1 1</scale>
-        <link name='base'>
-          <pose frame=''>1.55444 1.04316 0.00094 -6.9e-05 -0.000527 -0.003142</pose>
-          <velocity>0.003136 0.000104 0.0047 0.001099 -0.027659 -8.3e-05</velocity>
-          <acceleration>0.005457 -0.009785 8.35265 1.54958 0.995436 0.000884</acceleration>
-          <wrench>0.01219 -0.021859 18.6598 0 -0 0</wrench>
-        </link>
-        <link name='left_wheel'>
-          <pose frame=''>1.55483 1.17316 0.033008 -3.14138 -1.20009 3.13825</pose>
-          <velocity>0.00228 5e-06 0.017676 -8e-05 0.069077 -8.8e-05</velocity>
-          <acceleration>0.020579 -0.157387 37.2093 -1.75975 -0.234427 0.002015</acceleration>
-          <wrench>0.000206 -0.001574 0.372093 0 -0 0</wrench>
-        </link>
-        <link name='right_wheel'>
-          <pose frame=''>1.55401 0.913164 0.033005 -3.14139 -1.17511 3.13827</pose>
-          <velocity>0.002259 4e-06 0.01429 -7.3e-05 0.068421 -8.8e-05</velocity>
-          <acceleration>0.021352 -0.159235 29.6227 -1.70189 -0.233083 0.00204</acceleration>
-          <wrench>0.000214 -0.001592 0.296227 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='ground_plane'>
-        <pose frame=''>0 0 0 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose frame=''>0 0 0 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <light name='sun'>
-        <pose frame=''>0 0 10 0 -0 0</pose>
-      </light>
-    </state>
-    <gui fullscreen='0'>
-      <camera name='user_camera'>
-        <pose frame=''>5 -5 2 0 0.275643 2.35619</pose>
-        <view_controller>orbit</view_controller>
-        <projection_type>perspective</projection_type>
-      </camera>
-    </gui>
+    <light name='user_directional_light_0' type='directional'>
+      <pose frame=''>-0.049306 0.028235 1 0 -0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0.1 0.1 -0.9</direction>
+      <attenuation>
+        <range>20</range>
+        <constant>0.5</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <cast_shadows>1</cast_shadows>
+    </light>
   </world>
 </sdf>
