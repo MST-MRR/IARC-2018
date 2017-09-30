@@ -406,7 +406,7 @@ function Engine(CurrentFrame)
         {
           var Rot = (DataArray[CurrentFrame].GroundRobots[index2].Rotation % 360 < 0) ? DataArray[CurrentFrame].GroundRobots[index2].Rotation % 360 + 360 : DataArray[CurrentFrame].GroundRobots[index2].Rotation % 360;
           var TargetRot = 180;
-          if(DataArray[CurrentFrame].GroundRobots[index2].StillIn == true && (Rot < TargetRot - 70 / 2 || Rot > TargetRot + 70 / 2))
+          if(DataArray[CurrentFrame].GroundRobots[index2].StillIn == true && (Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2))
           {
             var SafeTarget = true;
             for(var index3 = 0; index3 < OBSTACLE_ROBOT_NUMBER; index3++)
@@ -554,6 +554,7 @@ function Engine(CurrentFrame)
       var GroundRobotPixelRadius = ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight;
       var A = DataArray[CurrentFrame].Drones[index].X - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X;
       var B = DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y;
+      /* SORRY, ONLY FRONT BUMP IS ALLOWED IN THIS SIMULATION
       if(Math.pow(A, 2) + Math.pow(B, 2) <= Math.pow(GroundRobotPixelRadius, 2))
       {
         if(DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].FramesToTurn <= 0)
@@ -578,7 +579,7 @@ function Engine(CurrentFrame)
           }
         }
       }
-      else if( Math.abs( ( Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) - ((GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100) ) / GroundRobotPixelRadius ) <= 0.05 )
+      else */if( Math.abs( ( Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) - ((GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100) ) / GroundRobotPixelRadius ) <= 0.05 )
       {
         if(DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].FramesToTurn <= 0)
         {
