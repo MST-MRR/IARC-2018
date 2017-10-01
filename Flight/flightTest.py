@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import dronekit, PID, time, math
 from dronekit import VehicleMode
 
