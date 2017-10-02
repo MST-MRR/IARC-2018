@@ -439,8 +439,8 @@ function Engine(CurrentFrame)
       
       var dist_to_target = Math.sqrt( Math.pow( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X - DataArray[CurrentFrame].Drones[index].X, 2 ) + Math.pow( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y - DataArray[CurrentFrame].Drones[index].Y, 2 ) );
       
-      TargetX = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X + Math.sin( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.min( dist_to_target, 100 );
-      TargetY = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y + Math.cos( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.min( dist_to_target, 100 );
+      TargetX = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X + Math.sin( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.max( Math.min( dist_to_target, 20 ), (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 );
+      TargetY = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y + Math.cos( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.max( Math.min( dist_to_target, 20 ), (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 );
       
       if(PrevTargetRobot != DataArray[CurrentFrame].Drones[index].TargetRobot)
       {
@@ -532,7 +532,7 @@ function Engine(CurrentFrame)
       var B = DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y;
       
       
-      if( Math.abs( ( Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) - ((GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100) ) / GroundRobotPixelRadius ) <= 0.05 )
+      if( Math.abs( ( Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) - ((GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100) ) / GroundRobotPixelRadius ) <= 0.1 )
       {
         if(DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].FramesToTurn <= 0)
         {
