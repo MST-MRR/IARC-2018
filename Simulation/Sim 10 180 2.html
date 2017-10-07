@@ -115,7 +115,7 @@ const START_SCORE = 12000;
 const ROBOT_SCORED_VALUE = 2000;
 const ROBOT_NOT_SCORED_VALUE = -1000;
 const MINUTE_USED_VALUE = -100;
-const MAX_FOLLOW_DISTANCE = 40; //px
+const MAX_FOLLOW_DISTANCE = 2; //meters
 
 var BrowserWindow = window;
 var c = document.getElementById("myCanvas");
@@ -532,7 +532,7 @@ function Engine(CurrentFrame)
       var A = DataArray[CurrentFrame].Drones[index].X - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X;
       var B = DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y;
       
-      if(Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true || Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) > MAX_FOLLOW_DISTANCE )
+      if(Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true || Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) > MAX_FOLLOW_DISTANCE * FieldHeight / GRIDNUMBER )
       {
         DataArray[CurrentFrame].Drones[index].X -= DRONE_SPEED * target_to_drone_x / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
         DataArray[CurrentFrame].Drones[index].Y -= DRONE_SPEED * target_to_drone_y / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
