@@ -45,25 +45,30 @@ def test_PWN(setpoint, pitchAngle, rollAngle, yawAngle):
     #yawVPWM = 1494
 
     #Initialize Throttle PID Controller
-    pid = PID.PID(0.5, 0.1, 0.1)
+    pid = PID.PID(10.0, 0.0, 0.0)
     pid.SetPoint = setpoint
-    PWM = getPWM(setpoint)
+    PWM = RC_MIN
     vehicle.channels.overrides['3'] = PWM
 
     while True:
         try:
-            
+            height = vehicle.location.global_relative_frame.alt
+
+            if height > 3:
+                pid.SetPoint = 0
             time.sleep(.1)
-            currentAlt = vehicle.location.global_relative_frame.alt
-            pid.update(currentAlt)
-            updateThrot = getPWM(pid.output)
-            vehicle.channels.overrides['3'] = updateThrot
-            print("Update throt: %s" % updateThrot)
-            print("Alt: %s" % currentAlt)
+            currentAltVel = vehicle.velocity[2]
+            pid.update(currentAltVel)
+            PWM += pid.output
+            vehicle.channels.overrides['3'] = PWM
+            print("Update throt: %s" % PWM)
+            print("Alt velocity: %s" % currentAltVel)
+            print("Velocites: %s " % vehicle.velocity)
+            print("Height: %s " % height)
             
 
             #Wait until the drone is at a good height to change direction
-            if (currentAlt > setpoint / 2):
+            if (currentAltVel > setpoint / 2):
                 '''     
                 vehiclePitch = vehicle.velocity[0]            #Get drones pitch velocity
                 pitchPID.update(vehiclePitch)                 #Update PID with current pitch          
@@ -89,7 +94,7 @@ def test_PWN(setpoint, pitchAngle, rollAngle, yawAngle):
                 #print("Actual roll:   %s" % vehicleRoll)
                 print("Desired yaw:   %s" % math.degrees(yawAngle))
                 print("Actual yaw:    %s" % math.degrees(vehicleYaw))
-                os.system('clear')
+            os.system('clear')
             
                 
         except KeyboardInterrupt:
@@ -120,4 +125,4 @@ def getRollPWM(angle):
     return (((512*angle)/45) + 1494)
 
 # Alt, Pitch, Roll, Yaw
-test_PWN(3.0, 0.3, -0.3, 1.5)
+test_PWN(0.3, 0.0, 0.0, 0.0)
