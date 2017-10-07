@@ -115,6 +115,7 @@ const START_SCORE = 12000;
 const ROBOT_SCORED_VALUE = 2000;
 const ROBOT_NOT_SCORED_VALUE = -1000;
 const MINUTE_USED_VALUE = -100;
+const MAX_FOLLOW_DISTANCE = 40; //px
 
 var BrowserWindow = window;
 var c = document.getElementById("myCanvas");
@@ -447,7 +448,7 @@ function Engine(CurrentFrame)
         DataArray[CurrentFrame].Drones[index].OkToLeave = false;
       }
         
-      
+      /*
       var GroundRobotPixelSpeed = GROUND_ROBOT_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
       for(var index2 = 0; index2 < GROUND_ROBOT_NUMBER; index2++)
       {
@@ -484,7 +485,7 @@ function Engine(CurrentFrame)
           }
         }
       }
-      
+      */
       
       
       target_to_drone_x = DataArray[CurrentFrame].Drones[index].X - TargetX;
@@ -507,8 +508,6 @@ function Engine(CurrentFrame)
       */
       
       
-      DataArray[CurrentFrame].Drones[index].X -= DRONE_SPEED * target_to_drone_x / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
-      DataArray[CurrentFrame].Drones[index].Y -= DRONE_SPEED * target_to_drone_y / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
       
       var Rot = (DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation % 360 < 0) ? DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation % 360 + 360 : DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation % 360;
       
@@ -527,9 +526,17 @@ function Engine(CurrentFrame)
         TargetRot = 180;
       }
       
+      
+      
       var GroundRobotPixelRadius = ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight;
       var A = DataArray[CurrentFrame].Drones[index].X - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X;
       var B = DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y;
+      
+      if(Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true || Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) > MAX_FOLLOW_DISTANCE )
+      {
+        DataArray[CurrentFrame].Drones[index].X -= DRONE_SPEED * target_to_drone_x / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
+        DataArray[CurrentFrame].Drones[index].Y -= DRONE_SPEED * target_to_drone_y / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
+      }
       
       
       if( Math.abs( ( Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) - ((GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100) ) / GroundRobotPixelRadius ) <= 0.1 )
