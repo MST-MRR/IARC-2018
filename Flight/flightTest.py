@@ -1,20 +1,38 @@
-import dronekit, PID, time, math, os
+import dronekit, PID, time, math
 from dronekit import VehicleMode
+
+YAW_MID = 1494
+PITCH_MID = 1494
+ROLL_MID = 1494
+THRUST_LOW = 986.0
+PITCH_P = 10
+PITCH_I = 0
+PITCH_D = 15
+ROLL_P = 10
+ROLL_I = 0
+ROLL_D = 15
+YAW_P = 2
+YAW_I = 0
+YAW_D = 8
+THROTTLE_P = 5
+THROTTLE_I = 0
+THROTTLE_D = 6
+ROLL_CHANNEL = '1'
+PITCH_CHANNEL = '2'
+THROTTLE_CHANNEL = '3'
+YAW_CHANNEL = '4'
+PID_UPDATE_TIME = 0.0
+PI = 3.14159265359
 
 vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
 
-
 print("\n Connected")
 
-RC_MAX = 2006
-RC_MIN = 982
-
-def test_PWN(setpoint, pitchAngle, rollAngle, yawAngle):
+def test_PWM(desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
     print("Waiting for pre-arm checks")
 
     while not vehicle.is_armable:
         print("Waiting...\n")
-        os.system("clear")
         time.sleep(1.0)
 
     print("Arming motors\n")
@@ -25,19 +43,25 @@ def test_PWN(setpoint, pitchAngle, rollAngle, yawAngle):
 
 
     #Initialize Pitch Pid Controller
-    pitchPID = PID.PID(10, 0, 15)
-    pitchPID.SetPoint = pitchAngle
-    pitchPWM= getPitchPWM(pitchAngle)
+    pitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
+    pitchPID.SetPoint = desiredPitchVel
+    pitchPID.setSampleTime(PID_UPDATE_TIME)
+    pitchPWM = getPitchPWM(desiredPitchVel)
+    
     
     #Initialize Roll PID Controller
-    rollPID = PID.PID(10.0, 0.0, 15.0)
-    rollPID.SetPoint = rollAngle
-    rollPWM = getPitchPWM(rollAngle)
+    rollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
+    rollPID.SetPoint = desiredRollVel
+    rollPID.setSampleTime(PID_UPDATE_TIME)
+    rollPWM = getPitchPWM(desiredRollVel)
 
+    
     #Initialize Yaw PID Controller
-    yawPID = PID.PID(10.0 , 1.5, 15.0)
-    yawPID.SetPoint = yawAngle
-    yawPWM = 1494
+    desiredYawAng = getYawRad(desiredYawAng)
+    yawPID = PID.PID(YAW_P , YAW_I, YAW_D)
+    yawPID.SetPoint = desiredYawAng
+    yawPID.setSampleTime(PID_UPDATE_TIME)
+    yawPWM = YAW_MID
 
     #Circle Stuffs
     #yawVPID = PID.PID(10 ,0 ,15)
@@ -45,66 +69,57 @@ def test_PWN(setpoint, pitchAngle, rollAngle, yawAngle):
     #yawVPWM = 1494
 
     #Initialize Throttle PID Controller
-    pid = PID.PID(10.0, 0.0, 0.0)
-    pid.SetPoint = setpoint
-    PWM = RC_MIN
-    vehicle.channels.overrides['3'] = PWM
+    throttlePID = PID.PID(THROTTLE_P, THROTTLE_I, THROTTLE_D)
+    throttlePID.SetPoint = desiredAlt
+    throttlePID.setSampleTime(PID_UPDATE_TIME)
+    throttlePWM = THRUST_LOW
+    vehicle.channels.overrides[THROTTLE_CHANNEL] = throttlePWM
 
     while True:
         try:
-            height = vehicle.location.global_relative_frame.alt
-
-            if height > 3:
-                pid.SetPoint = 0
+            
             time.sleep(.1)
-            currentAltVel = vehicle.velocity[2]
-            pid.update(currentAltVel)
-            PWM += pid.output
-            vehicle.channels.overrides['3'] = PWM
-            print("Update throt: %s" % PWM)
-            print("Alt velocity: %s" % currentAltVel)
-            print("Velocites: %s " % vehicle.velocity)
-            print("Height: %s " % height)
+            currentAlt = vehicle.location.global_relative_frame.alt
+            throttlePID.update(currentAlt)
+            throttlePWM += throttlePID.output
+            vehicle.channels.overrides[THROTTLE_CHANNEL] = throttlePWM
+            print("Update throt: %s" % throttlePWM)
+            print("Alt: %s" % currentAlt)
             
 
             #Wait until the drone is at a good height to change direction
-            if (currentAltVel > setpoint / 2):
-                '''     
-                vehiclePitch = vehicle.velocity[0]            #Get drones pitch velocity
-                pitchPID.update(vehiclePitch)                 #Update PID with current pitch          
-                pitchPWM -= pitchPID.output                   #Set PWM to desired PWM from PID
-                vehicle.channels.overrides['2'] = pitchPWM    #Send signal to drone
-                '''
-                '''
-                vehicleRoll = vehicle.velocity[1]             #Get drones roll velocity
-                rollPID.update(vehicleRoll)                   #Update PID with current roll 
-                rollPWM += rollPID.output                     #Set PWM to desired PWM from PID                                 
-                vehicle.channels.overrides['1'] = rollPWM     #Send signal to drone
-                '''
-                
-                vehicleYaw = vehicle.attitude.yaw             #Get drones yaw angle
-                yawPID.update(vehicleYaw)                     #Update PID with current yaw
-                yawPWM += yawPID.output                       #Set PWM to desired PWM from PID                            
-                vehicle.channels.overrides['4'] = yawPWM      #Send signal to drone   
-                
+            if (currentAlt > desiredAlt / 2):         
+                #currentPitchVel = vehicle.velocity[0]                 #Get drones pitch velocity
+                #pitchPID.update(currentPitchVel)                      #Update PID with current pitch          
+                #pitchPWM -= pitchPID.output                           #Set PWM to desired PWM from PID
+                #vehicle.channels.overrides[PITCH_CHANNEL] = pitchPWM  #Send signal to drone
 
-                #print("Desired pitch: %s" % pitchAngle)       #Output data
-                #print("Actual pitch:  %s" % vehiclePitch)
-                #print("Desired roll:  %s" % rollAngle)
-                #print("Actual roll:   %s" % vehicleRoll)
-                print("Desired yaw:   %s" % math.degrees(yawAngle))
-                print("Actual yaw:    %s" % math.degrees(vehicleYaw))
-            os.system('clear')
-            
+                #currentRollVel = vehicle.velocity[1]                  #Get drones roll velocity
+                #rollPID.update(currentRollVel)                        #Update PID with current roll 
+                #rollPWM += rollPID.output                             #Set PWM to desired PWM from PID                                 
+                #vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM    #Send signal to drone
+                
+                currentYawAng = vehicle.attitude.yaw     #Get drones yaw angle
+                yawPID.update(currentYawAng)                          #Update PID with current yaw
+                yawPWM += yawPID.output                               #Set PWM to desired PWM from PID                            
+                vehicle.channels.overrides[YAW_CHANNEL] = yawPWM      #Send signal to drone   
+
+                #print("Desired pitch: %s" % desiredPitchVel)          #Output data
+                #print("Actual pitch:  %s" % currentPitchVel)
+                #print("Desired roll:  %s" % desiredRollVel)
+                #print("Actual roll:   %s" % currentRollVel)
+                print("Desired yaw:   %s" % math.degrees(desiredYawAng))
+                print("Actual yaw:    %s" % math.degrees(currentYawAng))
+                print("")
                 
         except KeyboardInterrupt:
             break
 
     vehicle.mode = VehicleMode("LAND")
     
-    time.sleep(5.0)
+    time.sleep(10.0)
 
-    vehicle.channels.overrides['3'] = RC_MIN
+    vehicle.channels.overrides[THRUST_CHANNEL] = THRUST_LOW
     vehicle.close()
 
     return
@@ -112,17 +127,31 @@ def test_PWN(setpoint, pitchAngle, rollAngle, yawAngle):
 def getPWM(setpoint):
     return (0.6)*((512.0*setpoint)+1473.0)
 
-def getPitchPWM(speed):
-    value = 2*(256*speed+747)
-    if value > RC_MAX:
-        return RC_MAX
-    elif value < RC_MIN:
-        return RC_MIN
-    
-    return value
+def getPitchPWM(angle):
+    return  (((512*angle)/5) + 1494)
 
 def getRollPWM(angle):
     return (((512*angle)/45) + 1494)
 
-# Alt, Pitch, Roll, Yaw
-test_PWN(0.3, 0.0, 0.0, 0.0)
+def getYawRad(angle):
+    angRad = 0
+    if angle < 180:
+        angRad = math.radians(angle)
+    else:
+        angRad = math.radians(angle-180) -  PI
+    return angRad
+
+def getBetterYaw(yaw):
+    yawDeg = 0
+    if (yaw < PI) and (yaw > 0):
+        yawDeg = math.degrees(yaw)
+    if (yaw > -PI) and (yaw < 0):
+        yawDeg = math.degrees(yaw) + 360
+    return yawDeg
+
+for x in range(-314, 314):
+    print(getBetterYaw(float(x)/100.0))
+    
+
+test_PWM(2.0, 0, 0, 45)
+
