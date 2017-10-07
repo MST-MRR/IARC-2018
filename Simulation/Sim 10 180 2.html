@@ -116,6 +116,7 @@ const ROBOT_SCORED_VALUE = 2000;
 const ROBOT_NOT_SCORED_VALUE = -1000;
 const MINUTE_USED_VALUE = -100;
 const MAX_FOLLOW_DISTANCE = 2; //meters
+const PROJECTION_DISTANCE = 1; //meters
 
 var BrowserWindow = window;
 var c = document.getElementById("myCanvas");
@@ -440,8 +441,8 @@ function Engine(CurrentFrame)
       
       var dist_to_target = Math.sqrt( Math.pow( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X - DataArray[CurrentFrame].Drones[index].X, 2 ) + Math.pow( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y - DataArray[CurrentFrame].Drones[index].Y, 2 ) );
       
-      TargetX = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X + Math.sin( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.max( Math.min( dist_to_target, 0 ), (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 );
-      TargetY = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y + Math.cos( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.max( Math.min( dist_to_target, 0 ), (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 );
+      TargetX = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X + Math.sin( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.max( Math.min( dist_to_target, PROJECTION_DISTANCE * FieldHeight/GRIDNUMBER ), (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 );
+      TargetY = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y + Math.cos( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * Math.max( Math.min( dist_to_target, PROJECTION_DISTANCE * FieldHeight/GRIDNUMBER ), (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 );
       
       if(PrevTargetRobot != DataArray[CurrentFrame].Drones[index].TargetRobot)
       {
