@@ -404,7 +404,7 @@ function Engine(CurrentFrame)
     
       var PrevTargetRobot = DataArray[CurrentFrame].Drones[index].TargetRobot;
       //alert(DataArray[CurrentFrame].Drones[index].OkToLeave + "\n" + DataArray[CurrentFrame].Drones[index].TargetRobot);
-      if(DataArray[CurrentFrame].Drones[index].OkToLeave == true && (NextRotateFrame - CurrentFrame) / FRAME_RATE > 12 /*|| DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true*/)
+      if(DataArray[CurrentFrame].Drones[index].OkToLeave == true && (NextRotateFrame - CurrentFrame) / FRAME_RATE > 12)
       {
         var TempX = 0;
         var TempY = 0;
@@ -533,7 +533,7 @@ function Engine(CurrentFrame)
       var A = DataArray[CurrentFrame].Drones[index].X - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X;
       var B = DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y;
       
-      if(Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true || Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) > MAX_FOLLOW_DISTANCE * FieldHeight / GRIDNUMBER )
+      if( ( Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true || Math.sqrt( Math.pow( A, 2 ) + Math.pow( B, 2 ) ) > MAX_FOLLOW_DISTANCE * FieldHeight / GRIDNUMBER ) && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].FramesToTurn < 1 )
       {
         DataArray[CurrentFrame].Drones[index].X -= DRONE_SPEED_M_S * FieldHeight / GRIDNUMBER * (1 / FRAME_RATE) * target_to_drone_x / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
         DataArray[CurrentFrame].Drones[index].Y -= DRONE_SPEED_M_S * FieldHeight / GRIDNUMBER * (1 / FRAME_RATE) * target_to_drone_y / Math.sqrt(target_to_drone_x * target_to_drone_x + target_to_drone_y * target_to_drone_y);
