@@ -448,66 +448,12 @@ function Engine(CurrentFrame)
       {
         DataArray[CurrentFrame].Drones[index].OkToLeave = false;
       }
-        
-      /*
-      var GroundRobotPixelSpeed = GROUND_ROBOT_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
-      for(var index2 = 0; index2 < GROUND_ROBOT_NUMBER; index2++)
-      {
-        if(DataArray[CurrentFrame].GroundRobots[index2].StillIn == true && DataArray[CurrentFrame].GroundRobots[index2].FramesToTurn == 0)
-        {
-          var SafeTarget = true;
-          for(var index3 = 0; index3 < OBSTACLE_ROBOT_NUMBER; index3++)
-          {
-            var A = DataArray[CurrentFrame].GroundRobots[index2].X - DataArray[CurrentFrame].ObstacleRobots[index3].X;
-            var B = DataArray[CurrentFrame].GroundRobots[index2].Y - DataArray[CurrentFrame].ObstacleRobots[index3].Y;
-            var GroundRobotPixelRadius = ((GROUNDROBOTCENTIWIDTH / 2) / (GRIDNUMBER * 100)) * FieldHeight;
-            var ObstacleRobotPixelRadius = GroundRobotPixelRadius;
-            if(Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)) / (FieldHeight / GRIDNUMBER) < (GroundRobotPixelRadius + ObstacleRobotPixelRadius) / (FieldHeight / GRIDNUMBER) + 1)
-            {
-              var SafeTarget = false;
-            }
-          }
-          if(SafeTarget == true)
-          {
-            var TempX = DataArray[CurrentFrame].GroundRobots[index2].X;
-            var TempY = DataArray[CurrentFrame].GroundRobots[index2].Y;
-            TempX = TempX + Math.sin(DataArray[CurrentFrame].GroundRobots[index2].Rotation * TO_RADIANS) * GroundRobotPixelSpeed * (NextRotateFrame - CurrentFrame);
-            TempY = TempY + Math.cos(DataArray[CurrentFrame].GroundRobots[index2].Rotation * TO_RADIANS) * GroundRobotPixelSpeed * (NextRotateFrame - CurrentFrame);
-            //alert(DataArray[CurrentFrame].GroundRobots[index2].X + "\n" + TempX + "\n" + NextRotateFrame + "\n" + CurrentFrame);
-            if(TempX <= FieldX || TempX >= FieldX + FieldWidth || TempY >= FieldY + FieldHeight)
-            {
-              DataArray[CurrentFrame].Drones[index].TargetRobot = index2;
-              
-              var dist_to_target = Math.sqrt( Math.pow( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X - DataArray[CurrentFrame].Drones[index].X, 2 ) + Math.pow( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y - DataArray[CurrentFrame].Drones[index].Y, 2 ) );
-              
-              TargetX = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X + Math.sin( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * dist_to_target;
-              TargetY = DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Y + Math.cos( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS ) * dist_to_target;
-            }
-          }
-        }
-      }
-      */
       
       
       target_to_drone_x = DataArray[CurrentFrame].Drones[index].X - TargetX;
       target_to_drone_y = DataArray[CurrentFrame].Drones[index].Y - TargetY;
       target_direction_x = Math.sin( DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS );
       target_direction_y = Math.cos( DataArray[CurrentFrame].Drones[index].Y - DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation * TO_RADIANS );
-      /*
-      projection_x = ( target_to_drone_x * target_direction_x + target_to_drone_y * target_direction_y ) * target_direction_x;
-      projection_y = ( target_to_drone_x * target_direction_x + target_to_drone_y * target_direction_y ) * target_direction_y;
-      distance_from_projection = Math.sqrt( Math.pow( ( target_to_drone_x - projection_x ), 2 ) + Math.pow( ( target_to_drone_y - projection_y ), 2 ) );
-      console.log( target_direction_x, target_direction_y );
-      if( distance_from_projection > (GROUNDROBOTCENTIWIDTH / 2 + DRONE_CENTI_WIDTH / 2) * FieldHeight / GRIDNUMBER / 100 )
-      {
-        DataArray[CurrentFrame].Drones[index].OkToLeave = true;
-      }
-      else
-      {
-        DataArray[CurrentFrame].Drones[index].OkToLeave = false;
-      }
-      */
-      
       
       
       var Rot = (DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation % 360 < 0) ? DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation % 360 + 360 : DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation % 360;
@@ -515,7 +461,6 @@ function Engine(CurrentFrame)
       var TargetRot = 0;
       if(DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X > FieldHeight + FIELDMARGINSIZE - (FieldHeight / FIELDSIZE * 3))
       {
-        //alert("Hello" + "\n" + CurrentFrame);
         TargetRot = 270;
       }
       else if(DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].X < FIELDMARGINSIZE + (FieldHeight / FIELDSIZE * 3))
@@ -546,18 +491,16 @@ function Engine(CurrentFrame)
         {
           if(Rot < TargetRot - 120 / 2 || Rot > TargetRot + 120 / 2 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true)
           {
-            //alert(DataArray[CurrentFrame].Drones[index].TargetRobot + "\n" + CurrentFrame + "\n" + ((DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].Rotation + 90) / 180) % 2);
+            
             var FramesToTurn = TURN_BUMP_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
             DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].FramesToTurn = FramesToTurn;
             DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].TurnDirection = -1;
-            //DataArray[CurrentFrame].Drones[index].OkToLeave = true;
             console.log( "roomba bumped" );
           }
           else
           {
             if(TargetRot == 135)
             alert(CurrentFrame + "\n" + Rot);
-            //DataArray[CurrentFrame].Drones[index].OkToLeave = true;
           }
         }
       }
@@ -693,7 +636,7 @@ function Engine(CurrentFrame)
           }
         }
       }
-  }
+  } // end for each obstacle robot
   
   
   if(SingleMatchEndFrame == 0)
