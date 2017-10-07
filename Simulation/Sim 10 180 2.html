@@ -404,7 +404,7 @@ function Engine(CurrentFrame)
     
       var PrevTargetRobot = DataArray[CurrentFrame].Drones[index].TargetRobot;
       //alert(DataArray[CurrentFrame].Drones[index].OkToLeave + "\n" + DataArray[CurrentFrame].Drones[index].TargetRobot);
-      if(DataArray[CurrentFrame].Drones[index].OkToLeave == true && (NextRotateFrame - CurrentFrame) / FRAME_RATE > 12 && DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true)
+      if(DataArray[CurrentFrame].Drones[index].OkToLeave == true && (NextRotateFrame - CurrentFrame) / FRAME_RATE > 12 /*|| DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == true*/)
       {
         var TempX = 0;
         var TempY = 0;
@@ -430,7 +430,7 @@ function Engine(CurrentFrame)
             {
               if(TempX == 0 || DataArray[CurrentFrame].GroundRobots[index2].Y < TempY)
               {
-                DataArray[CurrentFrame].Drones[index].TargetRobot = index2;
+                DataArray[CurrentFrame].Drones[index].TargetRobot = index2; // Select new target robot
                 TempX = DataArray[CurrentFrame].GroundRobots[index2].X;
                 TempY = DataArray[CurrentFrame].GroundRobots[index2].Y;
               }
@@ -550,14 +550,14 @@ function Engine(CurrentFrame)
             var FramesToTurn = TURN_BUMP_AMOUNT / 360 * GROUND_ROBOT_SECONDS_PER_360_TURN * FRAME_RATE;
             DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].FramesToTurn = FramesToTurn;
             DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].TurnDirection = -1;
-            DataArray[CurrentFrame].Drones[index].OkToLeave = true;
+            //DataArray[CurrentFrame].Drones[index].OkToLeave = true;
             console.log( "roomba bumped" );
           }
           else
           {
             if(TargetRot == 135)
             alert(CurrentFrame + "\n" + Rot);
-            DataArray[CurrentFrame].Drones[index].OkToLeave = true;
+            //DataArray[CurrentFrame].Drones[index].OkToLeave = true;
           }
         }
       }
@@ -567,6 +567,7 @@ function Engine(CurrentFrame)
       while( DataArray[CurrentFrame].GroundRobots[DataArray[CurrentFrame].Drones[index].TargetRobot].StillIn == false && infineLoopPreventer < 10 )
       {
         DataArray[CurrentFrame].Drones[index].TargetRobot = (DataArray[CurrentFrame].Drones[index].TargetRobot + 1) % GROUND_ROBOT_NUMBER;
+        DataArray[CurrentFrame].Drones[index].OkToLeave = true;
         infineLoopPreventer++;
       }
       
@@ -663,7 +664,7 @@ function Engine(CurrentFrame)
           DataArray[CurrentFrame].GroundRobots[index].Scored = true;
 		  }
 		}
-    }
+    }  // end for each ground robot
 	
     
     ObstacleRobotPixelSpeed = OBSTACLE_ROBOT_SPEED * FieldHeight / GRIDNUMBER / FRAME_RATE;
