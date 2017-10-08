@@ -1,5 +1,6 @@
-import dronekit, PID, time, math
+import dronekit, PID, time, math, os, numpy as np, matplotlib.pyplot as plt
 from dronekit import VehicleMode
+from scipy.interpolate import spline
 
 YAW_MID = 1494
 PITCH_MID = 1494
@@ -29,6 +30,11 @@ vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
 print("\n Connected")
 
 def test_PWM(desiredSpeed, desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
+    acutal_values_list = []
+    time_list = []
+    settpoint_list = []
+    time_count = 0
+
     print("Waiting for pre-arm checks")
 
     while not vehicle.is_armable:
@@ -87,38 +93,58 @@ def test_PWM(desiredSpeed, desiredAlt, desiredPitchVel, desiredRollVel, desiredY
             print("Update throt: %s" % throttlePWM)
             print("Alt: %s" % currentAlt)
             
-
             #Wait until the drone is at a good height to change direction
-            if (currentAlt > desiredAlt / 2):         
+            if (currentAlt > desiredAlt / 2):    
+                     
+                
                 #currentPitchVel = vehicle.velocity[0]                 #Get drones pitch velocity
                 #pitchPID.update(currentPitchVel)                      #Update PID with current pitch          
                 #pitchPWM -= pitchPID.output                           #Set PWM to desired PWM from PID
                 #vehicle.channels.overrides[PITCH_CHANNEL] = pitchPWM  #Send signal to drone
 
-                #currentRollVel = vehicle.velocity[1]                  #Get drones roll velocity
-                #rollPID.update(currentRollVel)                        #Update PID with current roll 
-                #rollPWM += rollPID.output                             #Set PWM to desired PWM from PID                                 
-                #vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM    #Send signal to drone
+                currentRollVel = vehicle.velocity[1]                  #Get drones roll velocity
+                rollPID.update(currentRollVel)                        #Update PID with current roll 
+                rollPWM += rollPID.output                             #Set PWM to desired PWM from PID                                 
+                vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM    #Send signal to drone
                 
-                currentYawAng = vehicle.attitude.yaw     #Get drones yaw angle
-                yawPID.update(currentYawAng)                          #Update PID with current yaw
-                yawPWM += yawPID.output                               #Set PWM to desired PWM from PID                            
-                vehicle.channels.overrides[YAW_CHANNEL] = yawPWM      #Send signal to drone   
+                #currentYawAng = vehicle.attitude.yaw                  #Get drones yaw angle
+                #yawPID.update(currentYawAng)                          #Update PID with current yaw
+                #yawPWM += yawPID.output                               #Set PWM to desired PWM from PID                            
+                #vehicle.channels.overrides[YAW_CHANNEL] = yawPWM      #Send signal to drone   
 
                 #print("Desired pitch: %s" % desiredPitchVel)          #Output data
                 #print("Actual pitch:  %s" % currentPitchVel)
-                #print("Desired roll:  %s" % desiredRollVel)
-                #print("Actual roll:   %s" % currentRollVel)
+                print("Desired roll:  %s" % desiredRollVel)
+                print("Actual roll:   %s" % currentRollVel)
                 #print("Desired yaw:   %s" % math.degrees(desiredYawAng))
                 #print("Actual yaw:    %s" % math.degrees(currentYawAng))
-                print("")
+                time_count+=1
+                acutal_values_list.append(currentRollVel)
+                time_list.append(time_count)
+                settpoint_list.append(rollPID.SetPoint)
+                os.system('clear')
                 
         except KeyboardInterrupt:
+            time_sm = np.array(time_list)
+            time_smooth = np.linspace(time_sm.min(), time_sm.max(), 300)
+            feedback_smooth = spline(time_list, acutal_values_list, time_smooth)
+
+            plt.plot(time_smooth, feedback_smooth)
+            plt.plot(time_list, settpoint_list)
+            plt.xlim((0, time_count))
+            plt.ylim((min(acutal_values_list)-0.5, max(acutal_values_list)+0.5))
+            plt.xlabel('time (s)')
+            plt.ylabel('PID (PV)')
+            plt.title('Roll PID')
+
+
+            plt.grid(True)
+            plt.show()
             break
 
     vehicle.mode = VehicleMode("LAND")
     
-    time.sleep(10.0)
+    time.sleep(5.0)
 
     vehicle.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
     vehicle.close()
@@ -149,10 +175,12 @@ def getBetterYaw(yaw):
     if (yaw > -PI) and (yaw < 0):
         yawDeg = math.degrees(yaw) + 360
     return yawDeg
-
+'''
 for x in range(-314, 314):
     print(getBetterYaw(float(x)/100.0))
-    
-#Alt, Pitch, Roll, Yaw
-test_PWM(0.5, 3, 0, 0, 45.0)
+'''
+
+#Alt, Desired alt, Pitch, Roll, Yaw
+#Velocity, Meter, velocity, velocity, angle
+test_PWM(0.5, 3, 0.33, 0.3, 45.0)
 
