@@ -14,9 +14,9 @@ ROLL_D = 15
 YAW_P = 2
 YAW_I = 0
 YAW_D = 8
-THROTTLE_P = 5
-THROTTLE_I = 0
-THROTTLE_D = 6
+THROTTLE_P = 15.0
+THROTTLE_I = 0.0
+THROTTLE_D = 10.0
 ROLL_CHANNEL = '1'
 PITCH_CHANNEL = '2'
 THROTTLE_CHANNEL = '3'
@@ -28,7 +28,7 @@ vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
 
 print("\n Connected")
 
-def test_PWM(desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
+def test_PWM(desiredSpeed, desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
     print("Waiting for pre-arm checks")
 
     while not vehicle.is_armable:
@@ -39,7 +39,7 @@ def test_PWM(desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
     vehicle.mode = VehicleMode("LOITER")
     vehicle.armed = True
 
-    time.sleep(7.0)
+    time.sleep(5.0)
 
 
     #Initialize Pitch Pid Controller
@@ -70,17 +70,18 @@ def test_PWM(desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
 
     #Initialize Throttle PID Controller
     throttlePID = PID.PID(THROTTLE_P, THROTTLE_I, THROTTLE_D)
-    throttlePID.SetPoint = desiredAlt
+    throttlePID.SetPoint = desiredSpeed
     throttlePID.setSampleTime(PID_UPDATE_TIME)
     throttlePWM = THRUST_LOW
     vehicle.channels.overrides[THROTTLE_CHANNEL] = throttlePWM
 
     while True:
         try:
-            
             time.sleep(.1)
             currentAlt = vehicle.location.global_relative_frame.alt
-            throttlePID.update(currentAlt)
+            if currentAlt > 3:
+                throttlePID.SetPoint = 0
+            throttlePID.update(vehicle.velocity[2])
             throttlePWM += throttlePID.output
             vehicle.channels.overrides[THROTTLE_CHANNEL] = throttlePWM
             print("Update throt: %s" % throttlePWM)
@@ -108,8 +109,8 @@ def test_PWM(desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
                 #print("Actual pitch:  %s" % currentPitchVel)
                 #print("Desired roll:  %s" % desiredRollVel)
                 #print("Actual roll:   %s" % currentRollVel)
-                print("Desired yaw:   %s" % math.degrees(desiredYawAng))
-                print("Actual yaw:    %s" % math.degrees(currentYawAng))
+                #print("Desired yaw:   %s" % math.degrees(desiredYawAng))
+                #print("Actual yaw:    %s" % math.degrees(currentYawAng))
                 print("")
                 
         except KeyboardInterrupt:
@@ -119,7 +120,7 @@ def test_PWM(desiredAlt, desiredPitchVel, desiredRollVel, desiredYawAng):
     
     time.sleep(10.0)
 
-    vehicle.channels.overrides[THRUST_CHANNEL] = THRUST_LOW
+    vehicle.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
     vehicle.close()
 
     return
@@ -152,6 +153,6 @@ def getBetterYaw(yaw):
 for x in range(-314, 314):
     print(getBetterYaw(float(x)/100.0))
     
-
-test_PWM(2.0, 0, 0, 45)
+#Alt, Pitch, Roll, Yaw
+test_PWM(0.5, 3, 0, 0, 45.0)
 
