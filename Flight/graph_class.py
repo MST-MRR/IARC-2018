@@ -10,10 +10,10 @@ class Graph:
         self.title = title
         self.setpoint = setpoint
 
-    def update(self, update_value, update_setpoint):
+    def update(self, update_value):
         self.actual_values_list.append(update_value)    #Appending to the actual values list
         self.timer_count += 1                           #Incrementing the timer
-        self.setpoint_list.append(update_setpoint)      #Appending to the setpoint list
+        self.setpoint_list.append(self.setpoint)      #Appending to the setpoint list
         self.time_count_list.append(self.timer_count)   #Appending to the time list
     
     def display(self):
