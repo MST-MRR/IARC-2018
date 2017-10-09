@@ -29,7 +29,7 @@ vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
 
 print("\n Connected")
 
-def test_PWM(desired_speed, desired_alt, desired_pitch_velocity, desired_roll_velocity, desired_yaw_angle):
+def test_flight()(desired_speed, desired_alt, desired_pitch_velocity, desired_roll_velocity, desired_yaw_angle):
     print("Waiting for pre-arm checks")
 
     while not vehicle.is_armable:
@@ -142,20 +142,16 @@ def get_pitch_pwm(angle):
     return  (((512*angle)/5) + 1494)
 
 def get_yaw_radians(angle):
-    angRad = 0
     if angle < 180:
-        angRad = math.radians(angle)
+        return math.radians(angle)
     else:
-        angRad = math.radians(angle-180) -  PI
-    return angRad
-
+        return math.radians(angle-180) -  PI
+    
 def getBetterYaw(yaw):
-    yawDeg = 0
     if (yaw < PI) and (yaw > 0):
-        yawDeg = math.degrees(yaw)
+        return math.degrees(yaw)
     if (yaw > -PI) and (yaw < 0):
-        yawDeg = math.degrees(yaw) + 360
-    return yawDeg
+        return math.degrees(yaw) + 360
 
 def display_graphs(graphs):
     os.system("clear")
@@ -180,5 +176,5 @@ for x in range(-314, 314):
 
 #Alt, Desired alt, Pitch, Roll, Yaw
 #Velocity, Meter, velocity, velocity, angle
-test_PWM(0.5, 3, 0, 0, 170.0)
+test_flight()(0.5, 3, 0, 0, 170.0)
 
