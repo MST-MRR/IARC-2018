@@ -6,15 +6,15 @@ YAW_MID = 1494
 PITCH_MID = 1494
 ROLL_MID = 1494
 THRUST_LOW = 986.0
-PITCH_P = 10
-PITCH_I = 0
-PITCH_D = 15
-ROLL_P = 10
-ROLL_I = 0
-ROLL_D = 15
-YAW_P = 2
-YAW_I = 0
-YAW_D = 8
+PITCH_P = 10.0
+PITCH_I = 0.0
+PITCH_D = 15.0
+ROLL_P = 10.0
+ROLL_I = 0.0
+ROLL_D = 15.0
+YAW_P = 2.0
+YAW_I = 0.0
+YAW_D = 9.0
 THROTTLE_P = 15.0
 THROTTLE_I = 0.0
 THROTTLE_D = 10.0
@@ -29,7 +29,7 @@ vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
 
 print("\n Connected")
 
-def test_flight()(desired_speed, desired_alt, desired_pitch_velocity, desired_roll_velocity, desired_yaw_angle):
+def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll_velocity, desired_yaw_angle):
     print("Waiting for pre-arm checks")
 
     while not vehicle.is_armable:
@@ -93,6 +93,7 @@ def test_flight()(desired_speed, desired_alt, desired_pitch_velocity, desired_ro
             ThrottlePID.update(vehicle.velocity[2])
             ThrottlePWM += ThrottlePID.output
             vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
+            throttle_graph.update(vehicle.velocity[2])
             print("Update throt: %s" % ThrottlePWM)
             print("Alt: %s" % current_alt)
             
@@ -100,18 +101,18 @@ def test_flight()(desired_speed, desired_alt, desired_pitch_velocity, desired_ro
             if (current_alt > desired_alt / 2):    
                      
                 
-                #current_pitch_velocity = vehicle.velocity[0]               #Get drones pitch velocity
-                #PitchPID.update(current_pitch_velocity)                    #Update PID with current pitch          
-                #PitchPWM -= PitchPID.output                                #Set PWM to desired PWM from PID
-                #vehicle.channels.overrides[PITCH_CHANNEL] = PitchPWM       #Send signal to drone
-
-                '''
+                current_pitch_velocity = vehicle.velocity[0]               #Get drones pitch velocity
+                PitchPID.update(current_pitch_velocity)                    #Update PID with current pitch          
+                PitchPWM -= PitchPID.output                                #Set PWM to desired PWM from PID
+                vehicle.channels.overrides[PITCH_CHANNEL] = PitchPWM       #Send signal to drone
+                pitch_graph.update(current_pitch_velocity)
+                
                 current_roll_velocity = vehicle.velocity[1]                 #Get drones roll velocity
                 RollPID.update(current_roll_velocity)                       #Update PID with current roll 
                 RollPWM += RollPID.output                                   #Set PWM to desired PWM from PID                    
                 roll_graph.update(current_roll_velocity)             
                 vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM          #Send signal to drone
-                '''
+                
 
                 current_yaw_angle = vehicle.attitude.yaw                    #Get drones yaw angle
                 YawPID.update(current_yaw_angle)                            #Update PID with current yaw
@@ -119,10 +120,10 @@ def test_flight()(desired_speed, desired_alt, desired_pitch_velocity, desired_ro
                 vehicle.channels.overrides[YAW_CHANNEL] = YawPWM            #Send signal to drone   
                 yaw_graph.update(current_yaw_angle)
 
-                #print("Desired pitch: %s" % desired_pitch_velocity)         #Output data
-                #print("Actual pitch:  %s" % current_pitch_velocity)
-                #print("Desired roll:  %s" % desired_roll_velocity)
-                #print("Actual roll:   %s" % current_roll_velocity)
+                print("Desired pitch: %s" % desired_pitch_velocity)         #Output data
+                print("Actual pitch:  %s" % current_pitch_velocity)
+                print("Desired roll:  %s" % desired_roll_velocity)
+                print("Actual roll:   %s" % current_roll_velocity)
                 print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
                 print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
                 
@@ -176,5 +177,5 @@ for x in range(-314, 314):
 
 #Alt, Desired alt, Pitch, Roll, Yaw
 #Velocity, Meter, velocity, velocity, angle
-test_flight()(0.5, 3, 0, 0, 170.0)
+test_flight(0.5, 3, 0.3, 0.5, 5.5)
 
