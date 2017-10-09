@@ -295,7 +295,7 @@
           <material>
             <script>
               <uri>file://Gym/IARC_material.material</uri>
-              <name>Gazebo/IARC</name>
+              <name>Gazebo/IARC2</name>
             </script>
             <ambient>1 0.764706 0.305882 1</ambient>
           </material>

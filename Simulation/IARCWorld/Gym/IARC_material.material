@@ -349,7 +349,7 @@ material Gazebo/Orange
   }
 }
 
-material Gazebo/IARC
+material Gazebo/IARC2
 {
   technique
   {
@@ -362,6 +362,7 @@ material Gazebo/IARC
       texture_unit
       {
         texture IARC7field.png
+        scale 0.041666667 0.041666667
         filtering trilinear
       }
     }
