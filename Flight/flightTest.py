@@ -77,6 +77,9 @@ def test_PWM(desiredSpeed, desiredAlt, desiredPitchVel, desiredRollVel, desiredY
     throttlePID.setSampleTime(PID_UPDATE_TIME)
     throttlePWM = THRUST_LOW
     vehicle.channels.overrides[THROTTLE_CHANNEL] = throttlePWM
+    throttle_graph = PID_Graph(desiredSpeed, "Throttle")
+    
+    graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
 
     while True:
         try:
@@ -99,36 +102,33 @@ def test_PWM(desiredSpeed, desiredAlt, desiredPitchVel, desiredRollVel, desiredY
                 #pitchPWM -= pitchPID.output                           #Set PWM to desired PWM from PID
                 #vehicle.channels.overrides[PITCH_CHANNEL] = pitchPWM  #Send signal to drone
 
+                '''
                 currentRollVel = vehicle.velocity[1]                  #Get drones roll velocity
                 rollPID.update(currentRollVel)                        #Update PID with current roll 
                 rollPWM += rollPID.output                             #Set PWM to desired PWM from PID                    
                 roll_graph.update(currentRollVel)             
                 vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM    #Send signal to drone
-                
-                #currentYawAng = vehicle.attitude.yaw                  #Get drones yaw angle
-                #yawPID.update(currentYawAng)                          #Update PID with current yaw
-                #yawPWM += yawPID.output                               #Set PWM to desired PWM from PID                            
-                #vehicle.channels.overrides[YAW_CHANNEL] = yawPWM      #Send signal to drone   
+                '''
+
+                currentYawAng = vehicle.attitude.yaw                  #Get drones yaw angle
+                yawPID.update(currentYawAng)                          #Update PID with current yaw
+                yawPWM += yawPID.output                               #Set PWM to desired PWM from PID                            
+                vehicle.channels.overrides[YAW_CHANNEL] = yawPWM      #Send signal to drone   
+                yaw_graph.update(currentYawAng)
 
                 #print("Desired pitch: %s" % desiredPitchVel)          #Output data
                 #print("Actual pitch:  %s" % currentPitchVel)
-                print("Desired roll:  %s" % desiredRollVel)
-                print("Actual roll:   %s" % currentRollVel)
-                #print("Desired yaw:   %s" % math.degrees(desiredYawAng))
-                #print("Actual yaw:    %s" % math.degrees(currentYawAng))
+                #print("Desired roll:  %s" % desiredRollVel)
+                #print("Actual roll:   %s" % currentRollVel)
+                print("Desired yaw:   %s" % math.degrees(desiredYawAng))
+                print("Actual yaw:    %s" % math.degrees(currentYawAng))
                 
                 os.system('clear')
                 
         except KeyboardInterrupt:
-            roll_graph.display()
+            shutdown(vehicle)
+            display_graphs(graphs_list)
             break
-
-    vehicle.mode = VehicleMode("LAND")
-    
-    time.sleep(5.0)
-
-    vehicle.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
-    vehicle.close()
 
     return
 
@@ -156,6 +156,23 @@ def getBetterYaw(yaw):
     if (yaw > -PI) and (yaw < 0):
         yawDeg = math.degrees(yaw) + 360
     return yawDeg
+
+def display_graphs(graphs):
+    os.system("clear")
+    for graph in graphs:
+        try:
+            graph.display()
+        except ValueError:
+            print("%s has no graph" % graph.title)
+
+def shutdown(drone):
+    drone.mode = VehicleMode("LAND")
+    
+    time.sleep(5.0)
+
+    drone.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
+    drone.close()
+
 '''
 for x in range(-314, 314):
     print(getBetterYaw(float(x)/100.0))
@@ -163,5 +180,5 @@ for x in range(-314, 314):
 
 #Alt, Desired alt, Pitch, Roll, Yaw
 #Velocity, Meter, velocity, velocity, angle
-test_PWM(0.5, 3, 0.33, 0.3, 45.0)
+test_PWM(0.5, 3, 0, 0, 170.0)
 
