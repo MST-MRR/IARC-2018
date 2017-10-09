@@ -552,7 +552,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -827,7 +827,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -1102,7 +1102,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -1372,7 +1372,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -1642,7 +1642,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -1915,7 +1915,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -2186,7 +2186,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -2462,7 +2462,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -2737,7 +2737,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -3018,7 +3018,7 @@
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
