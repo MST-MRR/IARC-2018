@@ -178,49 +178,48 @@ def shutdown(drone):
     drone.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
     drone.close()
 
-def test_Roll(rollPID):
+def test_Roll(RollPID):
     time_end = time.time()+10 
-    rollPID.SetPoint = 0.3
-    rollPWM = 1495
+    RollPID.setSetPoint = 0.3
     print("Going to the right")
     while time.time() < time_end:
          roll_vel = vehicle.velocity[1]
-         rollPID.update(roll_vel) 
-         rollPWM += rollPID.output
-         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         #rollPID.update(roll_vel) 
+         #rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = RollPID.update(roll_vel)
          print("Desired roll:  0.3"  )
          print("Actual roll:   %s" % roll_vel)
          time.sleep(0.1)
     time_end = time.time()+10
-    rollPID.SetPoint = -0.3
+    RollPID.setSetPoint = -0.3
     print("Going to the original position")
     while time.time() < time_end:
          roll_vel = vehicle.velocity[1]
-         rollPID.update(roll_vel) 
-         rollPWM += rollPID.output
-         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         #rollPID.update(roll_vel) 
+         #rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = RollPID.update(roll_vel)
          print("Desired roll:  -0.3"  )
          print("Actual roll:   %s" % roll_vel)
          time.sleep(0.1) 
     time_end = time.time()+10
-    rollPID.SetPoint = -0.3
+    RollPID.SetPoint = -0.3
     print("Going to the left")              
     while time.time() < time_end:
          roll_vel = vehicle.velocity[1]
-         rollPID.update(roll_vel) 
-         rollPWM += rollPID.output
-         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         #rollPID.update(roll_vel) 
+         #rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = RollPID.update(roll_vel)
          print("Desired roll:  -0.3"  )
          print("Actual roll:   %s" % roll_vel)
          time.sleep(0.1)       
     time_end = time.time()+10
-    rollPID.SetPoint = 0.3
+    RollPID.SetPoint = 0.3
     print("Going to the original position")              
     while time.time() < time_end:
          roll_vel = vehicle.velocity[1]
-         rollPID.update(roll_vel) 
-         rollPWM += rollPID.output
-         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         #rollPID.update(roll_vel) 
+         #rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = RollPID.update(roll_vel)
          print("Desired roll:  0.3"  )
          print("Actual roll:   %s" % roll_vel)
          time.sleep(0.1)           
