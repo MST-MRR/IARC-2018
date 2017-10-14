@@ -88,7 +88,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
         try:
             time.sleep(.1)
             current_alt = vehicle.location.global_relative_frame.alt
-            if current_alt > 3:
+            if current_alt > 2.5:
                 ThrottlePID.SetPoint = 0
             ThrottlePID.update(vehicle.velocity[2])
             ThrottlePWM += ThrottlePID.output
@@ -99,7 +99,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
             
             #Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):    
-                     
+ 
                 
                 current_pitch_velocity = vehicle.velocity[0]               #Get drones pitch velocity
                 PitchPID.update(current_pitch_velocity)                    #Update PID with current pitch          
@@ -130,6 +130,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
                 os.system('clear')
                 
         except KeyboardInterrupt:
+            test_Roll(RollPID)
             shutdown(vehicle)
             display_graphs(graphs_list)
             break
@@ -170,6 +171,52 @@ def shutdown(drone):
     drone.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
     drone.close()
 
+def test_Roll(rollPID):
+    time_end = time.time()+10 
+    rollPID.SetPoint = 0.3
+    rollPWM = 1495
+    print("Going to the right")
+    while time.time() < time_end:
+         roll_vel = vehicle.velocity[1]
+         rollPID.update(roll_vel) 
+         rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         print("Desired roll:  0.3"  )
+         print("Actual roll:   %s" % roll_vel)
+         time.sleep(0.1)
+    time_end = time.time()+10
+    rollPID.SetPoint = -0.3
+    print("Going to the original position")
+    while time.time() < time_end:
+         roll_vel = vehicle.velocity[1]
+         rollPID.update(roll_vel) 
+         rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         print("Desired roll:  -0.3"  )
+         print("Actual roll:   %s" % roll_vel)
+         time.sleep(0.1) 
+    time_end = time.time()+10
+    rollPID.SetPoint = -0.3
+    print("Going to the left")              
+    while time.time() < time_end:
+         roll_vel = vehicle.velocity[1]
+         rollPID.update(roll_vel) 
+         rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         print("Desired roll:  -0.3"  )
+         print("Actual roll:   %s" % roll_vel)
+         time.sleep(0.1)       
+    time_end = time.time()+10
+    rollPID.SetPoint = 0.3
+    print("Going to the original position")              
+    while time.time() < time_end:
+         roll_vel = vehicle.velocity[1]
+         rollPID.update(roll_vel) 
+         rollPWM += rollPID.output
+         vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+         print("Desired roll:  0.3"  )
+         print("Actual roll:   %s" % roll_vel)
+         time.sleep(0.1)           
 '''
 for x in range(-314, 314):
     print(getBetterYaw(float(x)/100.0))
@@ -177,5 +224,5 @@ for x in range(-314, 314):
 
 #Alt, Desired alt, Pitch, Roll, Yaw
 #Velocity, Meter, velocity, velocity, angle
-test_flight(0.5, 3, 0.3, 0.5, 5.5)
+test_flight(0.3, 3, 0.0, 0.0, 1.0)
 
