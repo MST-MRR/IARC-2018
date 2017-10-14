@@ -11,6 +11,7 @@ const double ROOMBA_TIME_BETWEEN_NOISE = 5 ;
 const double ROOMBA_ROTATE_NOISE_DEGREES = 5 ;
 
 const double ROOMBA_ROTATE_180_TURN_DURATION = 2.150 ;
+const double ROOMBA_ROTATE_45_TURN_DURATION = 2.150 / 4 ;
 const double ROOMBA_ROTATE_NOISE_MAX_DURATION = 0.238888889 ;
 
 const double ROOBA_WHEEL_SPEED = 10.09 ;
@@ -19,6 +20,7 @@ const double SPEED_MULTIPLIER = 1 ;
 const unsigned int MOVEMENT_STATE_FORWARD = 0 ;
 const unsigned int MOVEMENT_STATE_180_ROTATE = 1 ;
 const unsigned int MOVEMENT_STATE_NOISE_ROTATE = 2 ;
+const unsigned int MOVEMENT_STATE_45_ROTATE = 3 ;
 
 const bool ROTATE_RIGHT = true ;
 const bool ROTATE_LEFT = false ;
@@ -30,6 +32,7 @@ namespace gazebo
   {
     common::Time MovementState ;
     common::Time Last180RotateStartTime ;
+    common::Time Last45RotateStartTime ;
     common::Time LastNoiseRotateStartTime ;
     common::Time NoiseRotateFrames ;
     bool NoiseRotateDirection ;
@@ -60,6 +63,13 @@ namespace gazebo
     common::Time CurrentTime = GetCurrentTime ( ) ;
     MyState.Last180RotateStartTime = CurrentTime ;
     MyState.MovementState = MOVEMENT_STATE_180_ROTATE ;
+    return MyState ;
+  }
+  
+  RoombaState & SetRotate45State ( RoombaState & MyState )
+  {
+    common::Time CurrentTime = GetCurrentTime ( ) ;
+    MyState.MovementState = MOVEMENT_STATE_45_ROTATE ;
     return MyState ;
   }
   
@@ -105,6 +115,18 @@ namespace gazebo
         sensors::SensorPtr sensor = sensors::get_sensor(std::string(SensorName));
         sensors::ContactSensorPtr contactSensor =
               std::dynamic_pointer_cast<sensors::ContactSensor>(sensor);
+        if (contactSensor)
+        {
+          contactSensor->SetActive(true);
+        }
+      }
+      if ( this->model->GetLink("base")->GetSensorCount ( ) > 1 )
+      {
+        std::string SensorName = this->model->GetLink("base")->GetSensorName ( 1 ) ;
+        std::cout << SensorName << std::endl;
+        sensors::SensorPtr sensor = sensors::get_sensor(std::string(SensorName));
+        sensors::ContactSensorPtr contactSensor =
+        std::dynamic_pointer_cast<sensors::ContactSensor>(sensor);
         if (contactSensor)
         {
           contactSensor->SetActive(true);
@@ -162,6 +184,29 @@ namespace gazebo
       }
       return Output ;
     }
+    
+    bool GetTopTouchSensorState ( )
+    {
+      //std::cout << "Getting touch sensor state" << std::endl;
+      bool Output = false ;
+      if ( this->model->GetLink("base")->GetSensorCount ( ) > 1 )
+      {
+        std::string SensorName = this->model->GetLink("base")->GetSensorName ( 1 ) ;
+        sensors::SensorPtr sensor = sensors::get_sensor(std::string(SensorName));
+        sensors::ContactSensorPtr contactSensor =
+        std::dynamic_pointer_cast<sensors::ContactSensor>(sensor);
+        if (contactSensor)
+        {
+          msgs::Contacts contacts;
+          contacts = contactSensor->Contacts();
+          if ( contacts.contact_size() > 0 )
+          {
+            Output = true ;
+          }
+        }
+      }
+      return Output ;
+    }
 
     // Called by the world update start event
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
@@ -193,6 +238,10 @@ namespace gazebo
         {
           MyState = SetRotate180State ( MyState ) ;
         }
+        if ( GetTopTouchSensorState ( ) == true )
+        {
+          MyState = SetRotate45State ( MyState ) ;
+        }
         
         
       }
@@ -202,6 +251,17 @@ namespace gazebo
         
         common::Time Rotate180Duration = ( ROOMBA_ROTATE_180_TURN_DURATION / SPEED_MULTIPLIER ) ;
         common::Time EndRotateTime = MyState.Last180RotateStartTime + Rotate180Duration;
+        if ( GetCurrentTime ( ) > EndRotateTime )
+        {
+          MyState = SetForwardState ( MyState ) ;
+        }
+      }
+      if ( MyState.MovementState == MOVEMENT_STATE_45_ROTATE )
+      {
+        SetRightTurnMotorPowers ( ) ;
+        
+        common::Time Rotate45Duration = ( ROOMBA_ROTATE_45_TURN_DURATION / SPEED_MULTIPLIER ) ;
+        common::Time EndRotateTime = MyState.Last45RotateStartTime + Rotate45Duration;
         if ( GetCurrentTime ( ) > EndRotateTime )
         {
           MyState = SetForwardState ( MyState ) ;
