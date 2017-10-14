@@ -1,4 +1,4 @@
-import dronekit, PID, time, math, os
+import dronekit,PID, flightControl, time, math, os, calendar, time
 from dronekit import VehicleMode
 from graph_class import Graph as PID_Graph
 
@@ -25,6 +25,7 @@ YAW_CHANNEL = '4'
 PID_UPDATE_TIME = 0.0
 PI = 3.14159265359
 
+
 vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
 
 print("\n Connected")
@@ -44,17 +45,21 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
 
 
     #Initialize Pitch Pid Controller
-    PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
-    PitchPID.SetPoint = desired_pitch_velocity
-    PitchPID.setSampleTime(PID_UPDATE_TIME)
+    #PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
+    #PitchPID.SetPoint = desired_pitch_velocity
+    #PitchPID.setSampleTime(PID_UPDATE_TIME)
+    PitchPID = flightControl.PIDController(desired_pitch_velocity, PITCH_MID, PID_UPDATE_TIME,
+                             PITCH_P, PITCH_I, PITCH_D)
     PitchPWM = get_pitch_pwm(desired_pitch_velocity)
 
     pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
     
     #Initialize Roll PID Controller
-    RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
-    RollPID.SetPoint = desired_roll_velocity
-    RollPID.setSampleTime(PID_UPDATE_TIME)
+    #RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
+    #RollPID.SetPoint = desired_roll_velocity
+    #RollPID.setSampleTime(PID_UPDATE_TIME)
+    RollPID = flightControl.PIDController(desired_roll_velocity, ROLL_MID, PID_UPDATE_TIME,
+                            ROLL_P, ROLL_I, ROLL_D) 
     RollPWM = get_pitch_pwm(desired_roll_velocity)
 
     roll_graph = PID_Graph(desired_roll_velocity, "Roll")
@@ -62,9 +67,11 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
     
     #Initialize Yaw PID Controller
     desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
-    YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
-    YawPID.SetPoint = desired_yaw_angle
-    YawPID.setSampleTime(PID_UPDATE_TIME)
+    #YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
+    #YawPID.SetPoint = desired_yaw_angle
+    #YawPID.setSampleTime(PID_UPDATE_TIME)
+    YawPID = flightControl.PIDController(desired_yaw_angle, YAW_MID, PID_UPDATE_TIME, 
+                           YAW_P, YAW_I, YAW_D)
     YawPWM = YAW_MID
 
     yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
@@ -81,9 +88,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
     ThrottlePWM = THRUST_LOW
     vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
     throttle_graph = PID_Graph(desired_speed, "Throttle")
-    
     graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
-
     while True:
         try:
             time.sleep(.1)
@@ -99,25 +104,27 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity, desired_roll
             
             #Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):    
- 
+
                 
-                current_pitch_velocity = vehicle.velocity[0]               #Get drones pitch velocity
-                PitchPID.update(current_pitch_velocity)                    #Update PID with current pitch          
-                PitchPWM -= PitchPID.output                                #Set PWM to desired PWM from PID
-                vehicle.channels.overrides[PITCH_CHANNEL] = PitchPWM       #Send signal to drone
+                current_pitch_velocity = -vehicle.velocity[0]               #Get drones pitch velocity
+                #PitchPID.update(current_pitch_velocity)                    #Update PID with current pitch          
+                #PitchPWM -= PitchPID.output                                #Set PWM to desired PWM from PID
+                #vehicle.channels.overrides[PITCH_CHANNEL] = PitchPWM       #Send signal to drone
+                vehicle.channels.overrides[PITCH_CHANNEL] = PitchPID.update(current_pitch_velocity)
                 pitch_graph.update(current_pitch_velocity)
                 
                 current_roll_velocity = vehicle.velocity[1]                 #Get drones roll velocity
-                RollPID.update(current_roll_velocity)                       #Update PID with current roll 
-                RollPWM += RollPID.output                                   #Set PWM to desired PWM from PID                    
+                #RollPID.update(current_roll_velocity)                       #Update PID with current roll 
+                #RollPWM += RollPID.output                                   #Set PWM to desired PWM from PID                    
                 roll_graph.update(current_roll_velocity)             
-                vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM          #Send signal to drone
-                
+                #vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM          #Send signal to drone
+                vehicle.channels.overrides[ROLL_CHANNEL] = RollPID.update(current_roll_velocity) 
 
                 current_yaw_angle = vehicle.attitude.yaw                    #Get drones yaw angle
-                YawPID.update(current_yaw_angle)                            #Update PID with current yaw
-                YawPWM += YawPID.output                                     #Set PWM to desired PWM from PID                            
-                vehicle.channels.overrides[YAW_CHANNEL] = YawPWM            #Send signal to drone   
+                #YawPID.update(current_yaw_angle)                            #Update PID with current yaw
+                #YawPWM += YawPID.output                                     #Set PWM to desired PWM from PID                            
+                #vehicle.channels.overrides[YAW_CHANNEL] = YawPWM            #Send signal to drone   
+                vehicle.channels.overrides[YAW_CHANNEL] = YawPID.update(current_yaw_angle)
                 yaw_graph.update(current_yaw_angle)
 
                 print("Desired pitch: %s" % desired_pitch_velocity)         #Output data
