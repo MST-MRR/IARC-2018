@@ -15,6 +15,7 @@ class LIDAR():
     #self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
     self.sweep = Sweep(self.lidar_sensor)
     print "SCANSE INIT"
+    self.sweep = None
 
   def connect_to_lidar(self):
     self.sweep.__enter__()
@@ -69,8 +70,10 @@ class LIDAR():
       lidar_data[i]=first_five
 
     print("\n")
+
     return lidar_data
 
   def shutdown(self):
     self.sweep.stop_scanning()
     self.sweep.__exit__()
+
