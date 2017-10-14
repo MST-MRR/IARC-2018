@@ -1,0 +1,3 @@
+/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/rebuild_cache.dir
+/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/edit_cache.dir
+/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/model_push.dir
