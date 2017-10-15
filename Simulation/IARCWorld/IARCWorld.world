@@ -557,6 +557,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -832,6 +858,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -1107,6 +1159,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -1377,6 +1455,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -1647,6 +1751,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -1920,6 +2050,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -2191,6 +2347,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -2467,6 +2649,32 @@
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
@@ -2731,6 +2939,32 @@
         <sensor name='my_contact' type='contact'>
           <contact>
             <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
           </contact>
         </sensor>
         <visual name='base_visual'>
@@ -3009,9 +3243,43 @@
             </friction>
           </surface>
         </collision>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='top_flap_visual'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+        </visual>
         <sensor name='my_contact' type='contact'>
           <contact>
             <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
           </contact>
         </sensor>
         <visual name='base_visual'>
@@ -3212,6 +3480,7 @@
       <pose frame=''>0.809016994 -0.587785252 0 0 0 5.65</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
+    
     
     
     
@@ -4412,15 +4681,6 @@
       <pose frame=''>0 -5 0 0 0 6.283185307</pose>
       <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     

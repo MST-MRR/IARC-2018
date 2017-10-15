@@ -72,6 +72,7 @@ namespace gazebo
   RoombaState & SetRotate45State ( RoombaState & MyState )
   {
     common::Time CurrentTime = GetCurrentTime ( ) ;
+    MyState.Last45RotateStartTime = CurrentTime ;
     MyState.MovementState = MOVEMENT_STATE_45_ROTATE ;
     return MyState ;
   }
@@ -110,10 +111,18 @@ namespace gazebo
       
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&ModelPush::OnUpdate, this, _1));
+          
+      InitializeSensors ( ) ;
       
-      if ( this->model->GetLink("base")->GetSensorCount ( ) > 0 )
+      SetStartMatchRoombaState ( MyState ) ;
+    }
+    
+    private: void InitializeSensors ( )
+    {
+      unsigned int SensorIndex = 0 ;
+      while ( SensorIndex < this->model->GetLink("base")->GetSensorCount ( ) )
       {
-        std::string SensorName = this->model->GetLink("base")->GetSensorName ( 0 ) ;
+        std::string SensorName = this->model->GetLink("base")->GetSensorName ( SensorIndex ) ;
         std::cout << SensorName << std::endl;
         sensors::SensorPtr sensor = sensors::get_sensor(std::string(SensorName));
         sensors::ContactSensorPtr contactSensor =
@@ -122,21 +131,8 @@ namespace gazebo
         {
           contactSensor->SetActive(true);
         }
+        SensorIndex = SensorIndex + 1 ;
       }
-      if ( this->model->GetLink("base")->GetSensorCount ( ) > 1 )
-      {
-        std::string SensorName = this->model->GetLink("base")->GetSensorName ( 1 ) ;
-        std::cout << SensorName << std::endl;
-        sensors::SensorPtr sensor = sensors::get_sensor(std::string(SensorName));
-        sensors::ContactSensorPtr contactSensor =
-        std::dynamic_pointer_cast<sensors::ContactSensor>(sensor);
-        if (contactSensor)
-        {
-          contactSensor->SetActive(true);
-        }
-      }
-      
-      SetStartMatchRoombaState ( MyState ) ;
     }
     
     private: void SetForwardMotorPowers ( )
