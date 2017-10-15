@@ -15,8 +15,8 @@ const double ROOMBA_ROTATE_NOISE_MAX_DURATION = 0.238888889 ;
 
 // 2×π×0.330m/s÷(2×π×(0.033))
 // 330m/s from IARC7GroundRobot.ino
-const double ROOBA_RIGHT_WHEEL_SPEED = ( 0.330 + 0.0085 ) / 0.033 ;
-const double ROOBA_LEFT_WHEEL_SPEED = ( 0.330 - 0.0085 ) / 0.033 ;
+const double ROOBA_RIGHT_WHEEL_SPEED = ( 0.330 + 0.0087 ) / 0.033 ;
+const double ROOBA_LEFT_WHEEL_SPEED = ( 0.330 - 0.0087 ) / 0.033 ;
 const double SPEED_MULTIPLIER = 1 ;
 
 const unsigned int MOVEMENT_STATE_FORWARD = 0 ;
@@ -31,6 +31,8 @@ namespace gazebo
   
   class ObstacleControl : public ModelPlugin
   {
+    private: common::Time LastBumpTime ;
+    private: bool IsWaiting ;
     
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
     {
@@ -59,6 +61,10 @@ namespace gazebo
           contactSensor->SetActive(true);
         }
       }
+      
+      IsWaiting = false ;
+      physics::WorldPtr world = physics::get_world("default");
+      LastBumpTime = world->GetSimTime();
     }
     
     bool GetFrontTouchSensorState ( )
@@ -88,15 +94,33 @@ namespace gazebo
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
       
-      if ( GetFrontTouchSensorState ( ) == false )
-      {
-        this->model->GetJoint("right_wheel")->SetVelocity(0, ROOBA_RIGHT_WHEEL_SPEED * SPEED_MULTIPLIER );
-        this->model->GetJoint("left_wheel")->SetVelocity(0, ROOBA_LEFT_WHEEL_SPEED * SPEED_MULTIPLIER );
-      }
-      else
+      physics::WorldPtr world = physics::get_world("default");
+      common::Time cur_time = world->GetSimTime();
+      
+      if ( IsWaiting == true )
       {
         this->model->GetJoint("right_wheel")->SetVelocity(0, 0);
         this->model->GetJoint("left_wheel")->SetVelocity(0, 0);
+        if ( cur_time > LastBumpTime + 1 )
+        {
+          IsWaiting = false ;
+        }
+      }
+      else
+      {
+      
+        if ( GetFrontTouchSensorState ( ) == false )
+        {
+          this->model->GetJoint("right_wheel")->SetVelocity(0, ROOBA_RIGHT_WHEEL_SPEED * SPEED_MULTIPLIER );
+          this->model->GetJoint("left_wheel")->SetVelocity(0, ROOBA_LEFT_WHEEL_SPEED * SPEED_MULTIPLIER );
+        }
+        else
+        {
+          IsWaiting = true ;
+          LastBumpTime = cur_time ;
+          this->model->GetJoint("right_wheel")->SetVelocity(0, 0);
+          this->model->GetJoint("left_wheel")->SetVelocity(0, 0);
+        }
       }
         
     }
