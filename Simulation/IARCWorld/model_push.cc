@@ -13,7 +13,10 @@ const double ROOMBA_ROTATE_NOISE_DEGREES = 5 ;
 const double ROOMBA_ROTATE_180_TURN_DURATION = 2.150 ;
 const double ROOMBA_ROTATE_NOISE_MAX_DURATION = 0.238888889 ;
 
-const double ROOBA_WHEEL_SPEED = 10.09 ;
+// 2×π×0.330m/s÷(2×π×(0.033))
+// 330m/s is speed from IARC7GroundRobot.ino
+// 0.033 is radius of wheel
+const double ROOBA_WHEEL_SPEED = 0.330 / 0.033 ;
 const double SPEED_MULTIPLIER = 1 ;
 
 const unsigned int MOVEMENT_STATE_FORWARD = 0 ;

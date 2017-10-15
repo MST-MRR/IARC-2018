@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named ObstacleControl
+
+# Build rule for target.
+ObstacleControl: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ObstacleControl
+.PHONY : ObstacleControl
+
+# fast build rule for target.
+ObstacleControl/fast:
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/build
+.PHONY : ObstacleControl/fast
+
+#=============================================================================
 # Target rules for targets named model_push
 
 # Build rule for target.
@@ -122,6 +135,33 @@ model_push: cmake_check_build_system
 model_push/fast:
 	$(MAKE) -f CMakeFiles/model_push.dir/build.make CMakeFiles/model_push.dir/build
 .PHONY : model_push/fast
+
+ObstacleControl.o: ObstacleControl.cc.o
+
+.PHONY : ObstacleControl.o
+
+# target to build an object file
+ObstacleControl.cc.o:
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/ObstacleControl.cc.o
+.PHONY : ObstacleControl.cc.o
+
+ObstacleControl.i: ObstacleControl.cc.i
+
+.PHONY : ObstacleControl.i
+
+# target to preprocess a source file
+ObstacleControl.cc.i:
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/ObstacleControl.cc.i
+.PHONY : ObstacleControl.cc.i
+
+ObstacleControl.s: ObstacleControl.cc.s
+
+.PHONY : ObstacleControl.s
+
+# target to generate assembly for a file
+ObstacleControl.cc.s:
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/ObstacleControl.cc.s
+.PHONY : ObstacleControl.cc.s
 
 model_push.o: model_push.cc.o
 
@@ -157,8 +197,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
+	@echo "... ObstacleControl"
 	@echo "... edit_cache"
 	@echo "... model_push"
+	@echo "... ObstacleControl.o"
+	@echo "... ObstacleControl.i"
+	@echo "... ObstacleControl.s"
 	@echo "... model_push.o"
 	@echo "... model_push.i"
 	@echo "... model_push.s"

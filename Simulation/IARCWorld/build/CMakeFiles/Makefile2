@@ -60,13 +60,50 @@ CMAKE_SOURCE_DIR = /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorl
 CMAKE_BINARY_DIR = /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build
 
 #=============================================================================
+# Target rules for target CMakeFiles/ObstacleControl.dir
+
+# All Build rule for target.
+CMakeFiles/ObstacleControl.dir/all:
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/depend
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles --progress-num=1,2 "Built target ObstacleControl"
+.PHONY : CMakeFiles/ObstacleControl.dir/all
+
+# Include target in all.
+all: CMakeFiles/ObstacleControl.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/ObstacleControl.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/ObstacleControl.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles 0
+.PHONY : CMakeFiles/ObstacleControl.dir/rule
+
+# Convenience name for target.
+ObstacleControl: CMakeFiles/ObstacleControl.dir/rule
+
+.PHONY : ObstacleControl
+
+# clean rule for target.
+CMakeFiles/ObstacleControl.dir/clean:
+	$(MAKE) -f CMakeFiles/ObstacleControl.dir/build.make CMakeFiles/ObstacleControl.dir/clean
+.PHONY : CMakeFiles/ObstacleControl.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/ObstacleControl.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/model_push.dir
 
 # All Build rule for target.
 CMakeFiles/model_push.dir/all:
 	$(MAKE) -f CMakeFiles/model_push.dir/build.make CMakeFiles/model_push.dir/depend
 	$(MAKE) -f CMakeFiles/model_push.dir/build.make CMakeFiles/model_push.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles --progress-num=1,2 "Built target model_push"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles --progress-num=3,4 "Built target model_push"
 .PHONY : CMakeFiles/model_push.dir/all
 
 # Include target in all.
