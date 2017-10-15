@@ -362,7 +362,6 @@ material Gazebo/IARC2
       texture_unit
       {
         texture IARC7field.png
-        scale 0.041666667 0.041666667
         filtering trilinear
       }
     }
