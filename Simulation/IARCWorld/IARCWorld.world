@@ -1,4 +1,4 @@
-<sdf version='1.6'>
+﻿<sdf version='1.6'>
   <world name='default'>
     <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
@@ -295,7 +295,7 @@
           <material>
             <script>
               <uri>file://Gym/IARC_material.material</uri>
-              <name>Gazebo/IARC</name>
+              <name>Gazebo/IARC2</name>
             </script>
             <ambient>1 0.764706 0.305882 1</ambient>
           </material>
@@ -475,33 +475,57 @@
       <cast_shadows>0</cast_shadows>
       <direction>0 0 -1</direction>
     </light>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
     <model name='create1'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -519,15 +543,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -555,6 +611,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -582,12 +639,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -627,12 +685,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -672,6 +731,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -709,17 +769,64 @@
         </axis>
       </joint>
       <pose frame=''>1 0 0 0 -0 0</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
     <model name='create2'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -737,15 +844,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -773,6 +912,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -800,12 +940,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -845,12 +986,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -890,6 +1032,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -927,6 +1070,7 @@
         </axis>
       </joint>
       <pose frame=''>0.809016994 0.587785252 0 0 -0 0.63</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -946,11 +1090,44 @@
     
     <model name='create3'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -968,15 +1145,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1004,6 +1213,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1031,12 +1241,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1076,12 +1287,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1121,6 +1333,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1158,8 +1371,8 @@
         </axis>
       </joint>
       <pose frame=''>0.309016994 0.951056516 0 0 -0 1.26</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
     
     
     
@@ -1173,11 +1386,44 @@
     
     <model name='create4'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -1195,15 +1441,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1231,6 +1509,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1258,12 +1537,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1303,12 +1583,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1348,6 +1629,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1385,6 +1667,7 @@
         </axis>
       </joint>
       <pose frame=''>-0.309016994 0.951056516 0 0 -0 1.88</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -1399,11 +1682,44 @@
     
     <model name='create5'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -1421,15 +1737,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1457,6 +1805,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1484,12 +1833,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1529,12 +1879,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1574,6 +1925,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1611,6 +1963,7 @@
         </axis>
       </joint>
       <pose frame=''>-0.809016994 0.587785252 0 0 -0 2.51</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -1628,11 +1981,44 @@
     
     <model name='create6'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -1650,15 +2036,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1686,6 +2104,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1713,12 +2132,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1758,12 +2178,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1803,6 +2224,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1840,6 +2262,7 @@
         </axis>
       </joint>
       <pose frame=''>-1 0 0 0 0 3.14</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -1855,11 +2278,44 @@
     
     <model name='create7'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -1877,15 +2333,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1913,6 +2401,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1940,12 +2429,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -1985,12 +2475,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2030,6 +2521,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2067,6 +2559,7 @@
         </axis>
       </joint>
       <pose frame=''>-0.809016994 -0.587785252 0 0 0 3.77</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -2087,11 +2580,44 @@
     
     <model name='create8'>
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -2109,15 +2635,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2145,6 +2703,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2172,12 +2731,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2217,12 +2777,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2262,6 +2823,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2299,6 +2861,7 @@
         </axis>
       </joint>
       <pose frame=''>-0.309016994 -0.951056516 0 0 0 4.4</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -2316,12 +2879,46 @@
     
     
     <model name='create9'>
+      
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -2339,15 +2936,47 @@
             </friction>
           </surface>
         </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_red.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2375,6 +3004,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2402,12 +3032,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2447,12 +3078,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2492,6 +3124,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2529,6 +3162,7 @@
         </axis>
       </joint>
       <pose frame=''>0.309016994 -0.951056516 0 0 0 5.03</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -2552,12 +3186,46 @@
     
     
     <model name='create10'>
+      
       <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
         <collision name='base_collision'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <cylinder>
-              <radius>0.016495</radius>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
               <length>0.061163</length>
             </cylinder>
           </geometry>
@@ -2575,15 +3243,55 @@
             </friction>
           </surface>
         </collision>
+        <collision name='top_flap_collision'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='top_flap_visual'>
+          <pose frame=''>0 0 0.1 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size> 0.1 0.1 0.01 </size>
+            </box>
+          </geometry>
+        </visual>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <sensor name='my_contact_2' type='contact'>
+          <contact>
+            <collision>top_flap_collision</collision>
+          </contact>
+        </sensor>
         <visual name='base_visual'>
           <pose frame=''>0 0 0.0478 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>file://createT/meshes/create_body.dae</uri>
+              <uri>file://createT/meshes/create_body_green.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
         </visual>
+        
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2611,6 +3319,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2638,12 +3347,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='left_wheel'>
-        <pose frame=''>0 0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2683,12 +3393,13 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
       <link name='right_wheel'>
-        <pose frame=''>0 -0.13 0.032 0 -0 0</pose>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
         <inertial>
           <inertia>
             <ixx>0.001</ixx>
@@ -2728,6 +3439,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
+        
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2764,7 +3476,9 @@
           </dynamics>
         </axis>
       </joint>
+      
       <pose frame=''>0.809016994 -0.587785252 0 0 0 5.65</pose>
+      <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
     
     
@@ -2777,6 +3491,1196 @@
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    <model name='Obstacle1'>
+      
+      <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
+        <collision name='base_collision'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.061163</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='cylinder_collision'>
+          <pose frame=''>0.0 0 0.5 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.1016</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <visual name='base_visual'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>file://createT/meshes/ObstacleShort.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        
+        <collision name='front_wheel_collision'>
+          <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.018</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <collision name='rear_wheel_collision'>
+          <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.015</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='left_wheel'>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='right_wheel'>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='left_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>left_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      <joint name='right_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>right_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      
+      <pose frame=''>5 0 0 0 0 1.570796327</pose>
+      <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
+    </model>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <model name='Obstacle2'>
+      
+      <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
+        <collision name='base_collision'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.061163</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='cylinder_collision'>
+          <pose frame=''>0.0 0 0.5 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.1016</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <visual name='base_visual'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>file://createT/meshes/ObstacleShort.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        
+        <collision name='front_wheel_collision'>
+          <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.018</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <collision name='rear_wheel_collision'>
+          <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.015</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='left_wheel'>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='right_wheel'>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='left_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>left_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      <joint name='right_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>right_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      
+      <pose frame=''>0 5 0 0 0 3.141592654</pose>
+      <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
+    </model>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <model name='Obstacle3'>
+      
+      <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
+        <collision name='base_collision'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.061163</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='cylinder_collision'>
+          <pose frame=''>0.0 0 0.75 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.1016</radius>
+              <length>1.5</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <visual name='base_visual'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>file://createT/meshes/ObstacleMid.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        
+        <collision name='front_wheel_collision'>
+          <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.018</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <collision name='rear_wheel_collision'>
+          <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.015</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='left_wheel'>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='right_wheel'>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='left_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>left_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      <joint name='right_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>right_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      
+      <pose frame=''>-5 0 0 0 0 4.71238898</pose>
+      <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
+    </model>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <model name='Obstacle4'>
+      
+      <link name='base'>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>3.5</mass>
+        </inertial>
+        <collision name='base_collision'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.08294</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='bumper_collision'>
+          <pose frame=''>0.01 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.16495</radius>
+              <length>0.061163</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <collision name='cylinder_collision'>
+          <pose frame=''>0.0 0 1 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.1016</radius>
+              <length>2</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <sensor name='my_contact' type='contact'>
+          <contact>
+            <collision>bumper_collision</collision>
+          </contact>
+        </sensor>
+        <visual name='base_visual'>
+          <pose frame=''>0 0 0.0478 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <uri>file://createT/meshes/ObstacleTall.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        
+        <collision name='front_wheel_collision'>
+          <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.018</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <collision name='rear_wheel_collision'>
+          <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
+          <geometry>
+            <sphere>
+              <radius>0.015</radius>
+            </sphere>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='left_wheel'>
+        <pose frame=''>0 0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <link name='right_wheel'>
+        <pose frame=''>0 -0.1175 0.032 0 -0 0</pose>
+        <inertial>
+          <inertia>
+            <ixx>0.001</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.001</iyy>
+            <iyz>0</iyz>
+            <izz>0.001</izz>
+          </inertia>
+          <mass>0.01</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 -0 1.5707 1.5707</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.033</radius>
+              <length>0.023</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>10</mu>
+                <mu2>10</mu2>
+                <fdir1>0 0 0</fdir1>
+                <slip1>0</slip1>
+                <slip2>0</slip2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='left_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>left_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      <joint name='right_wheel' type='revolute'>
+        <parent>base</parent>
+        <child>right_wheel</child>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <use_parent_model_frame>1</use_parent_model_frame>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+      </joint>
+      
+      <pose frame=''>0 -5 0 0 0 6.283185307</pose>
+      <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
+    </model>
     
     
     
