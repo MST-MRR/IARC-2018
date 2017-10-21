@@ -6,6 +6,7 @@
 # Christopher O'Toole
 # -------------------------------------------------------------------------
 
-from . import obj_detect
-
-__version__ = '1.0.1'
+# default bounding box color (green)
+DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
+# default bounding box thickness
+DEFAULT_BOUNDING_BOX_THICKNESS = 3
