@@ -178,7 +178,7 @@ def shutdown(drone):
     drone.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
     drone.close()
 
-def test_Roll(RollPID):
+def test_Roll(rollPID):
     time_end = time.time()+10 
     rollPID.SetPoint = 0.3
     rollPWM = 1495
