@@ -9,6 +9,9 @@
 
 import numpy as np
 import cv2
+import threshold_gpu
+import display
+
 from sklearn.preprocessing import normalize
 from timeit import default_timer as timer
 
@@ -22,9 +25,11 @@ ARROW_LENGTH = 50
 ARROW_COLOR = (255, 0, 255)
 # directional arrow thickness
 ARROW_THICKNESS = 3
+# key to quit
+QUIT_KEY = 'q'
 
 # image(s) for this file's unit test
-TEST_IMAGE_PATH = '../data/2017-09-15 20:43:47.724821.jpg'
+TEST_VIDEO_PATH = '../data/roombaRed.mp4'
 
 class Roomba():
     def __init__(self, bounding_box, center, orientation):
@@ -52,21 +57,13 @@ class Roomba():
         cv2.arrowedLine(img, tuple(self.center.astype(int)), tuple((self.center+ARROW_LENGTH*self.orientation).astype(int)), ARROW_COLOR, ARROW_THICKNESS)
 
 class RoombaDetector():
-    # lower bound for the red roomba's flap in YCrCb space
-    RED_YCRCB_LOWER_BOUND = np.array([0, 156, 107])
-    # upper bound for the red roomba's flap in YCrCb space
-    RED_YCRCB_UPPER_BOUND = np.array([255, 255, 255])
-    # lower bound for the green roomba's flap in LAB space
-    GREEN_LAB_LOWER_BOUND = np.array([0, 0, 127])
-    # upper bound for the green roomba's flap in LAB space
-    GREEN_LAB_UPPER_BOUND = np.array([94, 123, 250])
     # minimum area for a region to have a chance at being considered a roomba
     MIN_AREA = 100
     # amount to grow the proposed bounding box by on each side
     BOUNDING_BOX_SIZE_OFFSET = 30
 
     def __init__(self):
-        self._gaussian_blur_kernel = (11,11)
+        pass
     
     def detect(self, img):
         proposals = []
@@ -75,17 +72,11 @@ class RoombaDetector():
         orientations = []
 
         # detect red and green blobs in img
-        img = cv2.GaussianBlur(img, self._gaussian_blur_kernel, 0)
-        lab_img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-        ycrcb_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
-        red_roomba_mask = cv2.inRange(ycrcb_img, RoombaDetector.RED_YCRCB_LOWER_BOUND, RoombaDetector.RED_YCRCB_UPPER_BOUND)
-        green_romba_mask = cv2.inRange(lab_img, RoombaDetector.GREEN_LAB_LOWER_BOUND, RoombaDetector.GREEN_LAB_UPPER_BOUND)
-        combined_mask = np.bitwise_or(red_roomba_mask, green_romba_mask)
-        closed_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, np.ones((5, 5), dtype=np.uint8))
+        img = threshold_gpu.threshold_image_for_roombas(img)
         
         # find the location of those blobs
-        modified_img, contours, hierarchy = cv2.findContours(closed_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        modified_img, contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
         for contour in contours:
             area = cv2.contourArea(contour)
             if area >= RoombaDetector.MIN_AREA:
@@ -123,13 +114,27 @@ class RoombaDetector():
 
 if __name__ == '__main__':
     # unit test
-    img = cv2.imread(TEST_IMAGE_PATH)
     detector = RoombaDetector()
-    start = timer()
-    roombas = detector.detect(img)
-    print(timer()-start, 's')
-    for roomba in roombas:
-        roomba.draw(img)
-    
-    cv2.imshow(TEST_IMAGE_PATH, img)
-    cv2.waitKey()
+
+    with display.VideoReader(TEST_VIDEO_PATH) as video, display.Window(TEST_VIDEO_PATH) as window:
+        try:
+            should_quit = False
+
+            for frame in video:
+                if should_quit:
+                    break
+                if frame is None:
+                    break
+                
+                start = timer()
+                roombas = detector.detect(frame)
+                print(timer()-start, 'seconds')
+                
+                for roomba in roombas:
+                    roomba.draw(frame)
+
+                window.show(frame)
+
+                should_quit = window.is_key_down(QUIT_KEY)
+        except KeyboardInterrupt as e:
+            pass
