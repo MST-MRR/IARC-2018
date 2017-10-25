@@ -35,7 +35,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5760"
+  SIM = "tcp:127.0.0.1:5762"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -188,13 +188,22 @@ class Tower(object):
     initial_alt = self.vehicle.location.global_relative_frame.alt
     takeoff_vector = deepcopy(StandardFlightVectors.normal_takeoff)
 
-    self.STATE = VehicleStates.flying
+    self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(takeoff_vector)
 
     while((self.vehicle.location.global_relative_frame.alt - initial_alt) < desired_altitude):
       sleep(self.STANDARD_SLEEP_TIME)
 
     self.hover()
+
+  # def fly(self, desired_vector):
+  #   """
+  #   @purpose:
+  #   @args:
+  #   @returns:
+  #   """
+  #   self.STATE = VehicleStates.flying
+  #   self.pid_flight_controller.send_velocity_vector(desired_vector)
     
   def hover(self):
     """
@@ -226,7 +235,7 @@ class Tower(object):
     @returns:
     """
     if(self.vehicle.battery.voltage < self.BATTERY_FAILSAFE_VOLTAGE_PANIC):
-        self.land()
+        self.land_mode()
 
 class FailsafeController(threading.Thread):
 
@@ -238,7 +247,8 @@ class FailsafeController(threading.Thread):
   def run(self):
     while not self.stoprequest.isSet():
       if self.atc.STATE == VehicleStates.hover or self.atc.STATE == VehicleStates.flying:
-        self.atc.check_battery_voltage()
+        # self.atc.check_battery_voltage()
+        pass
       if self.atc.flight_prereqs_clear():
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
@@ -249,7 +259,7 @@ class FailsafeController(threading.Thread):
     if self.atc.vehicle.armed:
       if self.atc.STATE != VehicleStates.landed:
         self.atc.land_mode()
-        self.atc.pid_flight_controller.write_to_rc_channels(flushChannels=True)
+        self.atc.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
 
     self.stoprequest.set()
     super(FailsafeController, self).join(timeout)
