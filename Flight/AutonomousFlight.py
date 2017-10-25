@@ -18,7 +18,7 @@ class FlightVector(object):
   def __neg__(self):
     return FlightVector(-self.x, -self.y, -self.z)
 
-  # Scalar Multiplication
+  # Scalar multiplication
   def __mul__(self, number):
     return FlightVector(self.x * number, self.y * number, self.z * number)
 
@@ -29,7 +29,7 @@ class FlightVector(object):
   def __div__(self, number):
     return self.__copy() * (number**-1)
 
-  # Arithmetic Operations
+  # Arithmetic operations
   def __add__(self, operand):
     return FlightVector(self.x + operand.x, self.y + operand.y, self.z + operand.z)
 
@@ -43,7 +43,7 @@ class FlightVector(object):
                       self.z*operand.x - self.x*operand.z, 
                       self.z*operand.y - self.y*operand.x)
 
-  # Dot Project
+  # Dot product
   # dp = a & b
   def __and__(self, operand):
     return (self.x * operand.x) + \
@@ -51,13 +51,11 @@ class FlightVector(object):
             (self.z * operand.z)
 
   # Operations
-
   def normal(self):
     return self.__copy() / self.magnitude()
 
   def magnitude(self):
     return (self.x**2 + self.y**2 + self.z**2)**(.5)
-
 
 class PIDFlightController(object):
   YAW_MID = 1494.0
