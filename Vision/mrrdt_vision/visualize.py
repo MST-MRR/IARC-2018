@@ -42,6 +42,7 @@ class Window():
         self.name = name
         self.title = name
         self.type = window_type
+        self.state = {}
 
     def __enter__(self):
         """
@@ -98,6 +99,46 @@ class Window():
         """
 
         return cv2.waitKey(1) & 0xFF == ord(key)
+
+    def set_mouse_callback(self, func):
+        """
+        Sets a callback for handling mouse events when the window referred to by the calling object has focus.
+
+        Parameters
+        ----------
+        func: callable
+            Callback which will be called upon the occurrence of any mouse-related event.
+
+        Returns
+        -------
+        None
+        """
+        
+        cv2.setMouseCallback(self.name, func)
+
+    def create_trackbar(self, name, value, max, on_change=lambda val: None):
+        """
+        Creates a trackbar for the window referred to by the calling object.
+
+        Parameters
+        ----------
+        name: str
+            Label for the newly created trackbar
+        value: int
+            The slider's initial position value
+        max: int
+            The maximum possible value for the slider.
+        on_change: callable
+            Function called when the slider's position is changed. Defaults to a dummy function
+            which does nothing.
+
+        Returns
+        -------
+        None
+        """
+
+        cv2.createTrackbar(name, self.get_title(), value, max, on_change)
+
 
     def get_key(self):
         """
@@ -223,6 +264,10 @@ def visualizer(images, callback=None, win_title=DEFAULT_VISUALIZER_WINDOW_TITLE)
                 img = images[i]
             elif isinstance(images[i], str):
                 img = cv2.imread(images[i])
+
+                if img is None:
+                    i = (i + 1) % length
+                    continue
 
             if callback:
                 callback(img)

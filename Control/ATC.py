@@ -114,7 +114,7 @@ class Tower(object):
         sys.stdout = self.flight_log
 
       print("\nConnecting to vehicle...")
-      self.vehicle = dronekit.connect(self.USB, wait_ready=True)
+      self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
 
       if not self.vehicle:
         print("\nUnable to connect to vehicle.")
@@ -125,7 +125,7 @@ class Tower(object):
       self.vehicle_initialized = True
       self.failsafes = FailsafeController(self)
       self.failsafes.start()
-      self.start_time = time.time()
+      self.start_time = int(time.time())
 
       self.switch_control()
 
@@ -164,7 +164,7 @@ class Tower(object):
     while(self.vehicle.armed):
       sleep(self.STANDARD_SLEEP_TIME)
 
-  def switch_control(self, mode_name="GUIDED_NOGPS"):
+  def switch_control(self, mode_name="STABILIZE"):
     """
     @purpose: Switch the mode to GUIDED_NOGPS and make sure
              that the failsafe thread is running.
@@ -185,7 +185,7 @@ class Tower(object):
     @args:
     @returns:
     """
-    uptime = time.time() - self.start_time
+    uptime = int(time.time()) - self.start_time
     return uptime
 
   def map(self, x, in_min, in_max, out_min, out_max):
