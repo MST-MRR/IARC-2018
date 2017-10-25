@@ -92,7 +92,9 @@ class PID:
             self.last_time = self.current_time
             self.last_error = error
 
-            self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
+            self.ITerm = self.ITerm * self.Ki
+            self.KTerm = self.DTerm * self.Kd
+            self.output = self.PTerm + (self.ITerm) + (self.DTerm)
 
     def setKp(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
