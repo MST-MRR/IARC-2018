@@ -15,7 +15,7 @@ from sklearn.metrics import f1_score
 from .dataset import ClassifierDataset
 from .model import DEFAULT_NUM_EPOCHS
 
-def train(model, dataset_manager, num_epochs=DEFAULT_NUM_EPOCHS, tune=True):
+def train(model, dataset_manager, num_epochs=DEFAULT_NUM_EPOCHS, tune=True, metric_to_tune=f1_score):
     """
     Train `model` for `num_epochs` epochs on the data speficied by `dataset_manager`
 
@@ -29,6 +29,8 @@ def train(model, dataset_manager, num_epochs=DEFAULT_NUM_EPOCHS, tune=True):
         Number of training epochs, default is `DEFAULT_NUM_EPOCHS`.
     tune: bool, optional
         Whether or not to tune the hyperparameters of the model, default is True.
+    metric_to_tune: callable, optional
+        Function to optimize during hyperparameter tuning, defaults to f1 score.
     
     Notes
     ----------
@@ -45,7 +47,7 @@ def train(model, dataset_manager, num_epochs=DEFAULT_NUM_EPOCHS, tune=True):
     paths = dataset_manager.get_paths()
 
     if not model.was_tuned() and tune:
-        model.tune(dataset_manager, labels, f1_score)
+        model.tune(dataset_manager, labels, metric_to_tune)
 
     with ClassifierDataset(paths[0], paths[1], labels) as dataset:
         X_train, X_test, y_train, y_test = dataset.get_stratified_training_set()

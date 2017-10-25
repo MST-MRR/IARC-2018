@@ -5,7 +5,7 @@ import os
 import builtins
 import cv2
 
-WORKING_DIR = r'/home/christopher/IARC-2018/examples/roomba_detection/Positives'
+WORKING_DIR = r'/home/christopher/IARC-2018/Vision/examples/roomba_detection/Positives'
 
 RESIZE_DOC = \
 '''Syntax: resize <scaleBy>
@@ -67,6 +67,7 @@ def extractVideos( numFramesToSkip ):
         for fileName in os.listdir('.'):
             if os.path.splitext(fileName)[1] in SUPPORTED_VIDEO_FILE_EXTENSIONS:
                 try:
+                    print(fileName)
                     cap = cv2.VideoCapture(fileName)
                     ret = True
                     i = 0
@@ -83,7 +84,7 @@ def extractVideos( numFramesToSkip ):
                         
                         cv2.imwrite('%s%s' % (datetime.now(), '.jpg'), frame)
 
-                    os.remove(fileName)
+                    #os.remove(fileName)
                 except Exception as e:
                     return False, 'extractVideos: ' + str( e )
                 finally:
