@@ -15,11 +15,11 @@ import mrrdt_vision
 import cv2
 
 # folder containing postive image samples
-POSITIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/examples/roomba_detection/Positives'
+POSITIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/Vision/examples/roomba_detection/Positives'
 # folder containg negative image samples
-NEGATIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/examples/roomba_detection/Negatives'
+NEGATIVE_IMAGE_FOLDER = '/home/christopher/IARC-2018/Vision/examples/roomba_detection/Negatives'
 # binary file containing the annotations for each postive image
-ANNOTATIONS_FILE = '/home/christopher/IARC-2018/examples/roomba_detection/Positives/annotations'
+ANNOTATIONS_FILE = '/home/christopher/IARC-2018/Vision/examples/roomba_detection/Positives/annotations'
 
 # folder containing the files for the roomba detector.
 BASE_FOLDER = 'roomba'
@@ -59,7 +59,7 @@ def get_roomba_annotations(annotations_file_path=ANNOTATIONS_FILE, pos_img_folde
                     top_x, top_y = tuple(annotation[:,0])
                     bottom_x, bottom_y = tuple(annotation[:, 1])
 
-                    if (abs(top_x-bottom_x)*abs(bottom_y-top_y)>=MIN_AREA):
+                    if (abs(top_x-bottom_x)*abs(bottom_y-top_y)>=MIN_AREA and top_y < bottom_y and top_x < bottom_x):
                         img = cv2.imread(cur_file_path)
                         roombas.append((cur_file_path, top_x, top_y, bottom_x - top_x, bottom_y - top_y))
 
