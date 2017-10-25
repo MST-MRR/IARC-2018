@@ -1,10 +1,6 @@
 import PID, time, math
 
 class FlightVector(object):
-	x = 0
-	y = 0
-	z = 0
-
   def __init__(self, x, y, z):
     self.x = float(x)
     self.y = float(y)
@@ -77,9 +73,9 @@ class PIDFlightController(object):
   YAW_P = 2.0
   YAW_I = 0.0
   YAW_D = 9.0
-  THROTTLE_P = 15.0
-  THROTTLE_I = 0.0
-  THROTTLE_D = 10.0
+  THROTTLE_P = 0.35
+  THROTTLE_I = 0.09
+  THROTTLE_D = 0.05
   ROLL_CHANNEL = '1'
   PITCH_CHANNEL = '2'
   THROTTLE_CHANNEL = '3'
@@ -101,22 +97,22 @@ class PIDFlightController(object):
     self.initialize_controllers()
 
   def initialize_controllers(self):
-    if not controllers_initialized:
-      self.PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
-      self.PitchPID.SetPoint = desired_pitch_velocity
-      self.PitchPID.setSampleTime(PID_UPDATE_TIME)
+    if not self.controllers_initialized:
+      self.PitchPID = PID.PID(self.PITCH_P, self.PITCH_I, self.PITCH_D)
+      self.PitchPID.SetPoint = 0
+      self.PitchPID.setSampleTime(self.PID_UPDATE_TIME)
 
-      self.RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
-      self.RollPID.SetPoint = desired_roll_velocity
-      self.RollPID.setSampleTime(PID_UPDATE_TIME)
+      self.RollPID = PID.PID(self.ROLL_P, self.ROLL_I, self.ROLL_D)
+      self.RollPID.SetPoint = 0
+      self.RollPID.setSampleTime(self.PID_UPDATE_TIME)
       
-      self.YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
-      self.YawPID.SetPoint = desired_yaw_angle
-      self.YawPID.setSampleTime(PID_UPDATE_TIME)
+      self.YawPID = PID.PID(self.YAW_P , self.YAW_I, self.YAW_D)
+      self.YawPID.SetPoint = 0
+      self.YawPID.setSampleTime(self.PID_UPDATE_TIME)
 
-      self.ThrottlePID = PID.PID(THROTTLE_P, THROTTLE_I, THROTTLE_D)
-      self.ThrottlePID.SetPoint = desired_speed
-      self.ThrottlePID.setSampleTime(PID_UPDATE_TIME)
+      self.ThrottlePID = PID.PID(self.THROTTLE_P, self.THROTTLE_I, self.THROTTLE_D)
+      self.ThrottlePID.SetPoint = 0
+      self.ThrottlePID.setSampleTime(self.PID_UPDATE_TIME)
       self.controllers_initialized = True
 
   def send_velocity_vector(self, requested_flight_vector, yaw_angle=None):
@@ -129,29 +125,28 @@ class PIDFlightController(object):
     self.ThrottlePID.SetPoint = requested_flight_vector.z
 
   def update_controllers(self):
-    self.PitchPID.update(vehicle.velocity[0])
-    self.RollPID.update(vehicle.velocity[1])
+    self.PitchPID.update(self.vehicle.velocity[0])
+    self.RollPID.update(self.vehicle.velocity[1])
     self.YawPID.update(self.vehicle.attitude.yaw)
-    self.ThrottlePID.update(vehicle.velocity[2])
+    self.ThrottlePID.update(self.vehicle.velocity[2])
 
     self.PitchPWM -= self.PitchPID.output
     self.RollPWM += self.RollPID.output                
     self.YawPWM += self.YawPID.output
-    self.ThrottlePWM += self.ThrottlePWM.output
+    self.ThrottlePWM += self.ThrottlePID.output
   
-  def write_to_rc_channels(self, flushChannels=False):
+  def write_to_rc_channels(self, should_flush_channels=False):
     
-    if(self.flushChannels):
+    if(should_flush_channels):
       self.ThrottlePWM = self.THRUST_LOW
       self.RollPWM = self.ROLL_MID
       self.PitchPWM = self.PITCH_MID
       self.YawPWM = self.YAW_MID
     
-    self.vehicle.channels.overrides[PITCH_CHANNEL] = self.PitchPWM
-    self.vehicle.channels.overrides[ROLL_CHANNEL] = self.RollPWM
-    self.vehicle.channels.overrides[YAW_CHANNEL] = self.YawPWM
-    self.vehicle.channels.overrides[THROTTLE_CHANNEL] = self.ThrottlePWM
-
+    # self.vehicle.channels.overrides[self.PITCH_CHANNEL] = self.PitchPWM
+    # self.vehicle.channels.overrides[self.ROLL_CHANNEL] = self.RollPWM
+    # self.vehicle.channels.overrides[self.YAW_CHANNEL] = self.YawPWM
+    self.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.ThrottlePWM
 
   def get_yaw_radians(self, angle):
     if angle < 180:

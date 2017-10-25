@@ -10,10 +10,8 @@
 
 from datetime import datetime, timedelta
 from os import system
-import sys
 from time import sleep
 from copy import deepcopy
-
 
 import dronekit
 import math
@@ -21,46 +19,11 @@ import os
 import time
 import threading
 
-class DroneAttitude():
+from AutonomousFlight import FlightVector, PIDFlightController
 
-  def __init__(self, roll, pitch, yaw):
-    self.pitch_deg = pitch
-    self.yaw_deg = yaw
-    self.roll_deg = roll
-    self.pitch = math.radians(pitch)
-    self.yaw = math.radians(yaw)
-    self.roll = math.radians(roll)
-    self.quaternion = self.get_quaternion()
-
-  def get_quaternion(self):
-    t0 = math.cos(self.yaw * 0.5)
-    t1 = math.sin(self.yaw * 0.5)
-    t2 = math.cos(self.roll * 0.5)
-    t3 = math.sin(self.roll * 0.5)
-    t4 = math.cos(self.pitch * 0.5)
-    t5 = math.sin(self.pitch * 0.5)
-
-    w = t0 * t2 * t4 + t1 * t3 * t5
-    x = t0 * t3 * t4 - t1 * t2 * t5
-    y = t0 * t2 * t5 + t1 * t3 * t4
-    z = t1 * t2 * t4 - t0 * t3 * t5
-
-    return [w, x, y, z]
-
-class StandardAttitudes(object):
-  level = DroneAttitude(0,0,0)
-  forward = DroneAttitude(0,-5,0)
-  backward = DroneAttitude(0,5,0)
-  left = DroneAttitude(-5, 0, 0)
-  right = DroneAttitude(5, 0, 0)
-
-class StandardThrusts(object):
-  none = 0.00
-  low = 0.25
-  land = 0.25
-  hover = 0.525
-  takeoff = 0.75
-  full = 1.00
+class StandardFlightVectors(object):
+  hover = FlightVector(0, 0, 0)
+  normal_takeoff = FlightVector(0, 0, 0.3)
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -76,27 +39,25 @@ class Tower(object):
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
-  STANDARD_ATTITUDE_BIT_FLAGS = 0b00111111
-  STANDARD_THRUST_CHANGE = 0.05
-  MAX_TURN_TIME = 5
-  LAND_ALTITUDE = 0.5
-  TURN_START_VELOCITY = 3
-  TURN_RADIUS = 0.5 # Meters
-  STANDARD_ANGLE_ADJUSTMENT = 1.0
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 1
+  LAND_ALTITUDE = 0.25
   MAX_ANGLE_ALL_AXIS = 15.0
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
 
   def __init__(self):
+    """
+    @purpose: Simply for initializing this object, we are not connected to the flight controller at this point.
+    @args:
+    @returns:
+    """
     self.start_time = 0
     self.flight_log = None
     self.vehicle_initialized = False
     self.vehicle = None
-    self.scanse = None
-    self.LAST_ATTITUDE = StandardAttitudes.level
-    self.LAST_THRUST = StandardThrusts.none
+    self.failsafes = None
+    self.pid_flight_controller = None
     self.STATE = VehicleStates.unknown
 
   def initialize(self, should_write_to_file=False):
@@ -120,12 +81,13 @@ class Tower(object):
         print("\nUnable to connect to vehicle.")
         return
 
-      self.vehicle.mode = dronekit.VehicleMode("STABILIZE")
-      self.STATE = VehicleStates.landed
+      self.start_time = int(time.time())
       self.vehicle_initialized = True
       self.failsafes = FailsafeController(self)
       self.failsafes.start()
-      self.start_time = int(time.time())
+      self.pid_flight_controller = PIDFlightController(self.vehicle)
+      self.pid_flight_controller.initialize_controllers()
+      self.STATE = VehicleStates.landed
 
       self.switch_control()
 
@@ -164,11 +126,12 @@ class Tower(object):
     while(self.vehicle.armed):
       sleep(self.STANDARD_SLEEP_TIME)
 
-  def switch_control(self, mode_name="STABILIZE"):
+  def switch_control(self, mode_name="LOITER"):
     """
-    @purpose: Switch the mode to GUIDED_NOGPS and make sure
+    @purpose: Switch the mode to LOITER and make sure
              that the failsafe thread is running.
-    @args:
+    @args: A vehicle mode name, see ArduPilot documentation
+          for available modes.
     @returns:
     """
     if not self.failsafes:
@@ -179,11 +142,21 @@ class Tower(object):
       while(self.vehicle.mode.name != mode_name):
         sleep(self.STANDARD_SLEEP_TIME)
 
+  def flight_prereqs_clear(self):
+    """
+    @purpose: Check that objects are initialized and collision avoidance does not have control.
+    @args:
+    @returns: Boolean if basic checks are complete.
+    """
+    return (self.pid_flight_controller != None and
+      self.pid_flight_controller.controllers_initialized and
+      self.STATE != VehicleStates.avoidance)
+
   def get_uptime(self):
     """
     @purpose: Get up time of this object.
     @args:
-    @returns:
+    @returns: Vehicle uptime in seconds since the epoch.
     """
     uptime = int(time.time()) - self.start_time
     return uptime
@@ -202,65 +175,38 @@ class Tower(object):
     """
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-  def set_angle_thrust(self, attitude, thrust):
+
+  def takeoff(self, desired_altitude):
     """
-    @purpose: Send a specified attitude message to the
-              flight controller. For more information, see
-              http://mavlink.org/messages/common#SET_ATTITUDE_TARGET.
+    @purpose:
     @args:
-      attitude: A DroneAtittude object containing a target attitude.
-      thrust: A collective thrust from 0 to 1. Thrust is converted to
-              a climb rate internally by the flight controller. Therefore,
-              thrusts from 0.51 to 1 are climb rates and thrusts from 0.49
-              to 0 are descent rates. 0.50 attempts to maintain a hover.
     @returns:
     """
-    while(self.vehicle.mode.name != "GUIDED_NOGPS"):
-      sleep(self.STANDARD_SLEEP_TIME)
-
-    message = self.vehicle.message_factory.set_attitude_target_encode(
-      0,                                 # Timestamp in milliseconds since system boot (not used).
-      0,                                 # System ID
-      0,                                 # Component ID
-      self.STANDARD_ATTITUDE_BIT_FLAGS,  # Bit flags.
-      attitude.quaternion,               # Attitude quaternion.
-      0,                                 # Body roll rate.
-      0,                                 # Body pitch rate.
-      0,                                 # Body yaw rate.
-      thrust                             # Collective thrust, from 0-1.
-    )
-    self.vehicle.send_mavlink(message)
-    self.vehicle.commands.upload()
-    self.last_attitude = attitude
-    self.last_thrust = thrust
-
-  def hover(self):
-    pass
-
-  def takeoff_attitude(self, target_altitude):
-    """
-    @purpose: Takeoff using thrusts specific with SET_ATTITUDE_TARGET
-    @args:
-      attitude: Target altitude in meters.
-    @returns:
-    """
-    self.STATE = VehicleStates.takeoff
-
-    self.initial_yaw = self.vehicle.attitude.yaw
-
-    self.arm_drone()
     self.switch_control()
+    self.arm_drone()
 
     initial_alt = self.vehicle.location.global_relative_frame.alt
+    takeoff_vector = deepcopy(StandardFlightVectors.normal_takeoff)
 
-    while((self.vehicle.location.global_relative_frame.alt - initial_alt) < target_altitude):
-      self.set_angle_thrust(DroneAttitude(0,0, math.radians(self.initial_yaw)), StandardThrusts.takeoff)
+    self.STATE = VehicleStates.flying
+    self.pid_flight_controller.send_velocity_vector(takeoff_vector)
+
+    while((self.vehicle.location.global_relative_frame.alt - initial_alt) < desired_altitude):
       sleep(self.STANDARD_SLEEP_TIME)
 
-    print('Reached target altitude:{0:.2f}m'.format(self.vehicle.location.global_relative_frame.alt))
+    self.hover()
+    
+  def hover(self):
+    """
+    @purpose:
+    @args:
+    @returns:
+    """
+    hover_vector = deepcopy(StandardFlightVectors.hover)
+    self.pid_flight_controller.send_velocity_vector(hover_vector)
+    self.STATE = VehicleStates.hover
 
-
-  def land(self):
+  def land_mode(self):
     """
     @purpose: Initiate a landing using the built-in ArduPilot mode.
     @args:
@@ -279,7 +225,7 @@ class Tower(object):
     @args:
     @returns:
     """
-    if(self.vehicle.battery.voltage < self.BATTERY_FAILSAFE_VOLTAGE):
+    if(self.vehicle.battery.voltage < self.BATTERY_FAILSAFE_VOLTAGE_PANIC):
         self.land()
 
 class FailsafeController(threading.Thread):
@@ -293,11 +239,17 @@ class FailsafeController(threading.Thread):
     while not self.stoprequest.isSet():
       if self.atc.STATE == VehicleStates.hover or self.atc.STATE == VehicleStates.flying:
         self.atc.check_battery_voltage()
-      sleep(STANDARD_SLEEP_TIME) 
+      if self.atc.flight_prereqs_clear():
+        self.atc.pid_flight_controller.update_controllers()
+        if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
+          self.atc.pid_flight_controller.write_to_rc_channels()
+      sleep(0.001) 
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
       if self.atc.STATE != VehicleStates.landed:
-        self.atc.land()
+        self.atc.land_mode()
+        self.atc.pid_flight_controller.write_to_rc_channels(flushChannels=True)
+
     self.stoprequest.set()
     super(FailsafeController, self).join(timeout)
