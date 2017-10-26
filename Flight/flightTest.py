@@ -27,7 +27,7 @@ ROLL_CHANNEL = '1'
 PITCH_CHANNEL = '2'
 THROTTLE_CHANNEL = '3'
 YAW_CHANNEL = '4'
-PID_UPDATE_TIME = 0.0
+PID_UPDATE_TIME = 0.01
 PI = 3.14159265359
 
 
@@ -97,7 +97,8 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
     throttle_graph = PID_Graph(desired_speed, "Throttle")
     graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
-    while True:
+    testing = True
+    while testing:
         try:
             time.sleep(.1)
             current_alt = vehicle.location.global_relative_frame.alt
@@ -112,7 +113,8 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
 
             # Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):
-                
+                graph_test = tune_pid(0.3, 1, ROLL_CHANNEL, 3, 7.0, 0.0, 0.5, ThrottlePID, ThrottlePWM)
+                testing = False
                 '''
                 # Get drones pitch velocity
                 current_pitch_velocity = -vehicle.velocity[0]
@@ -148,10 +150,13 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 '''
         except KeyboardInterrupt:
             #testRoll(RollPID)
-            test_forwards(desired_alt)
+            #test_forwards(desired_alt)
             shutdown(vehicle)
             #display_graphs(graphs_list)
             break
+        if testing is False:
+            shutdown(vehicle)
+            graph_test.display()
 
     return
 
@@ -241,6 +246,36 @@ def test_forwards(highest_alt):
             print("Desired pitch: %s" % PitchPID.SetPoint)
             print("Current pitch %s" % vehicle.velocity[0])
             os.system("clear")
+    pass
+
+
+def tune_pid(setpoint, vel_index, channel, interval, PID_P, PID_I, PID_D, ThrottlePID, ThrottlePWM):
+    
+    t_end = time.time() + 60 * interval
+    curr_vel = vehicle.velocity[vel_index]
+    AxisPID = PID.PID(PID_P, PID_I, PID_D)
+    AxisPID.setSampleTime(PID_UPDATE_TIME)
+    AxisPID.SetPoint = setpoint
+    AxisPWM = PITCH_MID
+    graph = PID_Graph(setpoint, "Test")
+    ThrottlePID.SetPoint = 0
+    while time.time() < t_end:
+        time.sleep(0.1)
+        curr_vel = vehicle.velocity[vel_index]
+        ThrottlePID.update(vehicle.velocity[2])
+        AxisPID.update(curr_vel)
+        AxisPWM += AxisPID.output
+        ThrottlePWM += ThrottlePID.output
+        vehicle.channels.overrides[channel] = AxisPWM
+        vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
+        graph.update(curr_vel)
+        print("AxisPWM: %s " % AxisPWM)
+        print("Throttle: %s" % ThrottlePWM )
+        print("Desired: %s" % setpoint)
+        print("Actual: %s " % curr_vel)
+        print(t_end - time.time())
+        os.system("clear")
+    return graph
     pass
 '''
 for x in range(-314, 314):
