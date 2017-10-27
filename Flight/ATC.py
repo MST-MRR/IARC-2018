@@ -35,7 +35,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -85,7 +85,7 @@ class Tower(object):
       self.vehicle_initialized = True
       self.failsafes = FailsafeController(self)
       self.failsafes.start()
-      self.pid_flight_controller = PIDFlightController(self.vehicle)
+      self.pid_flight_controller = PIDFlightController(self)
       self.pid_flight_controller.initialize_controllers()
       self.STATE = VehicleStates.landed
 
@@ -134,6 +134,9 @@ class Tower(object):
           for available modes.
     @returns:
     """
+    if not self.pid_flight_controller:
+      self.pid_flight_controller = PIDFlightController(self)
+      self.pid_flight_controller.initialize_controllers()
     if not self.failsafes:
       self.failsafes = FailsafeController(self)
       self.failsafes.start()
@@ -161,6 +164,15 @@ class Tower(object):
     uptime = int(time.time()) - self.start_time
     return uptime
 
+  def get_altitude(self):
+    """
+    @purpose: Get vehicle altitude.
+    @args:
+    @returns: Vehicle altitude in meters.
+    """
+    if(self.vehicle):
+      return self.vehicle.location.global_relative_frame.alt
+
   def map(self, x, in_min, in_max, out_min, out_max):
     """
     @purpose: Re-maps a number from one range to another.
@@ -185,16 +197,16 @@ class Tower(object):
     self.switch_control()
     self.arm_drone()
 
-    initial_alt = self.vehicle.location.global_relative_frame.alt
+    initial_alt = self.get_altitude()
     takeoff_vector = deepcopy(FlightVector(0, 0, 1))
 
     self.STATE = VehicleStates.takeoff
-    self.pid_flight_controller.send_velocity_vector(takeoff_vector)
+    self.pid_flight_controller.send_velocity_vector(takeoff_vector, desired_altitude)
 
-    while((self.vehicle.location.global_relative_frame.alt - initial_alt) < desired_altitude):
+    while((self.get_altitude() - initial_alt) < desired_altitude):
       sleep(self.STANDARD_SLEEP_TIME)
 
-    # self.hover()
+    self.hover(desired_altitude)
 
   def fly(self, desired_vector):
     """
@@ -203,16 +215,16 @@ class Tower(object):
     @returns:
     """
     self.STATE = VehicleStates.flying
-    # self.pid_flight_controller.send_velocity_vector(desired_vector)
+    self.pid_flight_controller.send_velocity_vector(desired_vector)
     
-  def hover(self):
+  def hover(self, desired_altitude=None, desired_yaw=None):
     """
     @purpose:
     @args:
     @returns:
     """
     hover_vector = deepcopy(StandardFlightVectors.hover)
-    self.pid_flight_controller.send_velocity_vector(hover_vector)
+    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_yaw)
     self.STATE = VehicleStates.hover
 
   def land_mode(self):
@@ -223,7 +235,7 @@ class Tower(object):
     """
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
-    while((self.vehicle.location.global_relative_frame.alt) >= self.LAND_ALTITUDE):
+    while((self.get_altitude()) >= self.LAND_ALTITUDE):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
       self.STATE = VehicleStates.landed
@@ -253,11 +265,18 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           self.atc.pid_flight_controller.write_to_rc_channels()
-          print("Alt Controller Out: " + str(self.atc.pid_flight_controller.ThrottlePID.output) + 
-          "\nRC Out: " + str(self.atc.pid_flight_controller.ThrottlePWM) + 
-          "\nVehicle Altitude: " + str(self.atc.vehicle.location.global_relative_frame.alt) + 
-          "\nTarget Alt: " + str(self.atc.pid_flight_controller.ThrottlePID.SetPoint))
-      sleep(0.02) 
+          os.system("clear")
+          print("Velocity Controller Out: " + str(self.atc.pid_flight_controller.Throttle_PID.output) + 
+          "\nVelocity RC Out: " + str(self.atc.pid_flight_controller.Throttle_PWM) + 
+          "\n\nAltitude Controller Out: " + str(self.atc.pid_flight_controller.Altitude_PID.output) + 
+          "\nAltitude RC Out: " + str(self.atc.pid_flight_controller.Altitude_PWM) + 
+          "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
+          "\nTarget Alt: " + str(self.atc.pid_flight_controller.Altitude_PID.SetPoint) +
+          "\n\nYaw Controller Out: " + str(self.atc.pid_flight_controller.Yaw_PID.output) + 
+          "\nYaw RC Out: " + str(self.atc.pid_flight_controller.Yaw_PWM) + 
+          "\nVehicle Yaw: " + str(self.atc.vehicle.attitude.yaw) + 
+          "\nTarget Yaw: " + str(self.atc.pid_flight_controller.Yaw_PID.SetPoint))
+      sleep(0.1) 
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
