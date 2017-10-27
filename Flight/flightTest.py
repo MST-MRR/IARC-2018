@@ -113,7 +113,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
 
             # Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):
-                graph_test = tune_pid(0.3, 1, ROLL_CHANNEL, 3, 7.0, 0.0, 0.5, ThrottlePID, ThrottlePWM)
+                graph_test = tune_pid(0.3, 1, ROLL_CHANNEL, 2, 5.0, 1.0, 2.5, ThrottlePID, ThrottlePWM)
                 testing = False
                 '''
                 # Get drones pitch velocity
