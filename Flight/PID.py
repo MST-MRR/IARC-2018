@@ -63,11 +63,15 @@ class PID:
 
     def update(self, feedback_value):
         """Calculates PID value for given reference feedback
+
         .. math::
             u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
+
         .. figure:: images/pid_1.png
            :align:   center
+
            Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
+
         """
         error = self.SetPoint - feedback_value
 
@@ -92,9 +96,7 @@ class PID:
             self.last_time = self.current_time
             self.last_error = error
 
-            self.ITerm = self.ITerm * self.Ki
-            self.KTerm = self.DTerm * self.Kd
-            self.output = self.PTerm + (self.ITerm) + (self.DTerm)
+            self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
 
     def setKp(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
