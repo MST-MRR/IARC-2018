@@ -61,7 +61,8 @@ class PIDFlightController(object):
   YAW_MID = 1494.0
   PITCH_MID = 1494.0
   ROLL_MID = 1494.0
-  THRUST_LOW = 986.0
+  THROTTLE_MIN = 982.0
+  THROTTLE_MAX = 2006.0
   PITCH_P = 10.0
   PITCH_I = 0.0
   PITCH_D = 15.0
@@ -72,7 +73,7 @@ class PIDFlightController(object):
   YAW_I = 0.0
   YAW_D = 9.0
   THROTTLE_P = 0.35
-  THROTTLE_I = 0.09
+  THROTTLE_I = 0.095
   THROTTLE_D = 0.05
   ROLL_CHANNEL = '1'
   PITCH_CHANNEL = '2'
@@ -88,7 +89,7 @@ class PIDFlightController(object):
     self.RollPID = None
     self.PitchPID = None
     self.YawPID = None
-    self.ThrottlePWM = self.THRUST_LOW
+    self.ThrottlePWM = self.THROTTLE_MIN
     self.RollPWM = self.ROLL_MID
     self.PitchPWM = self.PITCH_MID
     self.YawPWM = self.YAW_MID
@@ -126,17 +127,18 @@ class PIDFlightController(object):
     self.PitchPID.update(self.vehicle.velocity[0])
     self.RollPID.update(self.vehicle.velocity[1])
     self.YawPID.update(self.vehicle.attitude.yaw)
-    self.ThrottlePID.update(self.vehicle.velocity[2])
+    self.ThrottlePID.update(self.vehicle.location.global_relative_frame.alt)
+    # self.ThrottlePID.update(self.vehicle.velocity[2])
 
     self.PitchPWM -= self.PitchPID.output
     self.RollPWM += self.RollPID.output                
     self.YawPWM += self.YawPID.output
-    self.ThrottlePWM += self.ThrottlePID.output
+    self.ThrottlePWM = self.convert_altitude_to_pwm(self.ThrottlePID.output)
   
   def write_to_rc_channels(self, should_flush_channels=False):
     
     if(should_flush_channels):
-      self.ThrottlePWM = self.THRUST_LOW
+      self.ThrottlePWM = self.THROTTLE_MIN
       self.RollPWM = self.ROLL_MID
       self.PitchPWM = self.PITCH_MID
       self.YawPWM = self.YAW_MID
@@ -152,5 +154,10 @@ class PIDFlightController(object):
     else:
         return math.radians(angle-180) -  math.pi
 
-  def convert_velocity_to_pwm(desired_velocity):
-    return  ((( 512.0 * desired_velocity ) / 5.0 ) + 1494.0)
+  def convert_altitude_to_pwm(self, desired_altitude):
+    rc_out =  340.0 * desired_altitude + 986.0
+    if(rc_out < self.THROTTLE_MIN):
+      rc_out = self.THROTTLE_MIN
+    elif(rc_out > self.THROTTLE_MAX):
+      rc_out = self.THROTTLE_MAX
+    return rc_out

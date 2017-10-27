@@ -186,7 +186,7 @@ class Tower(object):
     self.arm_drone()
 
     initial_alt = self.vehicle.location.global_relative_frame.alt
-    takeoff_vector = deepcopy(StandardFlightVectors.normal_takeoff)
+    takeoff_vector = deepcopy(FlightVector(0, 0, 1))
 
     self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(takeoff_vector)
@@ -194,16 +194,16 @@ class Tower(object):
     while((self.vehicle.location.global_relative_frame.alt - initial_alt) < desired_altitude):
       sleep(self.STANDARD_SLEEP_TIME)
 
-    self.hover()
+    # self.hover()
 
-  # def fly(self, desired_vector):
-  #   """
-  #   @purpose:
-  #   @args:
-  #   @returns:
-  #   """
-  #   self.STATE = VehicleStates.flying
-  #   self.pid_flight_controller.send_velocity_vector(desired_vector)
+  def fly(self, desired_vector):
+    """
+    @purpose:
+    @args:
+    @returns:
+    """
+    self.STATE = VehicleStates.flying
+    # self.pid_flight_controller.send_velocity_vector(desired_vector)
     
   def hover(self):
     """
@@ -253,7 +253,11 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           self.atc.pid_flight_controller.write_to_rc_channels()
-      sleep(0.001) 
+          print("Alt Controller Out: " + str(self.atc.pid_flight_controller.ThrottlePID.output) + 
+          "\nRC Out: " + str(self.atc.pid_flight_controller.ThrottlePWM) + 
+          "\nVehicle Altitude: " + str(self.atc.vehicle.location.global_relative_frame.alt) + 
+          "\nTarget Alt: " + str(self.atc.pid_flight_controller.ThrottlePID.SetPoint))
+      sleep(0.02) 
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
