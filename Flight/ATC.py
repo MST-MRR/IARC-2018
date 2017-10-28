@@ -18,6 +18,7 @@ import math
 import os
 import time
 import threading
+import LIDARCollisionAvoidance
 
 from AutonomousFlight import FlightVector, PIDFlightController
 
@@ -58,8 +59,10 @@ class Tower(object):
     self.failsafes = None
     self.pid_flight_controller = None
     self.STATE = VehicleStates.unknown
+    self.LIDAR_enabled = False
+    self.LIDAR_instance = None
 
-  def initialize(self, should_write_to_file=False):
+  def initialize(self, should_write_to_file=False, should_enable_LIDAR=False):
     """
     @purpose: Connect to the flight controller, start the failsafe
               thread, switch to GUIDED_NOGPS, and open a file to
@@ -72,6 +75,9 @@ class Tower(object):
       if(should_write_to_file):
         self.flight_log = open('flight_log.txt', 'w')
         sys.stdout = self.flight_log
+
+      if(should_enable_LIDAR):
+        self.LIDAR_instance = LIDAR()
 
       print("\nConnecting to vehicle...")
       self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
