@@ -23,7 +23,6 @@ from AutonomousFlight import FlightVector, PIDFlightController
 
 class StandardFlightVectors(object):
   hover = FlightVector(0.000, 0.000, 0.000)
-  normal_takeoff = FlightVector(0.00, 0.00, 0.33)
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -190,18 +189,18 @@ class Tower(object):
 
   def takeoff(self, desired_altitude):
     """
-    @purpose:
-    @args:
+    @purpose: Initiate a takeoff using the altitude based PID.
+    @args: 
+      desired_altitude: Altitude to hover at when the takeoff operation is finished.
     @returns:
     """
     self.switch_control()
     self.arm_drone()
 
     initial_alt = self.get_altitude()
-    takeoff_vector = deepcopy(StandardFlightVectors.normal_takeoff)
 
     self.STATE = VehicleStates.takeoff
-    self.pid_flight_controller.send_velocity_vector(takeoff_vector, desired_altitude)
+    self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.hover, desired_altitude)
 
     while((self.get_altitude() - initial_alt) < desired_altitude):
       sleep(self.STANDARD_SLEEP_TIME)
@@ -210,8 +209,9 @@ class Tower(object):
 
   def fly(self, desired_vector):
     """
-    @purpose:
-    @args:
+    @purpose: Fly the vehicle in a direction with a certain speed.
+    @args: 
+      desired_vector: FlightVector with direction/speed.
     @returns:
     """
     self.STATE = VehicleStates.flying
@@ -219,8 +219,10 @@ class Tower(object):
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
-    @purpose:
-    @args:
+    @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
+    @args: 
+      desired_altitude: Altitude for the vehicle to hover at.
+      desired_angle: Angle for the vehicle to yaw to.
     @returns:
     """
     hover_vector = deepcopy(StandardFlightVectors.hover)
