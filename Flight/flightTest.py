@@ -27,7 +27,7 @@ ROLL_CHANNEL = '1'
 PITCH_CHANNEL = '2'
 THROTTLE_CHANNEL = '3'
 YAW_CHANNEL = '4'
-PID_UPDATE_TIME = 0.0
+PID_UPDATE_TIME = 0.00
 PI = 3.14159265359
 
 
@@ -48,7 +48,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     vehicle.mode = VehicleMode("LOITER")
     vehicle.armed = True
 
-    time.sleep(5.0)
+    time.sleep(1.0)
 
     # Initialize Pitch Pid Controller
     # PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
@@ -101,13 +101,21 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
         try:
             time.sleep(.1)
             current_alt = vehicle.location.global_relative_frame.alt
-            if current_alt > 2.5:
+            
+            if current_alt > (desired_alt - 0.4):
                 ThrottlePID.SetPoint = 0
+            else:
+                if current_alt >= (desired_alt + 0.05):
+                    ThrottlePID.SetPoint = -0.3
+                else: 
+                    if current_alt <= (desired_alt - 0.05):
+                        ThrottlePID.SetPoint = 0.3
+
             ThrottlePID.update(vehicle.velocity[2])
             ThrottlePWM += ThrottlePID.output
             vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
             throttle_graph.update(vehicle.velocity[2])
-            print("Update throt: %s" % ThrottlePWM)
+            print("Desired Alt: %s" % desired_alt)
             print("Alt: %s" % current_alt)
 
             # Wait until the drone is at a good height to change direction
@@ -148,7 +156,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 '''
         except KeyboardInterrupt:
             #testRoll(RollPID)
-            test_forwards(desired_alt)
+            #test_forwards(desired_alt)
             shutdown(vehicle)
             #display_graphs(graphs_list)
             break
