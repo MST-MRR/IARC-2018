@@ -22,8 +22,8 @@ import threading
 from AutonomousFlight import FlightVector, PIDFlightController
 
 class StandardFlightVectors(object):
-  hover = FlightVector(0, 0, 0)
-  normal_takeoff = FlightVector(0, 0, 0.3)
+  hover = FlightVector(0.000, 0.000, 0.000)
+  normal_takeoff = FlightVector(0.00, 0.00, 0.33)
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -35,7 +35,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5760"
+  SIM = "tcp:127.0.0.1:5762"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -198,7 +198,7 @@ class Tower(object):
     self.arm_drone()
 
     initial_alt = self.get_altitude()
-    takeoff_vector = deepcopy(FlightVector(0, 0, 1))
+    takeoff_vector = deepcopy(StandardFlightVectors.normal_takeoff)
 
     self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(takeoff_vector, desired_altitude)
@@ -217,17 +217,17 @@ class Tower(object):
     self.STATE = VehicleStates.flying
     self.pid_flight_controller.send_velocity_vector(desired_vector)
     
-  def hover(self, desired_altitude=None, desired_yaw=None):
+  def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose:
     @args:
     @returns:
     """
     hover_vector = deepcopy(StandardFlightVectors.hover)
-    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_yaw)
+    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
     self.STATE = VehicleStates.hover
 
-  def land_mode(self):
+  def land(self):
     """
     @purpose: Initiate a landing using the built-in ArduPilot mode.
     @args:
@@ -235,6 +235,7 @@ class Tower(object):
     """
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
+    self.pid_flight_controller.send_velocity_vector(deepcopy(StandardFlightVectors.hover), desired_altitude=0)
     while((self.get_altitude()) >= self.LAND_ALTITUDE):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
@@ -247,7 +248,7 @@ class Tower(object):
     @returns:
     """
     if(self.vehicle.battery.voltage < self.BATTERY_FAILSAFE_VOLTAGE_PANIC):
-        self.land_mode()
+        self.land()
 
 class FailsafeController(threading.Thread):
 
@@ -265,23 +266,12 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           self.atc.pid_flight_controller.write_to_rc_channels()
-          os.system("clear")
-          print("Velocity Controller Out: " + str(self.atc.pid_flight_controller.Throttle_PID.output) + 
-          "\nVelocity RC Out: " + str(self.atc.pid_flight_controller.Throttle_PWM) + 
-          "\n\nAltitude Controller Out: " + str(self.atc.pid_flight_controller.Altitude_PID.output) + 
-          "\nAltitude RC Out: " + str(self.atc.pid_flight_controller.Altitude_PWM) + 
-          "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
-          "\nTarget Alt: " + str(self.atc.pid_flight_controller.Altitude_PID.SetPoint) +
-          "\n\nYaw Controller Out: " + str(self.atc.pid_flight_controller.Yaw_PID.output) + 
-          "\nYaw RC Out: " + str(self.atc.pid_flight_controller.Yaw_PWM) + 
-          "\nVehicle Yaw: " + str(self.atc.vehicle.attitude.yaw) + 
-          "\nTarget Yaw: " + str(self.atc.pid_flight_controller.Yaw_PID.SetPoint))
       sleep(0.1) 
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
       if self.atc.STATE != VehicleStates.landed:
-        self.atc.land_mode()
+        self.atc.land()
         self.atc.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
 
     self.stoprequest.set()
