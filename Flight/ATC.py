@@ -77,7 +77,10 @@ class Tower(object):
         sys.stdout = self.flight_log
 
       if(should_enable_LIDAR):
+        self.LIDAR_enabled = True
         self.LIDAR_instance = LIDAR()
+        self.LIDAR_instance.connect_to_lidar()
+        self.LIDAR_instance.reset_sectors()
 
       print("\nConnecting to vehicle...")
       self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
@@ -110,6 +113,9 @@ class Tower(object):
       self.flight_log.close()
     self.vehicle_initialized = False
     self.start_time = 0
+    if(self.LIDAR_enabled):
+      self.LIDAR_instance.shutdown()
+      self.LIDAR_instance = None
 
   def arm_drone(self):
     """
@@ -278,10 +284,20 @@ class FailsafeController(threading.Thread):
       if self.atc.STATE == VehicleStates.hover or self.atc.STATE == VehicleStates.flying:
         # self.atc.check_battery_voltage()
         pass
+      
       if self.atc.flight_prereqs_clear():
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           self.atc.pid_flight_controller.write_to_rc_channels()
+      
+      if(self.LIDAR_enabled): #if we should, get LIDAR points and send to flight controller
+        self.LIDAR_instance.get_lidar_data()
+        secval = 0
+        for sector in retVal: #iterate over values
+            endVal = min(5, len(sector))
+            for val in range(0,endVal):
+                distance_sensor(10, 300, sector[val][1], sector[val][2]) #create mavlink messages
+      
       sleep(0.1) 
 
   def join(self, timeout=None):

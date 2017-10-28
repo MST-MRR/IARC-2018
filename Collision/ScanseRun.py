@@ -24,7 +24,7 @@ def send_lidar_message(min_dist, max_dist, current_dist, sector):
     0                                              # covariance, not used
     )
     vehicle.send_mavlink(message)
-vehicle.commands.upload()
+    vehicle.commands.upload()
 
 blah = LIDAR()
 blah.connect_to_lidar()
