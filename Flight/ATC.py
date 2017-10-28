@@ -220,13 +220,21 @@ class Tower(object):
   def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
-    @args: 
+    @args:
       desired_altitude: Altitude for the vehicle to hover at.
       desired_angle: Angle for the vehicle to yaw to.
     @returns:
     """
+    intial_alt = self.get_altitude()
+
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
+  
+    while(self.get_altitude() < desired_altitude):
+      sleep(self.STANDARD_SLEEP_TIME)
+    while(self.get_altitude() > desired_altitude):
+      sleep(self.STANDARD_SLEEP_TIME)
+
     self.STATE = VehicleStates.hover
 
   def land(self):
