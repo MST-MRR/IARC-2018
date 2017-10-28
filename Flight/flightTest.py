@@ -16,7 +16,7 @@ PITCH_I = 0.0
 PITCH_D = 15.0
 ROLL_P = 10.0
 ROLL_I = 0.0
-ROLL_D = 15.0
+ROLL_D = 15.5
 YAW_P = 2.0
 YAW_I = 0.0
 YAW_D = 9.0
@@ -43,12 +43,13 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     while not vehicle.is_armable:
         print("Waiting...\n")
         time.sleep(1.0)
+        os.system(clear)
 
     print("Arming motors\n")
     vehicle.mode = VehicleMode("LOITER")
     vehicle.armed = True
 
-    time.sleep(5.0)
+    time.sleep(1.0)
 
     # Initialize Pitch Pid Controller
     # PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
@@ -113,7 +114,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
 
             # Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):
-                graph_test = tune_pid(0.3, 1, ROLL_CHANNEL, 2, 5.0, 1.0, 2.5, ThrottlePID, ThrottlePWM)
+                graph_test = tune_pid(0.3, 1, ROLL_CHANNEL, 2, ROLL_P, ROLL_I, ROLL_D, ThrottlePID, ThrottlePWM)
                 testing = False
                 '''
                 # Get drones pitch velocity
@@ -157,7 +158,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
         if testing is False:
             shutdown(vehicle)
             graph_test.display()
-
+        os.system("clear")
     return
 
 
