@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+*.swp
 env/
 build/
 develop-eggs/
@@ -107,5 +108,9 @@ ENV/
 #Ignore flight footage
 /Gridline Detection + Corner Detection/IARC 2016 Footage.mp4
 
-Flight/Tests
+#Flight/Tests
 Vision/examples/roomba_detection/IARC.mp4
+
+#VSCode
+.vscode/
+
