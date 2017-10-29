@@ -198,10 +198,15 @@ class PIDFlightController(object):
     self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Altitude_PWM
 
   def get_yaw_radians(self, angle):
-    if angle < 180:
+    if angle < 180.0:
+        if angle <= 0.0:
+            angle = 0.1
         return math.radians(angle)
     else:
-        return math.radians(angle-180) - math.pi
+        if angle >= 180.0:
+            angle = 179.00
+            return math.radians(angle)
+        return math.radians(angle-180) - PI
 
   def convert_altitude_to__PWM(self, desired_altitude):
     rc_out =  340.0 * desired_altitude + 986.0
