@@ -173,9 +173,14 @@ def get_pitch_pwm(angle):
 
 
 def get_yaw_radians(angle):
-    if angle < 180:
+    if angle < 180.0:
+        if angle <= 0.0:
+            angle = 0.1
         return math.radians(angle)
     else:
+        if angle >= 180.0:
+            angle = 179.00
+            return math.radians(angle)
         return math.radians(angle-180) - PI
 
 
