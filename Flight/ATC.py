@@ -228,9 +228,9 @@ class Tower(object):
     """
     intial_alt = self.get_altitude()
 
-    if(desired_altitude and (int(abs(self.get_altitude() - desired_altitude) * 10**2) != 0)):
+    if(desired_altitude and (int(abs(self.get_altitude() - desired_altitude) * 10**2) >= 4)):
       self.STATE = VehicleStates.hover_alt
-    elif(desired_angle and (int(abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) * 10**2) != 0)):
+    elif(desired_angle and (int(abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) * 10**2) >= 4)):
       self.STATE = VehicleStates.hover_yaw
     else:
       self.STATE = VehicleStates.hover
@@ -238,8 +238,8 @@ class Tower(object):
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
   
-    while((desired_altitude and (int(abs(self.get_altitude() - desired_altitude) * 10**2) != 0)) or 
-          (desired_angle and (int(abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) * 10**2) != 0))):
+    while((desired_altitude and (int(abs(self.get_altitude() - desired_altitude) * 10**2) >= 4)) or 
+          (desired_angle and (int(abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) * 10**2) >= 4))):
       sleep(self.STANDARD_SLEEP_TIME)
 
   def land(self):

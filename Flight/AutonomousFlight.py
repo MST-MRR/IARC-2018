@@ -146,17 +146,16 @@ class PIDFlightController(object):
 
     # self.Throttle_PID.update(self.atc.vehicle.velocity[2])
     # self.Throttle_PWM += self.constrain_rc_values(self.Throttle_PID.output)
-
-    #Next, set PWM values for other axes to neutral. The other axes controllers and PWM values will only be activated and changed if the current vehicle state requires it.
-    self.Roll_PWM = self.ROLL_MID
-    self.Pitch_PWM = self.PITCH_MID
-    self.Yaw_PWM = self.YAW_MID
-
+    
     if(self.atc.STATE != "TAKEOFF" and self.atc.STATE != "LANDING" and self.atc.STATE != "LANDED"):
       #Vehicle states such as landing or takeoff can adversly affect the any pitch, roll, or yaw controller so they will not be activated in these states.
       #TODO Figure out why VehicleStates can't be imported here.
       if("HOVER" in self.atc.STATE):
         #Yaw (besides the altitude/throttle controller itself) is the only other controller that is allowed to be updated while in hover.
+        self.Pitch_PID.output = 0.0
+        self.Roll_PID.output = 0.0
+        self.Pitch_PWM = self.PITCH_MID
+        self.Roll_PWM = self.ROLL_MID
         self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
         self.Yaw_PWM += self.Yaw_PID.output
       else:
@@ -170,10 +169,12 @@ class PIDFlightController(object):
         elif(self.atc.STATE == "FLYING_PITCH"):
           self.Pitch_PID.update(self.atc.vehicle.velocity[0])
           self.Pitch_PWM -= self.Pitch_PID.output
+          self.Roll_PWM = self.ROLL_MID
           #Roll will take the ROLL_MID value as set above. This ensures that the vehicle only travel along the requested axis.
         elif(self.atc.STATE == "FLYING_ROLL"):
           self.Roll_PID.update(self.atc.vehicle.velocity[1])
           self.Roll_PWM += self.Roll_PID.output
+          self.Pitch_PWM = self.PITCH_MID
           #Pitch will take the PITCH_MID value as set above. This ensures that the vehicle only travel along requested axis.
     
     self.Pitch_PWM = self.constrain_rc_values(self.Pitch_PWM)
