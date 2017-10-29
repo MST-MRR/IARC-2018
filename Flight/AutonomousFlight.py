@@ -132,6 +132,7 @@ class PIDFlightController(object):
 
     if(desired_yaw and requested_flight_vector.magnitude() == 0.00):
       # By checking the magnitude, we ensure that the vehicle will only yaw while it has a velocity of 0, 0, 0, for all axes.
+      # There is a similar check below in update_controllers.
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
 
     if(desired_altitude):
@@ -139,16 +140,28 @@ class PIDFlightController(object):
 
   def update_controllers(self):
 
-    # self.Throttle_PID.update(self.atc.vehicle.velocity[2])
+    #Start by updating our z-axis controllers regardless of state and updating the PWM value.
     self.Altitude_PID.update(self.atc.get_altitude())
+    self.Altitude_PWM = self.convert_altitude_to__PWM(self.Altitude_PID.output)
+
+    # self.Throttle_PID.update(self.atc.vehicle.velocity[2])
+    # self.Throttle_PWM += self.constrain_rc_values(self.Throttle_PID.output)
+
+    #Next, set PWM values for other axes to neutral. The other axes controllers and PWM values will only be activated and changed if the current vehicle state requires it.
+    self.Roll_PWM = self.ROLL_MID
+    self.Pitch_PWM = self.PITCH_MID
+    self.Yaw_PWM = self.YAW_MID
 
     if(self.atc.STATE != "TAKEOFF" and self.atc.STATE != "LANDING" and self.atc.STATE != "LANDED"):
-      #Vehicle states such as landing or takeoff can adversly affect the pitch values.
+      #Vehicle states such as landing or takeoff can adversly affect the any pitch, roll, or yaw controller so they will not be activated in these states.
       #TODO Figure out why VehicleStates can't be imported here.
-      if("HOVER" not in self.atc.STATE):
-        #Vehicle will drift if these controllers are on in Hover. Bad tuning?
-        #Even so, loiter mode will stop the vehicle if we return the Pitch and Roll channel to center.
-
+      if("HOVER" in self.atc.STATE):
+        #Yaw (besides the altitude/throttle controller itself) is the only other controller that is allowed to be updated while in hover.
+        self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
+        self.Yaw_PWM += self.Yaw_PID.output
+      else:
+        #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover. This may be caused by the tuning of the respective PID controllers.
+        #In any case, the tunings don't particularly matter. LOITER mode will stop the vehicle if we return the Pitch and Roll channel to neutral.
         if(self.atc.STATE == "FLYING"):
           self.Pitch_PID.update(self.atc.vehicle.velocity[0])
           self.Roll_PID.update(self.atc.vehicle.velocity[1])
@@ -157,21 +170,12 @@ class PIDFlightController(object):
         elif(self.atc.STATE == "FLYING_PITCH"):
           self.Pitch_PID.update(self.atc.vehicle.velocity[0])
           self.Pitch_PWM -= self.Pitch_PID.output
-          self.Roll_PWM = self.ROLL_MID
+          #Roll will take the ROLL_MID value as set above. This ensures that the vehicle only travel along the requested axis.
         elif(self.atc.STATE == "FLYING_ROLL"):
           self.Roll_PID.update(self.atc.vehicle.velocity[1])
           self.Roll_PWM += self.Roll_PID.output
-          self.Pitch_PWM = self.PITCH_MID
-      
-      else:
-        self.Roll_PWM = self.ROLL_MID
-        self.Pitch_PWM = self.PITCH_MID
-        self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
-        self.Yaw_PWM += self.Yaw_PID.output
+          #Pitch will take the PITCH_MID value as set above. This ensures that the vehicle only travel along requested axis.
     
-    # self.Throttle_PWM += self.Throttle_PID.output
-    self.Altitude_PWM = self.convert_altitude_to__PWM(self.Altitude_PID.output)
-
     self.Pitch_PWM = self.constrain_rc_values(self.Pitch_PWM)
     self.Roll_PWM = self.constrain_rc_values(self.Roll_PWM)
     self.Yaw_PWM = self.constrain_rc_values(self.Yaw_PWM)

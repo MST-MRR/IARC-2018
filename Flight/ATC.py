@@ -26,8 +26,8 @@ class StandardFlightVectors(object):
 
 class VehicleStates(object):
   hover = "HOVER"
-  hover_yaw = "HOVER_WITH_YAW_CHANGE"
-  hover_alt = "HOVER_WITH_ALT_CHANGE"
+  hover_yaw = "HOVER_YAW_CHANGE"
+  hover_alt = "HOVER_ALT_CHANGE"
   flying_pitching = "FLYING_PITCH"
   flying_rolling = "FLYING_ROLL"
   flying = "FLYING"
@@ -45,8 +45,6 @@ class Tower(object):
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 1
   LAND_ALTITUDE = 0.25
-  YAW_START_ALT = 0.17
-  MAX_ANGLE_ALL_AXIS = 15.0
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
 
@@ -179,21 +177,6 @@ class Tower(object):
     if(self.vehicle):
       return self.vehicle.location.global_relative_frame.alt
 
-  def map(self, x, in_min, in_max, out_min, out_max):
-    """
-    @purpose: Re-maps a number from one range to another.
-    @args:
-      x: the number to map
-      in_min: the lower bound of the value's current range
-      in_max: the upper bound of the value's current range
-      out_min: the lower bound of the value's target range
-      out_max: the upper bound of the value's target range
-    @returns:
-      The mapped value.
-    """
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
-
   def takeoff(self, desired_altitude):
     """
     @purpose: Initiate a takeoff using the altitude based PID.
@@ -229,12 +212,15 @@ class Tower(object):
     elif(desired_vector.y):
       self.STATE = VehicleStates.flying_rolling
 
-
     self.pid_flight_controller.send_velocity_vector(desired_vector)
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
+              This method will block until the desired_angle/desired_altitude
+              is achieved with 2 decimal places of precision. For example,
+              if you ask to go to 1 meter, this method will wait until the vehicle
+              gets exactly to 1.00 meters.
     @args:
       desired_altitude: Altitude for the vehicle to hover at.
       desired_angle: Angle for the vehicle to yaw to.
