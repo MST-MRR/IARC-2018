@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from os import system
 from time import sleep
 from copy import deepcopy
+from sys import stdout
 
 import dronekit
 import math
@@ -74,7 +75,7 @@ class Tower(object):
 
       if(should_write_to_file):
         self.flight_log = open('flight_log.txt', 'w')
-        sys.stdout = self.flight_log
+        stdout = self.flight_log
 
       print("\nConnecting to vehicle...")
       self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
@@ -188,6 +189,7 @@ class Tower(object):
     self.arm_drone()
 
     initial_alt = self.get_altitude()
+    initial_yaw = math.degrees(self.vehicle.attitude.yaw)
 
     self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.hover, desired_altitude)
@@ -195,7 +197,7 @@ class Tower(object):
     while((self.get_altitude() - initial_alt) < desired_altitude):
       sleep(self.STANDARD_SLEEP_TIME)
 
-    self.hover(desired_altitude)
+    self.hover(desired_altitude, desired_angle=initial_yaw)
 
   def fly(self, desired_vector):
     """
@@ -228,9 +230,9 @@ class Tower(object):
     """
     intial_alt = self.get_altitude()
 
-    if(desired_altitude and (int(abs(self.get_altitude() - desired_altitude) * 10**2) >= 4)):
+    if(desired_altitude and (abs(self.get_altitude() - desired_altitude)) >= 0.04):
       self.STATE = VehicleStates.hover_alt
-    elif(desired_angle and (int(abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) * 10**2) >= 4)):
+    elif(desired_angle and (abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) >= 0.04)):
       self.STATE = VehicleStates.hover_yaw
     else:
       self.STATE = VehicleStates.hover
@@ -238,8 +240,8 @@ class Tower(object):
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
   
-    while((desired_altitude and (int(abs(self.get_altitude() - desired_altitude) * 10**2) >= 4)) or 
-          (desired_angle and (int(abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) * 10**2) >= 4))):
+    while((desired_altitude and (abs(self.get_altitude() - desired_altitude) >= 0.04)) or 
+          (desired_angle and abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) >= 0.04)):
       sleep(self.STANDARD_SLEEP_TIME)
 
   def land(self):
