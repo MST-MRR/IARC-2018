@@ -13,8 +13,10 @@ import display
 from sklearn.preprocessing import normalize
 from timeit import default_timer as timer
 
-from __init__ import DEFAULT_BOUNDING_BOX_COLOR, DEFAULT_BOUNDING_BOX_THICKNESS
-
+# default bounding box color (green)
+DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
+# default bounding box thickness
+DEFAULT_BOUNDING_BOX_THICKNESS = 3
 # GPU-accelerated module path
 GPU_MODULE_PATH = 'threshold_gpu.so'
 # whether or not to enable GPU-accelerated thresholding 
@@ -75,10 +77,11 @@ class RoombaDetector():
     # minimum area for a region to have a chance at being considered a roomba
     MIN_AREA = 100
     # amount to grow the proposed bounding box by on each side
-    BOUNDING_BOX_SIZE_OFFSET = 30
+    BOUNDING_BOX_SIZE_OFFSET = 50
 
     def __init__(self):
         self._gaussian_blur_kernel = (11,11)
+        self._aperture_size = 3
     
     def _threshold_image_for_roombas(self, img):
         img = cv2.GaussianBlur(img, self._gaussian_blur_kernel, 0)
@@ -100,7 +103,7 @@ class RoombaDetector():
             binary_mask = threshold_gpu.threshold_image_for_roombas(img)
         else:
             binary_mask = self._threshold_image_for_roombas(img)
-    
+           
         closed_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, np.ones((11, 11), dtype=np.uint8))
         
         # find the location of those blobs
@@ -119,6 +122,14 @@ class RoombaDetector():
                 x, y, w, h = cv2.boundingRect(contour)
                 top_left = np.array([x, y]) - RoombaDetector.BOUNDING_BOX_SIZE_OFFSET
                 bottom_right = np.array([x + w, y + h]) + RoombaDetector.BOUNDING_BOX_SIZE_OFFSET
+                
+                # filter out false positives
+                blur = cv2.GaussianBlur(img, (15, 15), 3.38)
+                edges = cv2.Canny(cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY), 85, 30, apertureSize = self._aperture_size)
+                closing = cv2.dilate(edges, np.ones((3,3), dtype=np.uint8), iterations=1)
+                
+                cv2.imshow('before', img & closing[:, :, None])
+                
                 proposals.append((*top_left.astype(int), *bottom_right.astype(int)))
 
         # vectorize the list of centroids
