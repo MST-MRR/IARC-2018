@@ -56,7 +56,7 @@ class LIDAR():
       point_list.sort()
 
     for sector_index in range(0,8):
-      endVal = min(5, len(sector_lists[sector_index]))
+      endVal = min(10, len(sector_lists[sector_index]))
       for index in range(0,endVal):
         lidar_data[sector_index].append(sector_lists[sector_index][index])
 
