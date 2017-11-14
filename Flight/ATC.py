@@ -27,8 +27,7 @@ class StandardFlightVectors(object):
 
 class VehicleStates(object):
   hover = "HOVER"
-  hover_yaw = "HOVER_YAW_CHANGE"
-  hover_alt = "HOVER_ALT_CHANGE"
+  hover_alt_yaw_change = "HOVER_ALT_OR_YAW_CHANGE"
   flying_pitching = "FLYING_PITCH"
   flying_rolling = "FLYING_ROLL"
   flying = "FLYING"
@@ -39,13 +38,14 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 1
   LAND_ALTITUDE = 0.25
+  PID_ACCURACY_THRESHOLD = 0.046
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
 
@@ -178,6 +178,15 @@ class Tower(object):
     if(self.vehicle):
       return self.vehicle.location.global_relative_frame.alt
 
+  def get_yaw_deg(self):
+    """
+    @purpose: Get vehicle yaw in degrees.
+    @args:
+    @returns: Vehicle yaw in degrees.
+    """
+    if(self.vehicle):
+      return math.degrees(self.vehicle.attitude.yaw)
+
   def takeoff(self, desired_altitude):
     """
     @purpose: Initiate a takeoff using the altitude based PID.
@@ -189,15 +198,17 @@ class Tower(object):
     self.arm_drone()
 
     initial_alt = self.get_altitude()
-    initial_yaw = math.degrees(self.vehicle.attitude.yaw)
 
     self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.hover, desired_altitude)
 
-    while((self.get_altitude() - initial_alt) < desired_altitude):
+    def in_range(base_value, num):
+      return base_value - self.PID_ACCURACY_THRESHOLD <= num <= base_value + self.PID_ACCURACY_THRESHOLD
+
+    while(not (in_range(desired_altitude, self.get_altitude() - initial_alt))):
       sleep(self.STANDARD_SLEEP_TIME)
 
-    self.hover(desired_altitude, desired_angle=initial_yaw)
+    self.hover(desired_altitude)
 
   def fly(self, desired_vector):
     """
@@ -207,41 +218,52 @@ class Tower(object):
     @returns:
     """
 
-    if((desired_vector.x != 0 and desired_vector.y != 0) or ((desired_vector.x == 0 and desired_vector.y == 0) and desired_vector.z)):
+    if((desired_vector.x != 0 and desired_vector.y != 0)):
       self.STATE = VehicleStates.flying
     elif(desired_vector.x):
       self.STATE = VehicleStates.flying_pitching
     elif(desired_vector.y):
       self.STATE = VehicleStates.flying_rolling
 
-    self.pid_flight_controller.send_velocity_vector(desired_vector)
+    #TODO Remove check. This check is here in case the someone asks for a Z axis change only which will not change the vehicle's state because the Z axis controller is not finished yet.
+    if "FLYING" in self.STATE:
+      self.pid_flight_controller.send_velocity_vector(desired_vector)
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
               This method will block until the desired_angle/desired_altitude
-              is achieved with 2 decimal places of precision. For example,
-              if you ask to go to 1 meter, this method will wait until the vehicle
-              gets exactly to 1.00 meters.
+              is achieved with 2 decimal places of precision (PID_ACCURACY_THRESHOLD).
+              For example,if you ask to go to 1 meter, this method will wait until the vehicle
+              gets to 1.00 +- PID_ACCURACY_THRESHOLD meters.
     @args:
       desired_altitude: Altitude for the vehicle to hover at.
       desired_angle: Angle for the vehicle to yaw to.
     @returns:
     """
-    intial_alt = self.get_altitude()
+    
+    #If we don't get arguments, set desired to the vehicle's current readings.
+    if not desired_altitude:
+      desired_altitude = self.get_altitude()
+    if not desired_angle:
+      desired_angle = self.get_yaw_deg()
 
-    if(desired_altitude and (abs(self.get_altitude() - desired_altitude)) >= 0.04):
-      self.STATE = VehicleStates.hover_alt
-    elif(desired_angle and (abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) >= 0.04)):
-      self.STATE = VehicleStates.hover_yaw
+    #Calculate the range of acceptable altitudes/yaws.
+    def in_range(base_value, num):
+      return base_value - self.PID_ACCURACY_THRESHOLD <= num <= base_value + self.PID_ACCURACY_THRESHOLD
+
+    if(not (in_range(desired_altitude, self.get_altitude())) 
+      or not (in_range(desired_angle, self.get_yaw_deg()))):
+      self.STATE = VehicleStates.hover_alt_yaw_change
     else:
       self.STATE = VehicleStates.hover
 
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
   
-    while((desired_altitude and (abs(self.get_altitude() - desired_altitude) >= 0.04)) or 
-          (desired_angle and abs(self.vehicle.attitude.yaw - math.radians(desired_angle)) >= 0.04)):
+    #Wait for the vehicle to correct.
+    while(not (in_range(desired_altitude, self.get_altitude())) 
+      or not (in_range(desired_angle, self.get_yaw_deg()))):
       sleep(self.STANDARD_SLEEP_TIME)
 
   def land(self):
@@ -276,35 +298,15 @@ class FailsafeController(threading.Thread):
 
   def run(self):
     while not self.stoprequest.isSet():
-      if "HOVER" in self.atc.STATE or "FLYING" in self.atc.STATE:
-        # self.atc.check_battery_voltage()
-        pass
       if self.atc.flight_prereqs_clear():
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
+          # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
           os.system("clear")
-          print("Vehicle State: " + self.atc.STATE + 
-          # "\n\nZ Velocity Controller Out: " + str(self.atc.pid_flight_controller.Throttle_PID.output) + 
-          # "\nZ Velocity RC Out: " + str(self.atc.pid_flight_controller.Throttle_PWM) + 
-          # "\nVehicle Z Velocity: " + str(self.atc.vehicle.velocity[2]) + 
-          # "\nTarget Z Velocity: " + str(self.atc.pid_flight_controller.Throttle_PID.SetPoint) + 
-          "\n\nAltitude Controller Out: " + str(self.atc.pid_flight_controller.Altitude_PID.output) + 
-          "\nAltitude RC Out: " + str(self.atc.pid_flight_controller.Altitude_PWM) + 
-          "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
-          "\n\nPitch Controller Out: " + str(self.atc.pid_flight_controller.Pitch_PID.output) + 
-          "\nPitch RC Out: " + str(self.atc.pid_flight_controller.Pitch_PWM) + 
-          "\nVehicle X Velocity: " + str(self.atc.vehicle.velocity[0]) + 
-          "\nTarget X Velocity: " + str(self.atc.pid_flight_controller.Pitch_PID.SetPoint) + 
-          "\n\nRoll Controller Out: " + str(self.atc.pid_flight_controller.Roll_PID.output) + 
-          "\nRoll RC Out: " + str(self.atc.pid_flight_controller.Roll_PWM) + 
-          "\nVehicle Y Velocity: " + str(self.atc.vehicle.velocity[1]) + 
-          "\nTarget Y Velocity: " + str(self.atc.pid_flight_controller.Roll_PID.SetPoint) + 
-          "\n\nYaw Controller Out: " + str(self.atc.pid_flight_controller.Yaw_PID.output) + 
-          "\nYaw RC Out: " + str(self.atc.pid_flight_controller.Yaw_PWM) + 
-          "\nVehicle Yaw: " + str(math.degrees(self.atc.vehicle.attitude.yaw)) + 
-          "\nTarget Yaw: " + str(math.degrees(self.atc.pid_flight_controller.Yaw_PID.SetPoint)))
+          print(self.atc.pid_flight_controller.get_debug_string())
       sleep(0.1) 
+      #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
