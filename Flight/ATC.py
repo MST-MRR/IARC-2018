@@ -20,16 +20,16 @@ import os
 import time
 import threading
 
-from AutonomousFlight import FlightVector, PIDFlightController
+import AutonomousFlight
 
 class StandardFlightVectors(object):
-  hover = FlightVector(0.000, 0.000, 0.000)
+  hover = AutonomousFlight.FlightVector(0.000, 0.000, 0.000)
 
 class VehicleStates(object):
   hover = "HOVER"
-  hover_alt_yaw_change = "HOVER_ALT_OR_YAW_CHANGE"
-  flying_pitching = "FLYING_PITCH"
-  flying_rolling = "FLYING_ROLL"
+  hover_adjusting = "HOVER (Adjusting yaw, altitude, or waiting for velocity to settle.)"
+  flying_pitching = "FLYING (Pitch)"
+  flying_rolling = "FLYING (Roll)"
   flying = "FLYING"
   takeoff = "TAKEOFF"
   unknown = "UNKNOWN"
@@ -38,14 +38,15 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5760"
+  SIM = "tcp:127.0.0.1:5762"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 1
   LAND_ALTITUDE = 0.25
-  PID_ACCURACY_THRESHOLD = 0.046
+  ALT_PID_ACCURACY_THRESHOLD = 0.046
+  YAW_PID_ACCURACY_THRESHOLD = 0.752
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
 
@@ -88,7 +89,7 @@ class Tower(object):
       self.vehicle_initialized = True
       self.failsafes = FailsafeController(self)
       self.failsafes.start()
-      self.pid_flight_controller = PIDFlightController(self)
+      self.pid_flight_controller = AutonomousFlight.PIDFlightController(self)
       self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
       self.pid_flight_controller.initialize_controllers()
       self.STATE = VehicleStates.landed
@@ -187,6 +188,17 @@ class Tower(object):
     if(self.vehicle):
       return math.degrees(self.vehicle.attitude.yaw)
 
+  def in_range(self, threshold, base_value, num):
+    """
+    @purpose: Check if number is between base_value +- threshold.
+    @args:
+      threshold: A decimal you want to add/subtract to the base_value.
+      base_value: Base value.
+      num: Number to be tested.
+    @returns: Boolean if num within range.
+    """
+    return abs(base_value) - threshold <= abs(num) <= abs(base_value) + threshold
+
   def takeoff(self, desired_altitude):
     """
     @purpose: Initiate a takeoff using the altitude based PID.
@@ -202,10 +214,7 @@ class Tower(object):
     self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.hover, desired_altitude)
 
-    def in_range(base_value, num):
-      return base_value - self.PID_ACCURACY_THRESHOLD <= num <= base_value + self.PID_ACCURACY_THRESHOLD
-
-    while(not (in_range(desired_altitude, self.get_altitude() - initial_alt))):
+    while(not (self.in_range(self.ALT_PID_ACCURACY_THRESHOLD, desired_altitude, self.get_altitude() - initial_alt))):
       sleep(self.STANDARD_SLEEP_TIME)
 
     self.hover(desired_altitude)
@@ -249,12 +258,13 @@ class Tower(object):
       desired_angle = self.get_yaw_deg()
 
     #Calculate the range of acceptable altitudes/yaws.
-    def in_range(base_value, num):
-      return base_value - self.PID_ACCURACY_THRESHOLD <= num <= base_value + self.PID_ACCURACY_THRESHOLD
 
-    if(not (in_range(desired_altitude, self.get_altitude())) 
-      or not (in_range(desired_angle, self.get_yaw_deg()))):
-      self.STATE = VehicleStates.hover_alt_yaw_change
+
+    if(not (self.in_range(self.ALT_PID_ACCURACY_THRESHOLD, desired_altitude, self.get_altitude()))
+      or not (self.in_range(self.YAW_PID_ACCURACY_THRESHOLD, desired_angle, self.get_yaw_deg()))):
+      # or not (in_range(0.00, self.vehicle.velocity[0]))
+      # or not (in_range(0.00, self.vehicle.velocity[1]))):
+      self.STATE = VehicleStates.hover_adjusting
     else:
       self.STATE = VehicleStates.hover
 
@@ -262,8 +272,10 @@ class Tower(object):
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
   
     #Wait for the vehicle to correct.
-    while(not (in_range(desired_altitude, self.get_altitude())) 
-      or not (in_range(desired_angle, self.get_yaw_deg()))):
+    while(not (self.in_range(self.ALT_PID_ACCURACY_THRESHOLD, desired_altitude, self.get_altitude()))
+      or not (self.in_range(self.YAW_PID_ACCURACY_THRESHOLD, desired_angle, self.get_yaw_deg()))):
+      # or not (in_range(0.00, self.vehicle.velocity[0]))
+      # or not (in_range(0.00, self.vehicle.velocity[1]))):
       sleep(self.STANDARD_SLEEP_TIME)
 
   def land(self):
