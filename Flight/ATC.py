@@ -140,7 +140,7 @@ class Tower(object):
     @returns:
     """
     if not self.pid_flight_controller:
-      self.pid_flight_controller = PIDFlightController(self)
+      self.pid_flight_controller = AutonomousFlight.PIDFlightController(self)
       self.pid_flight_controller.initialize_controllers()
     if not self.failsafes:
       self.failsafes = FailsafeController(self)
@@ -257,8 +257,12 @@ class Tower(object):
     if not desired_angle:
       desired_angle = self.get_yaw_deg()
 
-    #Calculate the range of acceptable altitudes/yaws.
-
+    hover_vector = deepcopy(StandardFlightVectors.hover)
+    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
+  
+    #Wait for vehicle to slow down if it was previous flying.
+    while("FLYING" in self.STATE and (not self.in_range(0.25, 0.00, self.vehicle.velocity[0]) or not self.in_range(0.25, 0.00, self.vehicle.velocity[1]))):
+      sleep(self.STANDARD_SLEEP_TIME)
 
     if(not (self.in_range(self.ALT_PID_ACCURACY_THRESHOLD, desired_altitude, self.get_altitude()))
       or not (self.in_range(self.YAW_PID_ACCURACY_THRESHOLD, desired_angle, self.get_yaw_deg()))):
@@ -268,9 +272,6 @@ class Tower(object):
     else:
       self.STATE = VehicleStates.hover
 
-    hover_vector = deepcopy(StandardFlightVectors.hover)
-    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
-  
     #Wait for the vehicle to correct.
     while(not (self.in_range(self.ALT_PID_ACCURACY_THRESHOLD, desired_altitude, self.get_altitude()))
       or not (self.in_range(self.YAW_PID_ACCURACY_THRESHOLD, desired_angle, self.get_yaw_deg()))):
