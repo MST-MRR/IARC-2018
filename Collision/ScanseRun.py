@@ -1,5 +1,5 @@
 from time import sleep
-from altScan import LIDAR
+from altscan import LIDAR
 import dronekit
 
 vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
