@@ -28,10 +28,12 @@ PITCH_CHANNEL = '2'
 THROTTLE_CHANNEL = '3'
 YAW_CHANNEL = '4'
 PID_UPDATE_TIME = 0.00
-PI = 3.14159265359
+PI = math.pi
 
+SIM = "tcp:127.0.0.1:5762"
+USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
 
-vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
+vehicle = dronekit.connect(SIM, wait_ready=True)
 
 print("\n Connected")
 
