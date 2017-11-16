@@ -69,9 +69,9 @@ class PIDFlightController(object):
   ROLL_P = 10.00
   ROLL_I = 0.00
   ROLL_D = 15.00
-  YAW_P = 0.50
-  YAW_I = 0.01
-  YAW_D = 8.00
+  YAW_P = 4.85
+  YAW_I = 0.06
+  YAW_D = 14.00
   THROTTLE_P = 15.00
   THROTTLE_I = 0.00
   THROTTLE_D = 10.00
@@ -130,7 +130,7 @@ class PIDFlightController(object):
     self.Roll_PID.SetPoint = requested_flight_vector.y
     self.Throttle_PID.SetPoint = requested_flight_vector.z
 
-    if(desired_yaw and requested_flight_vector.magnitude() == 0.00):
+    if(desired_yaw is not None and requested_flight_vector.magnitude() == 0.00):
       # By checking the magnitude, we ensure that the vehicle will only yaw while it has a velocity of 0, 0, 0, for all axes.
       # There is a similar check below in update_controllers.
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
@@ -158,7 +158,6 @@ class PIDFlightController(object):
     #In any case, LOITER mode will stop the vehicle if we return the Pitch and Roll channel to neutral.
     #TODO Figure out why VehicleStates can't be imported here.
     if("HOVER" in self.atc.STATE):
-      #Yaw (besides the altitude/throttle controller itself) is the only other controller that is allowed to be updated while in hover.
       self.Pitch_PID.output = 0.0
       self.Roll_PID.output = 0.0
       self.Pitch_PWM = self.PITCH_MID
@@ -206,9 +205,9 @@ class PIDFlightController(object):
         return math.radians(angle)
     else:
         if angle == 180.0:
-            angle = 179.00
+            angle = 179.0
             return math.radians(angle)
-        return math.radians(angle-180) - math.pi
+        return math.radians(angle-180.0) - math.pi
 
   def convert_altitude_to__PWM(self, desired_altitude):
     rc_out =  340.0 * desired_altitude + 986.0
@@ -247,5 +246,5 @@ class PIDFlightController(object):
     "\nYaw RC Out: " + str(self.Yaw_PWM) + 
     "\nVehicle Yaw: " + str(self.atc.get_yaw_deg()) + 
     "\nTarget Yaw: " + str(math.degrees(self.Yaw_PID.SetPoint)) +
-    "\nWithin Yaw Threshold: " + str(self.atc.in_range(self.atc.YAW_PID_THRESHOLD, self.Yaw_PID.SetPoint, self.atc.get_yaw_deg())))
+    "\nWithin Yaw Threshold: " + str(self.atc.in_range(self.atc.YAW_PID_THRESHOLD, math.degrees(self.Yaw_PID.SetPoint), self.atc.get_yaw_deg())))
     return debug_string

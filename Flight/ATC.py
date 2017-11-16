@@ -38,7 +38,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -46,7 +46,7 @@ class Tower(object):
   STANDARD_SLEEP_TIME = 1
   LAND_ALTITUDE = 0.25
   ALT_PID_THRESHOLD = 0.09
-  VEL_PID_THRESHOLD = 0.09
+  VEL_PID_THRESHOLD = 0.05
   YAW_PID_THRESHOLD = 0.32
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
@@ -218,6 +218,9 @@ class Tower(object):
     while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude() - initial_alt))):
       sleep(self.STANDARD_SLEEP_TIME)
 
+    if desired_angle is None:
+      desired_angle = self.get_yaw_deg()
+      
     self.hover(desired_altitude, desired_angle)
 
   def fly(self, desired_vector):
@@ -256,20 +259,26 @@ class Tower(object):
     #If we don't get arguments, set desired to the vehicle's current readings.
     if desired_altitude is None:
       desired_altitude = self.get_altitude()
+    if desired_angle is None:
+      desired_angle = self.get_yaw_deg()
 
-    #Send the hover vector.
+    #Send the hover vector without an angle first to stop the vehicle.
     hover_vector = deepcopy(StandardFlightVectors.hover)
-    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
+    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude)
   
     #Wait for vehicle to slow down via PID if it was previous flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    while(("FLYING (Pitch)" in self.STATE and 
-        not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])) 
-        or ("FLYING (Roll)" in self.STATE and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+    while("FLYING" in self.STATE and 
+        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
       sleep(self.STANDARD_SLEEP_TIME)
 
+    #Re-send the hover vector with angle.
+    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
+
+    #Check if vehicle's altitude or yaw are not correct and set state appropriately.
     if(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))
-      or (desired_angle and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg())))):
+      or (desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg())))):
       self.STATE = VehicleStates.hover_adjusting
     else:
       self.STATE = VehicleStates.hover
@@ -277,7 +286,7 @@ class Tower(object):
     #Wait for the vehicle to correct.
     while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
       sleep(self.STANDARD_SLEEP_TIME)
-    while(desired_angle and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
+    while(desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
       sleep(self.STANDARD_SLEEP_TIME)
 
   def land(self):
