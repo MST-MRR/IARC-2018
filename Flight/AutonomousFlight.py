@@ -69,7 +69,7 @@ class PIDFlightController(object):
   ROLL_P = 10.00
   ROLL_I = 0.00
   ROLL_D = 15.00
-  YAW_P = 4.85
+  YAW_P = 0.85
   YAW_I = 0.06
   YAW_D = 14.00
   THROTTLE_P = 15.00

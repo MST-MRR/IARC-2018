@@ -9,15 +9,16 @@ t.initialize()
 t.takeoff(1.0)
 sleep(10)
 
-t.fly(FlightVector(0.33, 0, 0))
-sleep(10)
+in_air_yaw = t.get_yaw_deg()
 
-t.hover(desired_angle=-120)
+t.hover(desired_angle=in_air_yaw - 45.0)
 sleep(5)
 
-t.fly(FlightVector(0.33, 0, 0))
-sleep(10)
-
-t.hover(desired_angle=0)
+t.hover(desired_angle=in_air_yaw + 45.0)
 sleep(5)
+
+t.hover(desired_angle=in_air_yaw)
+sleep(5)
+
+t.land()
 
