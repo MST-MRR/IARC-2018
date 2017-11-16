@@ -11,8 +11,8 @@ class LIDAR():
   QUADRANT_SIZE = 45.0
 
   def __init__(self):
-    self.lidar_sensor = "/dev/cu.usbserial-DO00867Q" #this is for Mac OS X 
-    #self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
+    #self.lidar_sensor = "/dev/cu.usbserial-DO00867Q" #this is for Mac OS X 
+    self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
     self.sweep = Sweep(self.lidar_sensor)
     print "SCANSE INIT"
     self.sweep = None
@@ -50,6 +50,8 @@ class LIDAR():
         angle_deg = (sample.angle / 1000.0) % 360.0
         angle_rad = math.radians(sample.angle / 1000.0)
         sector = abs((((angle_deg % 360.0)-360) // self.QUADRANT_SIZE)+1)
+        sector = (8 - sector) % 8 #The LIDAR sensor returns angle data in the wrong direction
+                                  #We correct this here so that it can be sent as a proper MAVLink command.
         
         if (distance < self.MAX_SAFE_DISTANCE and distance > self.MIN_SAFE_DISTANCE):
           sector_lists[(int)(sector)].append( (distance, angle_deg) )

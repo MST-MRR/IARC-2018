@@ -36,9 +36,10 @@ while(1):   #constantly grab data
     for sector in retVal:
         print "\nFor sector " + (str)(secval)
         endVal = min(10, len(sector))
-        for val in range(0,endVal):
-            print "Sending message"
-            send_lidar_message(10, 300, sector[val][0], sector[val][2]) #((8 - sector[val][2] % 8))
+        if (endVal > 5):
+            for val in range(0,endVal):
+                print "Sending message"
+                send_lidar_message(10, 300, sector[val][0], ((8 - sector[val][2] % 8))) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
         secval += 1
         sleep(0.000001)
 
