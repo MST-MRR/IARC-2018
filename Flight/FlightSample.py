@@ -6,53 +6,23 @@ t = Tower()
 
 t.initialize()
 
-t.takeoff(1.0)
+t.takeoff(1.0, desired_angle=45)
 sleep(10)
 
 # t.fly(FlightVector(0.33, 0, 0))
+# sleep(10)
+
+# t.hover(desired_angle=45)
 # sleep(5)
 
-t.hover(desired_angle=45)
-sleep(5)
+# t.fly(FlightVector(-0.33, 0, 0))
+# sleep(10)
 
-t.hover(desired_angle=320)
+t.hover(desired_angle=-120)
 sleep(5)
 
 t.hover(desired_angle=0)
 sleep(5)
 
-# t.fly(FlightVector(-0.33, 0, 0))
-# sleep(5)
-
-t.hover()
-sleep(10)
-
-# t.hover(1.5)
-# sleep(5)
-
-# t.fly(FlightVector(0, 0.33, 0))
-# sleep(10)
-
 # t.hover()
-# sleep(5)
-
-# t.fly(FlightVector(0, -0.33, 0))
 # sleep(10)
-
-# t.hover()
-# sleep(5)
-
-# t.hover(1.0)
-# sleep(5)
-
-# t.hover(desired_angle=45)
-# sleep(2)
-
-# t.hover(desired_angle=0.001)
-# sleep(2)
-
-# t.hover(desired_angle=-45)
-
-# t.hover(desired_angle=0.001)
-# sleep(2)
-

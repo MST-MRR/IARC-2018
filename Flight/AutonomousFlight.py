@@ -69,9 +69,9 @@ class PIDFlightController(object):
   ROLL_P = 10.00
   ROLL_I = 0.00
   ROLL_D = 15.00
-  YAW_P = 0.95
+  YAW_P = 0.50
   YAW_I = 0.01
-  YAW_D = 9.00
+  YAW_D = 8.00
   THROTTLE_P = 15.00
   THROTTLE_I = 0.00
   THROTTLE_D = 10.00
@@ -141,12 +141,17 @@ class PIDFlightController(object):
   def update_controllers(self):
 
     #Start by updating our z-axis controllers regardless of state and updating the PWM value.
-    #Vehicle states such as landing or takeoff can adversly affect the any pitch, roll, or yaw controller so those controllers will not be activated in these states.
+    #Vehicle states such as landing or takeoff can adversly affect the pitch, roll, or yaw controllers.
+    #Those controllers will not be activated in these states.
     self.Altitude_PID.update(self.atc.get_altitude())
     self.Altitude_PWM = self.convert_altitude_to__PWM(self.Altitude_PID.output)
 
     # self.Throttle_PID.update(self.atc.vehicle.velocity[2])
     # self.Throttle_PWM += self.constrain_rc_values(self.Throttle_PID.output)
+
+    if(self.atc.STATE != "TAKEOFF" and self.atc.STATE != "LANDING" and self.atc.STATE != "LANDED"):
+      self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
+      self.Yaw_PWM += self.Yaw_PID.output
 
     #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover. 
     #This may be caused by the tuning of the respective PID controllers or too much noise in accelerometer data.
@@ -158,24 +163,21 @@ class PIDFlightController(object):
       self.Roll_PID.output = 0.0
       self.Pitch_PWM = self.PITCH_MID
       self.Roll_PWM = self.ROLL_MID
-      self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
-      self.Yaw_PWM += self.Yaw_PID.output
-    else:
-      if("FLYING (Pitch)" in self.atc.STATE):
-        self.Pitch_PID.update(self.atc.vehicle.velocity[0])
-        self.Pitch_PWM -= self.Pitch_PID.output
-        self.Roll_PWM = self.ROLL_MID
-        #Roll will take the ROLL_MID value as set above. This ensures that the vehicle only travels along the requested axis.
-      elif("FLYING (Roll)" in self.atc.STATE):
-        self.Roll_PID.update(self.atc.vehicle.velocity[1])
-        self.Roll_PWM += self.Roll_PID.output
-        self.Pitch_PWM = self.PITCH_MID
-        #Pitch will take the PITCH_MID value as set above. This ensures that the vehicle only travels along requested axis.
-      elif("FLYING" in self.atc.STATE):
-        self.Pitch_PID.update(self.atc.vehicle.velocity[0])
-        self.Roll_PID.update(self.atc.vehicle.velocity[1])
-        self.Pitch_PWM -= self.Pitch_PID.output
-        self.Roll_PWM += self.Roll_PID.output
+    elif("FLYING (Pitch)" in self.atc.STATE):
+      self.Pitch_PID.update(self.atc.vehicle.velocity[0])
+      self.Pitch_PWM -= self.Pitch_PID.output
+      self.Roll_PWM = self.ROLL_MID
+      #Roll will take the ROLL_MID value as set above. This ensures that the vehicle only travels along the requested axis.
+    elif("FLYING (Roll)" in self.atc.STATE):
+      self.Roll_PID.update(self.atc.vehicle.velocity[1])
+      self.Roll_PWM += self.Roll_PID.output
+      self.Pitch_PWM = self.PITCH_MID
+      #Pitch will take the PITCH_MID value as set above. This ensures that the vehicle only travels along requested axis.
+    elif("FLYING" in self.atc.STATE):
+      self.Pitch_PID.update(self.atc.vehicle.velocity[0])
+      self.Roll_PID.update(self.atc.vehicle.velocity[1])
+      self.Pitch_PWM -= self.Pitch_PID.output
+      self.Roll_PWM += self.Roll_PID.output
     
     self.Pitch_PWM = self.constrain_rc_values(self.Pitch_PWM)
     self.Roll_PWM = self.constrain_rc_values(self.Roll_PWM)
@@ -199,14 +201,14 @@ class PIDFlightController(object):
 
   def get_yaw_radians(self, angle):
     if angle < 180.0:
-        if angle <= 0.0:
+        if angle == 0.0:
             angle = 0.1
         return math.radians(angle)
     else:
-        if angle >= 180.0:
+        if angle == 180.0:
             angle = 179.00
             return math.radians(angle)
-        return math.radians(angle-180) - PI
+        return math.radians(angle-180) - math.pi
 
   def convert_altitude_to__PWM(self, desired_altitude):
     rc_out =  340.0 * desired_altitude + 986.0
@@ -232,6 +234,7 @@ class PIDFlightController(object):
     "\n\nAltitude Controller Out: " + str(self.Altitude_PID.output) + 
     "\nAltitude RC Out: " + str(self.Altitude_PWM) + 
     "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
+    "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
     "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
     "\nPitch RC Out: " + str(self.Pitch_PWM) + 
     "\nVehicle X Velocity: " + str(self.atc.vehicle.velocity[0]) + 
@@ -243,5 +246,6 @@ class PIDFlightController(object):
     "\n\nYaw Controller Out: " + str(self.Yaw_PID.output) + 
     "\nYaw RC Out: " + str(self.Yaw_PWM) + 
     "\nVehicle Yaw: " + str(self.atc.get_yaw_deg()) + 
-    "\nTarget Yaw: " + str(math.degrees(self.Yaw_PID.SetPoint)))
+    "\nTarget Yaw: " + str(math.degrees(self.Yaw_PID.SetPoint)) +
+    "\nWithin Yaw Threshold: " + str(self.atc.in_range(self.atc.YAW_PID_THRESHOLD, self.Yaw_PID.SetPoint, self.atc.get_yaw_deg())))
     return debug_string
