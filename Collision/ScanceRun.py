@@ -4,9 +4,9 @@ import dronekit
 
 vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
 
-def send_lidar_message(min_dist, max_dist, current_dist, sector, rotation):
-
-    print("Distance :" + str(current_dist) + " Quad: " + str(sector) + " Rotation: " + str(rotation))
+def send_lidar_message(min_dist, max_dist, current_dist, sector):
+   
+    print("Distance :" + str(current_dist) + " Quad: " + str(sector))
     message = vehicle.message_factory.distance_sensor_encode(
     0,                                             # time since system boot, not used
     min_dist,                                      # min distance cm
@@ -31,12 +31,12 @@ while(1):   #constantly grab data
     for sector in retVal:
         print "\nFor sector " + (str)(secval)
         endVal = min(10, len(sector))
-        if (endVal > 3):
+        if (endVal > 5):
             for val in range(0,endVal):
                 if (((sector[val][2] -1) != 0) and (sector[val][2] == 0)):
                     rotate += 1
                 print "Sending message"
-                send_lidar_message(10, 15000, sector[val][1], sector[val][2], rotate)
+                send_lidar_message(10, 15000, sector[val][1], sector[val][2])
         secval += 1
         sleep(.00001)
     

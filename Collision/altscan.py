@@ -1,43 +1,78 @@
 from time import sleep
-from altScan import LIDAR
-import dronekit
+import itertools
+import sys
+import math
 
-vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
+from sweeppy import Sweep
 
-def distance_sensor(min_dist, max_dist, current_dist, sector):
-    msg = vehicle.message_factory.command_long_encode(0, 0 , 0, 
-                            0, min_dist, max_dist, current_dist, 0, 0, sector,0)
-    print "%s" %msg
-    vehicle.send_mavlink(msg)
+class LIDAR():
+  MIN_SAFE_DISTANCE = 50.0
+  MAX_SAFE_DISTANCE = 15000.0
+  QUADRANT_SIZE = 45.0
 
-def send_lidar_message(min_dist, max_dist, current_dist, sector):
-    distance = data[0]
-    sensor_rotation = data[1]
-    print("Distance :" + str(distance) + " Quad: " + str(sensor_rotation))
-    message = vehicle.message_factory.distance_sensor_encode(
-    0,                                             # time since system boot, not used
-    min_dist,                                      # min distance cm
-    max_dist,                                      # max distance cm
-    current_dist,                                  # current distance, must be int
-    0,                                             # type = laser
-    0,                                             # onboard id, not used
-    sector,                                        # sensor rotation
-    0                                              # covariance, not used
-    )
-    vehicle.send_mavlink(message)
-    vehicle.commands.upload()
+  def __init__(self):
+    self.lidar_sensor = "/dev/cu.usbserial-DO00867Q" #this is for Mac OS X 
+    #self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
+    self.sweep = Sweep(self.lidar_sensor)
+    print "SCANSE INIT"
+    self.sweep = None
 
-blah = LIDAR()
-blah.connect_to_lidar()
+  def connect_to_lidar(self):
+    self.sweep.__enter__()
+    # Starts scanning as soon as the motor is ready
+    self.sweep.set_motor_speed(6)
+    self.sweep.set_sample_rate(1000)
 
-blah.reset_sectors()
-while(1):   #constantly grab data
-    retVal = blah.get_lidar_data()
-    secval = 0
-    for sector in retVal:
-        print "\nFor sector " + (str)(secval)
-        endVal = min(5, len(sector))
-        for val in range(0,endVal):
-            print "Sending message"
-            distance_sensor(10, 300, sector[val][1], sector[val][2])
-        secval += 1
+    self.sweep.start_scanning()
+
+  #We encountered errors with getting points in each sector, so this method
+  #     forces the sensor to be aligned with sector 0 before providing useful data
+  #     Run this method before getting the first sample
+  def reset_sectors(self):
+    for scan in itertools.islice(self.sweep.get_scans(), 1): #for every sector
+      print ""
+
+  def get_lidar_data(self):
+    # Starts scanning as soon as the motor is ready
+    lidar_data = [ [], [], [], [], [], [], [], [] ]
+
+    # get_scans is coroutine-based generator lazily returning scans
+    for scan in itertools.islice(self.sweep.get_scans(), 1): #for every sector
+      
+      sector_points = []
+      sector_lists = [ [], [], [], [], [], [], [], [] ]
+      
+      #sort data
+
+      for sample in scan.samples: #for every sample
+        
+        distance = sample.distance
+        angle_deg = (sample.angle / 1000.0) % 360.0
+        angle_rad = math.radians(sample.angle / 1000.0)
+        sector = abs((((angle_deg % 360.0)-360) // self.QUADRANT_SIZE)+1)
+        
+        if (distance < self.MAX_SAFE_DISTANCE and distance > self.MIN_SAFE_DISTANCE):
+          sector_lists[(int)(sector)].append( (distance, angle_deg) )
+          #print (distance, angle_deg)
+          
+    
+    for k in range(0, 8): #force at least 5 elements into list, they will be filtered out
+        sector_lists[k] = [len(sector_lists[k]), (3000, -1.0)]*5
+        
+    #Begin processing
+    for i in range(0, 8):
+      sector_lists[i].sort()
+      #print sector_lists[i]
+      first_five = []
+      for j in range(0, 5):
+        first_five.append(sector_lists[i][j])
+      print first_five
+      lidar_data[i]=first_five
+
+    print("\n")
+
+    return lidar_data
+
+  def shutdown(self):
+    self.sweep.stop_scanning()
+    self.sweep.__exit__()
