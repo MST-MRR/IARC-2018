@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
   
-  <title>MRR-GLADIS</title>
+  <title>MRR-GCS</title>
 
   <!-- Google Fonts -->
   <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
@@ -27,7 +27,9 @@
     <div id="loading_screen" class="centered" style="max-width: 1000px; min-width: 300px; display:block;">
 
       <div style="margin-bottom: 25px;">
-        <div class="huge-header">gladIS </div>
+        <div class="huge-header">MR<sup>2</sup>
+          <p>Ground Control Station</p>
+        </div>
 
         <p>{{ loading_message }}</p>
 
@@ -42,112 +44,153 @@
 
     <div id="information_view" style="display: none;">
 
-      <div id="important_info" class="centered flex-container" style="text-align: left; justify-content: space-around;" v-if="vehicle_data != null">
+      <div id="important_info" class="centered flex-container" style="text-align: left; justify-content: space-between;" v-if="vehicle_data != null">
 
-          <div class="card important">
-
-            <h3 style="margin: 5px;">Battery</h3>
-
-            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
-
-            <div style="text-align: left; margin: 5px;">
-
-               Remaining: {{ (vehicle_data.battery.percent_remaining * 100).toFixed(0) }}%
-              <br>
-              Current Voltage: {{ vehicle_data.battery.voltage.toFixed(2) }}(v) 
-
-            </div>
-
-          </div>
-
-          <div class="card important">
-
-            <h3 style="margin: 5px;">IMU</h3>
-
-            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
-
-            <div style="text-align: left; margin: 5px;">
-
-              Altitude: {{ vehicle_data.altitude.toFixed(2) }} (m)
-              <br>
-              Attitude: 
-              Roll: {{ vehicle_data.attitude.roll.toFixed(1) }} &deg; 
-              Pitch: {{ vehicle_data.attitude.pitch.toFixed(1) }} &deg;
-              Yaw: {{ vehicle_data.attitude.yaw.toFixed(1) }} &deg;
-
-            </div>
+        <div class="card important">
             
-          </div>
+          <h3 style="margin: 5px;">State</h3>
 
-          <div class="card important">
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
-            <h3 style="margin: 5px;">Position and Maneuvers</h3>
-
-            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
-
-            <div style="text-align: left; margin: 5px;">
-              Mode: {{ vehicle_data.mode }}
-              <br> State: {{ vehicle_data.state }}
-              <br>Localized Position: X: 0.00 (m) Y: 0.00 (m)
-
-            </div>
+          <div style="text-align: left; margin: 5px;">
+            Mode: {{ vehicle_data.mode }}
+            <br> State: {{ vehicle_data.state }}
+            <!-- <br>Localized Position: X: 0.00 (m) Y: 0.00 (m) -->
+            <br>Current Gimbal Mode: Unknown
             
+
+          <!-- <button disabled style="margin-top: 5px;">Switch Gimbal Mode</button> -->
           </div>
+          
+        </div>
+
+        <div class="card important">
+            
+          <h3 style="margin: 5px;">Battery</h3>
+
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+          <div style="text-align: left; margin: 5px;">
+
+              Remaining: {{ (vehicle_data.battery.percent_remaining * 100).toFixed(0) }}%
+            <br>
+            Current Voltage: {{ vehicle_data.battery.voltage.toFixed(2) }}(v) 
+
+          </div>
+
+        </div>
+
+        <div class="card important">
+
+          <h3 style="margin: 5px;">Misc.</h3>
+
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+          <div style="text-align: left; margin: 5px;">
+
+            Vehicle Name: {{ vehicle }}
+            <br>
+            
+            Airspeed: {{ vehicle_data.airspeed.toFixed(2) }} m/s
+            <br>              
+            
+            Armed: {{ vehicle_data.armed }}
+            <br>
+
+            Runtime: {{ Math.floor((vehicle_data.uptime / 60) % 60)}}:{{ ((vehicle_data.uptime) % 60)}} (min)
+
+          </div>
+          
+        </div>
 
       </div>
 
       <div id="secondary_info" class="centered flex-container row" style="flex-wrap: row wrap;justify-content: space-around;" v-if="vehicle_data != null">
 
-          <div class="card important">
+        <div class="card important">
+            
+          <h3 style="margin: 5px;">Altitude</h3>
 
-            <h3 style="margin: 5px;">Gimbal</h3>
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+          <div style="text-align: left;">
+            Vehicle Altitude: {{ vehicle_data.altitude.toFixed(2) }} (m)
+            <br>              
+            Target Altitude: {{ vehicle_data.pid.target_alt.toFixed(2) }} (m)
+            <br>         
 
             <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
-            <!-- <div style="text-align: left; margin: 5px;">
-              Current Mode: Scanning
-            </div> -->
-
-            <button>Switch Mode</button>
-
+            Alt Controller Out: {{ vehicle_data.pid.alt_controller_output.toFixed(2) }}
+            <br>
+            Alt RC Out: {{ vehicle_data.pid.altitude_rc_out.toFixed(2) }}
             
-          </div>
+          </div>            
+        </div>
 
-          <div class="card important">
+        <div class="card important">
+            
+          <h3 style="margin: 5px;">Roll</h3>
 
-            <h3 style="margin: 5px;">Velocity</h3>
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+          <div style="text-align: left;">
+            
+            Vehicle Y Velocity: {{ vehicle_data.velocity.y.toFixed(2) }} (m/s)
+            <br>
+            Target Y Velocity: {{ vehicle_data.pid.target_roll_vel.toFixed(2) }} (m/s)
 
             <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
-            <div style="text-align: left; margin: 5px;">
+            Roll Controller Out: {{ vehicle_data.pid.roll_controller_output.toFixed(2) }}
+            <br>              
+            Roll RC Out: {{ vehicle_data.pid.roll_rc_out.toFixed(2) }}
+        
+          </div>            
+        </div>
 
-              X: {{ vehicle_data.velocity.x }} (m/s)  <br> Y: {{ vehicle_data.velocity.y }} (m/s) <br> Z: {{ vehicle_data.velocity.z }} (m/s) 
-              <br>
-              Airspeed: {{ vehicle_data.airspeed.toFixed(2) }} m/s
-
-            </div>
+        <div class="card important">
             
-          </div>
+          <h3 style="margin: 5px;">Pitch</h3>
 
-          <div class="card important">
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
-            <h3 style="margin: 5px;">Misc.</h3>
+          <div style="text-align: left;">
+
+            Vehicle X Velocity: {{ vehicle_data.velocity.x.toFixed(2) }} (m/s)
+            <br>
+            Target X Velocity: {{ vehicle_data.pid.target_pitch_vel.toFixed(2) }} (m/s)
 
             <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
-            <div style="text-align: left; margin: 5px;">
-
-              Vehicle Name: {{ vehicle }}
-              <br>
-
-              Armed: {{ vehicle_data.armed }}
-              <br>
-
-              Runtime: {{ Math.floor((vehicle_data.uptime / 60) % 60)}} : {{ ((vehicle_data.uptime) % 60)}} 
-
-            </div>
+            Pitch Controller Out: {{ vehicle_data.pid.pitch_controller_output.toFixed(2) }}
+            <br>              
+            Pitch RC Out: {{ vehicle_data.pid.pitch_rc_out.toFixed(2) }}
+          
+          </div>            
+        </div>
+  
+        <div class="card important">
             
-          </div>
+          <h3 style="margin: 5px;">Yaw</h3>
+
+          <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+
+          <div style="text-align: left;">
+
+            Vehicle Yaw: {{ vehicle_data.attitude.yaw.toFixed(2) }} &deg;
+            <br>
+            Target Yaw: {{ vehicle_data.pid.target_yaw.toFixed(2) }} &deg;
+
+            <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
+            
+            Yaw Controller Out: {{ vehicle_data.pid.yaw_controller_output.toFixed(2) }}
+            <br>              
+            Yaw RC Out: {{ vehicle_data.pid.yaw_rc_out.toFixed(2) }}
+
+          </div>            
+        </div>
+
 
       </div>
     </div>

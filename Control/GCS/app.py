@@ -8,7 +8,7 @@ from json import loads, dumps
 from math import degrees
 from datetime import datetime
 
-sys.path.append('../')
+sys.path.append('../../Flight')
 
 from ATC import Tower
 
@@ -58,6 +58,23 @@ def get_attitude():
     attitude_deg["yaw"] = degrees(tower.vehicle.attitude.yaw)
     return attitude_deg
 
+def get_pid_status():
+    pid_status = {}
+    pid_status["alt_controller_output"] = tower.pid_flight_controller.Altitude_PID.output
+    pid_status["altitude_rc_out"] = tower.pid_flight_controller.Altitude_PWM
+    pid_status["target_alt"] = tower.pid_flight_controller.Altitude_PID.SetPoint
+    pid_status["alt_threshold"] = tower.in_range(tower.ALT_PID_THRESHOLD, tower.pid_flight_controller.Altitude_PID.SetPoint, tower.get_altitude())
+    pid_status["pitch_controller_output"] = tower.pid_flight_controller.Pitch_PID.output
+    pid_status["pitch_rc_out"] = tower.pid_flight_controller.Pitch_PWM
+    pid_status["target_pitch_vel"] = tower.pid_flight_controller.Pitch_PID.SetPoint
+    pid_status["roll_controller_output"] = tower.pid_flight_controller.Roll_PID.output
+    pid_status["roll_rc_out"] = tower.pid_flight_controller.Roll_PWM
+    pid_status["target_roll_vel"] = tower.pid_flight_controller.Roll_PID.SetPoint
+    pid_status["yaw_controller_output"] = tower.pid_flight_controller.Yaw_PID.output
+    pid_status["yaw_rc_out"] = tower.pid_flight_controller.Yaw_PWM
+    pid_status["target_yaw"] = degrees(tower.pid_flight_controller.Yaw_PID.SetPoint)
+    pid_status["yaw_threshold"] = tower.in_range(tower.YAW_PID_THRESHOLD, degrees(tower.pid_flight_controller.Yaw_PID.SetPoint), tower.get_yaw_deg())
+    return pid_status
 
 def get_vehicle_status():
     """Laundry list function.
@@ -71,11 +88,12 @@ def get_vehicle_status():
     status['armed'] = tower.vehicle.armed
     status['mode'] = tower.vehicle.mode.name
     status['state'] = tower.STATE
-    status['altitude'] = tower.vehicle.location.global_relative_frame.alt
+    status['altitude'] = tower.get_altitude()
     status['attitude'] = get_attitude()
     status['airspeed'] = tower.vehicle.airspeed
     status['velocity'] = get_velocities()
     status['hearbeat'] = int(time.mktime(datetime.utcnow().timetuple())) * 1000
+    status['pid'] = get_pid_status()
     return status
 
 @app.route('/')
