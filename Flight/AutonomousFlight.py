@@ -69,9 +69,9 @@ class PIDFlightController(object):
   ROLL_P = 10.00
   ROLL_I = 0.00
   ROLL_D = 15.00
-  YAW_P = 0.85
-  YAW_I = 0.06
-  YAW_D = 14.00
+  YAW_P = 0.025
+  YAW_I = 0.30
+  YAW_D = 11.00
   THROTTLE_P = 15.00
   THROTTLE_I = 0.00
   THROTTLE_D = 10.00
@@ -149,9 +149,6 @@ class PIDFlightController(object):
     # self.Throttle_PID.update(self.atc.vehicle.velocity[2])
     # self.Throttle_PWM += self.constrain_rc_values(self.Throttle_PID.output)
 
-    if(self.atc.STATE != "TAKEOFF" and self.atc.STATE != "LANDING" and self.atc.STATE != "LANDED"):
-      self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
-      self.Yaw_PWM += self.Yaw_PID.output
 
     #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover. 
     #This may be caused by the tuning of the respective PID controllers or too much noise in accelerometer data.
@@ -162,6 +159,11 @@ class PIDFlightController(object):
       self.Roll_PID.output = 0.0
       self.Pitch_PWM = self.PITCH_MID
       self.Roll_PWM = self.ROLL_MID
+      self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
+      self.Yaw_PWM += self.Yaw_PID.output
+      if("(Yaw Achieved)" in self.atc.STATE):
+        self.Yaw_PID.output = 0.0
+        self.Yaw_PWM = self.YAW_MID
     elif("FLYING (Pitch)" in self.atc.STATE):
       self.Pitch_PID.update(self.atc.vehicle.velocity[0])
       self.Pitch_PWM -= self.Pitch_PID.output

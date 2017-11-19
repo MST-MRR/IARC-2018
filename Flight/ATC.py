@@ -28,6 +28,7 @@ class StandardFlightVectors(object):
 class VehicleStates(object):
   hover = "HOVER"
   hover_adjusting = "HOVER (Adjusting vehicle's yaw or altitude)"
+  hover_yaw_achieved = "HOVER (Yaw Achieved)"
   flying_pitching = "FLYING (Pitch)"
   flying_rolling = "FLYING (Roll)"
   flying = "FLYING"
@@ -38,7 +39,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -268,10 +269,10 @@ class Tower(object):
   
     #Wait for vehicle to slow down via PID if it was previous flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    while("FLYING" in self.STATE and 
-        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
-        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-      sleep(self.STANDARD_SLEEP_TIME)
+    # while("FLYING" in self.STATE and 
+    #     (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+    #     and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+    #   sleep(self.STANDARD_SLEEP_TIME)
 
     #Re-send the hover vector with angle.
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
@@ -288,6 +289,8 @@ class Tower(object):
       sleep(self.STANDARD_SLEEP_TIME)
     while(desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
       sleep(self.STANDARD_SLEEP_TIME)
+    else:
+      self.STATE = VehicleStates.hover_yaw_achieved
 
   def land(self):
     """
