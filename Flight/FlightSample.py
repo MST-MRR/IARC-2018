@@ -11,13 +11,20 @@ sleep(10)
 
 in_air_yaw = t.get_yaw_deg()
 
-t.hover(desired_angle=in_air_yaw - 45.0)
+if(not (-5.0 <= in_air_yaw <= 5.0)):
+    t.hover(desired_angle=0)
+
+in_air_yaw = t.get_yaw_deg()
+
+t.hover(desired_angle=90.0)
+sleep(5)
 
 t.fly(FlightVector(1.00, 0.00, 0.00))
-sleep(20)
-
-t.hover()
 sleep(10)
+
+t.hover(desired_angle=0)
+sleep(5)
+
 
 t.land()
 

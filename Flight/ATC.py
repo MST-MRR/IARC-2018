@@ -39,7 +39,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5760"
+  SIM = "tcp:127.0.0.1:5762"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -48,7 +48,7 @@ class Tower(object):
   LAND_ALTITUDE = 0.25
   ALT_PID_THRESHOLD = 0.09
   VEL_PID_THRESHOLD = 0.05
-  YAW_PID_THRESHOLD = 0.32
+  YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
 
@@ -94,7 +94,11 @@ class Tower(object):
       self.pid_flight_controller = AutonomousFlight.PIDFlightController(self)
       self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
       self.pid_flight_controller.initialize_controllers()
-      self.STATE = VehicleStates.landed
+
+      if(self.get_altitude() < self.LAND_ALTITUDE):
+        self.STATE = VehicleStates.landed
+      else:
+        self.land()
 
       self.switch_control()
 
@@ -269,10 +273,10 @@ class Tower(object):
   
     #Wait for vehicle to slow down via PID if it was previous flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    # while("FLYING" in self.STATE and 
-    #     (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
-    #     and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-    #   sleep(self.STANDARD_SLEEP_TIME)
+    while("FLYING" in self.STATE and 
+        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+      sleep(self.STANDARD_SLEEP_TIME)
 
     #Re-send the hover vector with angle.
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
@@ -291,6 +295,7 @@ class Tower(object):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
       self.STATE = VehicleStates.hover_yaw_achieved
+      sleep(1) #Wait for AutonomousFlight to query the state.
 
   def land(self):
     """

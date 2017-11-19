@@ -69,9 +69,9 @@ class PIDFlightController(object):
   ROLL_P = 10.00
   ROLL_I = 0.00
   ROLL_D = 15.00
-  YAW_P = 0.025
-  YAW_I = 0.30
-  YAW_D = 11.00
+  YAW_P = 2.00
+  YAW_I = 0.00
+  YAW_D = 8.00
   THROTTLE_P = 15.00
   THROTTLE_I = 0.00
   THROTTLE_D = 10.00
@@ -154,6 +154,15 @@ class PIDFlightController(object):
     #This may be caused by the tuning of the respective PID controllers or too much noise in accelerometer data.
     #In any case, LOITER mode will stop the vehicle if we return the Pitch and Roll channel to neutral.
     #TODO Figure out why VehicleStates can't be imported here.
+
+    vehicle_x_velocity = (self.atc.vehicle.velocity[0])
+    vehicle_y_velocity = (self.atc.vehicle.velocity[1])
+    vehicle_z_velocity = (self.atc.vehicle.velocity[2])
+
+    if(self.atc.get_yaw_deg() < 90.0 or self.atc.get_yaw_deg() > 90.0):
+      vehicle_x_velocity *=-1.0
+      vehicle_y_velocity *=-1.0
+
     if("HOVER" in self.atc.STATE):
       self.Pitch_PID.output = 0.0
       self.Roll_PID.output = 0.0
@@ -165,18 +174,18 @@ class PIDFlightController(object):
         self.Yaw_PID.output = 0.0
         self.Yaw_PWM = self.YAW_MID
     elif("FLYING (Pitch)" in self.atc.STATE):
-      self.Pitch_PID.update(self.atc.vehicle.velocity[0])
+      self.Pitch_PID.update(vehicle_x_velocity)
       self.Pitch_PWM -= self.Pitch_PID.output
       self.Roll_PWM = self.ROLL_MID
       #Roll will take the ROLL_MID value as set above. This ensures that the vehicle only travels along the requested axis.
     elif("FLYING (Roll)" in self.atc.STATE):
-      self.Roll_PID.update(self.atc.vehicle.velocity[1])
+      self.Roll_PID.update(vehicle_y_velocity)
       self.Roll_PWM += self.Roll_PID.output
       self.Pitch_PWM = self.PITCH_MID
       #Pitch will take the PITCH_MID value as set above. This ensures that the vehicle only travels along requested axis.
     elif("FLYING" in self.atc.STATE):
-      self.Pitch_PID.update(self.atc.vehicle.velocity[0])
-      self.Roll_PID.update(self.atc.vehicle.velocity[1])
+      self.Pitch_PID.update(vehicle_x_velocity)
+      self.Roll_PID.update(vehicle_y_velocity)
       self.Pitch_PWM -= self.Pitch_PID.output
       self.Roll_PWM += self.Roll_PID.output
     
