@@ -12,6 +12,7 @@ import display
 
 from sklearn.preprocessing import normalize
 from timeit import default_timer as timer
+from gridline import Grid, four_point_transform, find_closest_point_to
 
 # default bounding box color (green)
 DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
@@ -75,9 +76,9 @@ class RoombaDetector():
     # upper bound for the green roomba's flap in LAB space
     GREEN_LAB_UPPER_BOUND = np.array([94, 123, 250])
     # minimum area for a region to have a chance at being considered a roomba
-    MIN_AREA = 100
+    MIN_AREA = 25
     # amount to grow the proposed bounding box by on each side
-    BOUNDING_BOX_SIZE_OFFSET = 50
+    BOUNDING_BOX_SIZE_OFFSET = 100
 
     def __init__(self):
         self._gaussian_blur_kernel = (11,11)
@@ -97,6 +98,9 @@ class RoombaDetector():
         polygons = []
         centers = []
         orientations = []
+        grid = Grid()
+        grid.detect_gridlines(img)
+
 
         # detect red and green blobs in img
         if GPU_ACCELERATED:
@@ -113,24 +117,31 @@ class RoombaDetector():
             area = cv2.contourArea(contour)
             if area >= RoombaDetector.MIN_AREA:
                 moments = cv2.moments(contour)
-                # extract a polygon approximation of the roomba's flap
                 epsilon = EPSILON*cv2.arcLength(contour,True)
-                polygons.append(cv2.approxPolyDP(contour,epsilon,True))
-                # get the centroid for the roomba's flap
-                centers.append((int(moments['m10'] / moments['m00']), int(moments['m01'] / moments['m00'])))
-                # get the roomba's bounding box
                 x, y, w, h = cv2.boundingRect(contour)
                 top_left = np.array([x, y]) - RoombaDetector.BOUNDING_BOX_SIZE_OFFSET
                 bottom_right = np.array([x + w, y + h]) + RoombaDetector.BOUNDING_BOX_SIZE_OFFSET
-                
-                # filter out false positives
-                blur = cv2.GaussianBlur(img, (15, 15), 3.38)
-                edges = cv2.Canny(cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY), 85, 30, apertureSize = self._aperture_size)
-                closing = cv2.dilate(edges, np.ones((3,3), dtype=np.uint8), iterations=1)
-                
-                cv2.imshow('before', img & closing[:, :, None])
-                
-                proposals.append((*top_left.astype(int), *bottom_right.astype(int)))
+                top_right = np.array([bottom_right[0], top_left[1]])
+                bottom_left = np.array([top_left[0], bottom_right[1]])
+
+                if grid.lines is not None:
+                    points = []
+                    gridline_intersections = grid.intersections
+
+                    if gridline_intersections is not None:
+                        for point in (top_left, top_right, bottom_right, bottom_left):
+                            points.append(find_closest_point_to(point, gridline_intersections))
+                            cv2.circle(img, tuple(points[-1]), 10, (0, 0, 255))
+                        
+                        topdown = four_point_transform(img, np.asarray(points))
+                        cv2.imshow('topdown', topdown)
+
+                        # extract a polygon approximation of the roomba's flap
+                        polygons.append(cv2.approxPolyDP(contour,epsilon,True))
+                        # get the centroid for the roomba's flap
+                        centers.append((int(moments['m10'] / moments['m00']), int(moments['m01'] / moments['m00'])))
+                        # get the roomba's bounding box
+                        proposals.append((*top_left.astype(int), *bottom_right.astype(int)))
 
         # vectorize the list of centroids
         centers = np.asarray(centers)
