@@ -126,6 +126,7 @@ class PIDFlightController(object):
       self.controllers_initialized = True
 
   def send_velocity_vector(self, requested_flight_vector, desired_altitude = None, desired_yaw = None):
+
     self.Pitch_PID.SetPoint = requested_flight_vector.x
     self.Roll_PID.SetPoint = requested_flight_vector.y
     self.Throttle_PID.SetPoint = requested_flight_vector.z
@@ -155,9 +156,13 @@ class PIDFlightController(object):
     #In any case, LOITER mode will stop the vehicle if we return the Pitch and Roll channel to neutral.
     #TODO Figure out why VehicleStates can't be imported here.
 
-    vehicle_x_velocity = abs(self.atc.vehicle.velocity[0])
-    vehicle_y_velocity = abs(self.atc.vehicle.velocity[1])
+    vehicle_x_velocity = (self.atc.vehicle.velocity[0])
+    vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
+
+    if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
+      vehicle_x_velocity *=-1.0
+      vehicle_y_velocity *=-1.0
 
     if("HOVER" in self.atc.STATE):
       self.Pitch_PID.output = 0.0
