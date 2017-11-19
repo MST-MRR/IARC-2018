@@ -39,14 +39,14 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 1
   LAND_ALTITUDE = 0.25
-  ALT_PID_THRESHOLD = 0.09
+  ALT_PID_THRESHOLD = 0.05
   VEL_PID_THRESHOLD = 0.05
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25

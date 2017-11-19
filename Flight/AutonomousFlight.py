@@ -160,6 +160,7 @@ class PIDFlightController(object):
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
 
+    #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
     if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
       vehicle_x_velocity *=-1.0
       vehicle_y_velocity *=-1.0
@@ -213,11 +214,11 @@ class PIDFlightController(object):
   def get_yaw_radians(self, angle):
     if angle < 180.0:
         if angle == 0.0:
-            angle = 0.1
+            angle = 0.01
         return math.radians(angle)
     else:
         if angle == 180.0:
-            angle = 179.0
+            angle = 179.9
             return math.radians(angle)
         return math.radians(angle-180.0) - math.pi
 
