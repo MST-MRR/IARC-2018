@@ -117,12 +117,15 @@ def on_initialization(selected_vehicle_name):
         if vehicle["name"] == selected_vehicle_name:
             vehicle_config_data = vehicle
             global tower
-            if(tower == None):
+            if(tower is None):
                 tower = Tower()
                 tower.initialize()
-            elif not tower.vehicle_initialized:
+            if not tower.vehicle_initialized:
                 tower.initialize()
-            emit('status', get_vehicle_status())
+            if(tower.vehicle_initialized):
+                emit('status', get_vehicle_status())
+            else:
+                emit('information', 'Failed to connect to vehicle.')
             return
 
 if __name__ == '__main__':

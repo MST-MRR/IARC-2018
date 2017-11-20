@@ -79,11 +79,11 @@ class Tower(object):
       if(should_write_to_file):
         self.flight_log = open('flight_log.txt', 'w')
         stdout = self.flight_log
-
-      print("\nConnecting to vehicle...")
-      self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
-
-      if not self.vehicle:
+      
+      try:
+        print("\nConnecting to vehicle...")        
+        self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
+      except:
         print("\nUnable to connect to vehicle.")
         return
 
