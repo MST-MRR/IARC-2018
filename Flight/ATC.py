@@ -270,13 +270,16 @@ class Tower(object):
     #Send the hover vector without an angle first to stop the vehicle.
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude)
+
+    #Wait for vehicle to slow before sending next vector with yaw.
+    sleep(1)
   
-    #Wait for vehicle to slow down via PID if it was previous flying. 
-    #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    while("FLYING" in self.STATE and 
-        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
-        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-      sleep(self.STANDARD_SLEEP_TIME)
+    # #Wait for vehicle to slow down via PID if it was previous flying. 
+    # #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
+    # while("FLYING" in self.STATE and 
+    #     (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+    #     and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+    #   sleep(self.STANDARD_SLEEP_TIME)
 
     #Re-send the hover vector with angle.
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
@@ -341,9 +344,9 @@ class FailsafeController(threading.Thread):
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
-      if self.atc.STATE != VehicleStates.landed:
-        self.atc.land()
+      if self.atc.STATE != VehicleStates.landed or self.atc.vehicle.mode.name != "LAND":
         self.atc.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
+        self.atc.land()
 
     self.stoprequest.set()
     super(FailsafeController, self).join(timeout)

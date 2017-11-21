@@ -238,6 +238,11 @@ class PIDFlightController(object):
     return rc_out
 
   def get_debug_string(self):
+    vehicle_x_velocity = (self.atc.vehicle.velocity[0])
+    vehicle_y_velocity = (self.atc.vehicle.velocity[1])    #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
+    if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
+      vehicle_x_velocity *=-1.0
+      vehicle_y_velocity *=-1.0
     debug_string = ("Vehicle State: " + self.atc.STATE + 
     # "\n\nZ Velocity Controller Out: " + str(self.Throttle_PID.output) + 
     # "\nZ Velocity RC Out: " + str(self.Throttle_PWM) + 
@@ -249,11 +254,11 @@ class PIDFlightController(object):
     "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
     "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
     "\nPitch RC Out: " + str(self.Pitch_PWM) + 
-    "\nVehicle X Velocity: " + str(self.atc.vehicle.velocity[0]) + 
+    "\nVehicle X Velocity: " + str(vehicle_x_velocity) + 
     "\nTarget X Velocity: " + str(self.Pitch_PID.SetPoint) + 
     "\n\nRoll Controller Out: " + str(self.Roll_PID.output) + 
     "\nRoll RC Out: " + str(self.Roll_PWM) + 
-    "\nVehicle Y Velocity: " + str(self.atc.vehicle.velocity[1]) + 
+    "\nVehicle Y Velocity: " + str(vehicle_y_velocity) + 
     "\nTarget Y Velocity: " + str(self.Roll_PID.SetPoint) + 
     "\n\nYaw Controller Out: " + str(self.Yaw_PID.output) + 
     "\nYaw RC Out: " + str(self.Yaw_PWM) + 
