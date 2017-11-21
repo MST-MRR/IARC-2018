@@ -39,7 +39,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5760"
+  SIM = "tcp:127.0.0.1:5762"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -203,7 +203,7 @@ class Tower(object):
       num: Number to be tested.
     @returns: Boolean if num within range.
     """
-    return abs(base_value) - threshold <= abs(num) <= abs(base_value) + threshold
+    return base_value - threshold <= num <= base_value + threshold
 
   def takeoff(self, desired_altitude, desired_angle=None):
     """
@@ -269,15 +269,15 @@ class Tower(object):
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude)
 
-    #Wait for vehicle to slow before sending next vector with yaw.
-    sleep(1)
+    # #Wait for vehicle to slow before sending next vector with yaw. (For when PID based slowing is disabled.)
+    # sleep(1)
   
-    # #Wait for vehicle to slow down via PID if it was previous flying. 
-    # #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    # while("FLYING" in self.STATE and 
-    #     (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
-    #     and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-    #   sleep(self.STANDARD_SLEEP_TIME)
+    #Wait for vehicle to slow down via PID if it was previous flying. 
+    #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
+    while("FLYING" in self.STATE and 
+        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+      sleep(self.STANDARD_SLEEP_TIME)
 
     #Re-send the hover vector with angle.
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
