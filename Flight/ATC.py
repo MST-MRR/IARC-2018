@@ -47,7 +47,7 @@ class Tower(object):
   STANDARD_SLEEP_TIME = 1
   LAND_ALTITUDE = 0.25
   ALT_PID_THRESHOLD = 0.05
-  VEL_PID_THRESHOLD = 0.05
+  VEL_PID_THRESHOLD = 0.09
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
@@ -215,12 +215,10 @@ class Tower(object):
     self.switch_control()
     self.arm_drone()
 
-    initial_alt = self.get_altitude()
-
     self.STATE = VehicleStates.takeoff
     self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.hover, desired_altitude)
 
-    while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude() - initial_alt))):
+    while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
       sleep(self.STANDARD_SLEEP_TIME)
 
     if desired_angle is None:
