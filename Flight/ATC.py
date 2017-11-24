@@ -39,7 +39,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -307,6 +307,9 @@ class Tower(object):
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
     self.pid_flight_controller.send_velocity_vector(deepcopy(StandardFlightVectors.hover), desired_altitude=0)
+    
+    self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
+
     while((self.get_altitude()) >= self.LAND_ALTITUDE):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
@@ -343,7 +346,6 @@ class FailsafeController(threading.Thread):
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
       if self.atc.STATE != VehicleStates.landed or self.atc.vehicle.mode.name != "LAND":
-        self.atc.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
         self.atc.land()
 
     self.stoprequest.set()
