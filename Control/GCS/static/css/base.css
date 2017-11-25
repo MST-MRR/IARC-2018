@@ -159,7 +159,7 @@ select:-moz-focusring {
   border: 1px solid #ddd;
   padding: 15px;
   position: relative;
-  margin: 25px;
+  margin: 10px;
 }
 
 .card.h1, .card.h2, .card.h3, .card.h4, .card.h5 {
@@ -168,7 +168,7 @@ select:-moz-focusring {
 
 .important {
   width: 33%;
-  max-height: 75%;
+  max-height: 55%;
 }
 
 .secondary {
