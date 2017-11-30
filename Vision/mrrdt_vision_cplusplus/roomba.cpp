@@ -52,7 +52,7 @@ PyObject* threshold_image_for_roombas(PyObject* img)
     
     in_range(lab_img, green_threshold, GREEN_LAB_LOWER_BOUND, GREEN_LAB_UPPER_BOUND);
     in_range(ycrcb_img, red_threshold, RED_YCRCB_LOWER_BOUND, RED_YCRCB_UPPER_BOUND);
-    cuda::bitwise_or(red_threshold, red_threshold, combined_mask);
+    cuda::bitwise_or(green_threshold, red_threshold, combined_mask);
     combined_mask.download(cpu_img);
 
     return pyopencv_from(cpu_img);
