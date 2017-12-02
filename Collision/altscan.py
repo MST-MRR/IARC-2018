@@ -7,7 +7,7 @@ from sweeppy import Sweep
 
 class LIDAR():
   MIN_SAFE_DISTANCE = 10.0
-  MAX_SAFE_DISTANCE = 300.0
+  MAX_SAFE_DISTANCE = 1000.0
   QUADRANT_SIZE = 45.0
 
   def __init__(self):
@@ -47,16 +47,17 @@ class LIDAR():
         
         distance = sample.distance
         angle_deg = (sample.angle / 1000.0) % 360.0
-        sector = (int)((angle_deg % 360.0) // self.QUADRANT_SIZE)
-        
+        sector = abs((((angle_deg % 360.0) - 360) // self.QUADRANT_SIZE) + 1)
+
         if (distance < self.MAX_SAFE_DISTANCE and distance > self.MIN_SAFE_DISTANCE):
+          #print(str(distance) + ": "+ str(sector))
           sector_lists[(int)(sector)].append( (distance, angle_deg, sector) )
 
     for point_list in sector_lists:
       point_list.sort()
 
     for sector_index in range(0,8):
-      endVal = min(10, len(sector_lists[sector_index]))
+      endVal = min(5, len(sector_lists[sector_index]))
       for index in range(0,endVal):
         lidar_data[sector_index].append(sector_lists[sector_index][index])
 
