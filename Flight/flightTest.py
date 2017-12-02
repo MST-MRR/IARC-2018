@@ -212,9 +212,8 @@ def display_graphs(graphs):
 
 
 def shutdown(drone):
-    drone.mode = VehicleMode("LAND")
-    time.sleep(5.0)
     drone.channels.overrides[THROTTLE_CHANNEL] = THRUST_LOW
+    drone.mode = VehicleMode("LAND")
     drone.close()
 
 
@@ -241,13 +240,14 @@ def test_forwards(highest_alt):
     vels = [-0.3, 0.3]
     PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
     ThrottlePID = PID.PID(THROTTLE_P, THROTTLE_I, THROTTLE_D)    
-    PitchPID.SetPoint = vels[1]
+    PitchPID.SetPoint = vels[1]*(-1.0)
     curr_alt = vehicle.location.global_relative_frame.alt
     for x in range(0, 2):
-        ThrottlePID.SetPoint = vels[x]
+        ThrottlePID.SetPoint = 0
         PitchPWM = PITCH_MID
         ThrottlePWM = PITCH_MID
-        while abs(curr_alt - alts[x]) > 0.1:
+        time_end = time.time()+3
+        while abs(curr_alt - alts[x]) > 0.1 and time.time()<time_end:
             time.sleep(0.1)
             current_throttle_velocity = vehicle.velocity[2]
             current_pitch_velocity = vehicle.velocity[0]
@@ -264,7 +264,7 @@ def test_forwards(highest_alt):
             print("Current throt: %s" % vehicle.velocity[2])
             print("Desired pitch: %s" % PitchPID.SetPoint)
             print("Current pitch %s" % vehicle.velocity[0])
-            os.system("clear")
+            print(" ")
     pass
 
 def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
@@ -295,4 +295,4 @@ def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 3, 0.0, 0.0, 90.0)
+test_flight(0.3, 2, 0.0, 0.0, 90.0)
