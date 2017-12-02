@@ -16,7 +16,7 @@ PITCH_I = 0.0
 PITCH_D = 15.0
 ROLL_P = 10.0
 ROLL_I = 0.0
-ROLL_D = 15.5
+ROLL_D = 15.0
 YAW_P = 2.0
 YAW_I = 0.0
 YAW_D = 9.0
@@ -27,11 +27,13 @@ ROLL_CHANNEL = '1'
 PITCH_CHANNEL = '2'
 THROTTLE_CHANNEL = '3'
 YAW_CHANNEL = '4'
-PID_UPDATE_TIME = 0.01
-PI = 3.14159265359
+PID_UPDATE_TIME = 0.00
+PI = math.pi
 
+SIM = "tcp:127.0.0.1:5762"
+USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
 
-vehicle = dronekit.connect("tcp:127.0.0.1:5762", wait_ready=True)
+vehicle = dronekit.connect(SIM, wait_ready=True)
 
 print("\n Connected")
 
@@ -43,7 +45,6 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     while not vehicle.is_armable:
         print("Waiting...\n")
         time.sleep(1.0)
-        os.system('clear')
 
     print("Arming motors\n")
     vehicle.mode = VehicleMode("LOITER")
@@ -59,31 +60,32 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     # PitchPID = flightControl.PIDController(desired_pitch_velocity, PITCH_MID,
     #                                        PID_UPDATE_TIME, PITCH_P, PITCH_I,
     #                                        PITCH_D)
-    PitchPWM = PITCH_MID
+    #PitchPWM = get_pitch_pwm(desired_pitch_velocity)
 
-    pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
+    #pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
 
     # Initialize Roll PID Controller
-    # RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
-    # RollPID.SetPoint = desired_roll_velocity
-    # RollPID.setSampleTime(PID_UPDATE_TIME)
-    RollPID = flightControl.PIDController(desired_roll_velocity, ROLL_MID,
-                                          PID_UPDATE_TIME, ROLL_P, ROLL_I,
-                                          ROLL_D)
+    RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
+    RollPID.SetPoint = desired_roll_velocity
+    RollPID.setSampleTime(PID_UPDATE_TIME)
+    RollPWM = ROLL_MID
+    # RollPID = flightControl.PIDController(desired_roll_velocity, ROLL_MID,
+    #                                       PID_UPDATE_TIME, ROLL_P, ROLL_I,
+    #                                       ROLL_D)
     # RollPWM = get_pitch_pwm(desired_roll_velocity)
 
-    roll_graph = PID_Graph(desired_roll_velocity, "Roll")
+    #roll_graph = PID_Graph(desired_roll_velocity, "Roll")
 
     # Initialize Yaw PID Controller
-    desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
-    YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
-    YawPID.SetPoint = desired_yaw_angle
-    YawPID.setSampleTime(PID_UPDATE_TIME)
+    #desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
+    # YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
+    # YawPID.SetPoint = desired_yaw_angle
+    # YawPID.setSampleTime(PID_UPDATE_TIME)
     # YawPID = flightControl.PIDController(desired_yaw_angle, YAW_MID,
     #                                      PID_UPDATE_TIME, YAW_P, YAW_I, YAW_D)
-    YawPWM = YAW_MID
+    # YawPWM = YAW_MID
 
-    yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
+    # yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
 
     # Circle Stuffs
     # yawVPID = PID.PID(10 ,0 ,15)
@@ -96,28 +98,33 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     ThrottlePID.setSampleTime(PID_UPDATE_TIME)
     ThrottlePWM = THRUST_LOW
     vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
-    throttle_graph = PID_Graph(desired_speed, "Throttle")
-    graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
-    testing = True
+    #throttle_graph = PID_Graph(desired_speed, "Throttle")
+    #graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
     while True:
         try:
             time.sleep(.1)
             current_alt = vehicle.location.global_relative_frame.alt
-            if current_alt > 2.5:
+            
+            if current_alt > (desired_alt - 0.4):
                 ThrottlePID.SetPoint = 0
+            else:
+                if current_alt >= (desired_alt + 0.05):
+                    ThrottlePID.SetPoint = -0.3
+                else: 
+                    if current_alt <= (desired_alt - 0.05):
+                        ThrottlePID.SetPoint = 0.3
+
             ThrottlePID.update(vehicle.velocity[2])
             ThrottlePWM += ThrottlePID.output
             vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
-            throttle_graph.update(vehicle.velocity[2])
-            print("Update throt: %s" % ThrottlePWM)
+            #throttle_graph.update(vehicle.velocity[2])
+            print("Desired Alt: %s" % desired_alt)
             print("Alt: %s" % current_alt)
 
             # Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):
-                #graph_test = tune_pid(0.3, 1, ROLL_CHANNEL, 2, ROLL_P, ROLL_I, ROLL_D, ThrottlePID, ThrottlePWM)
-                #testing = False
                 
-                
+                '''
                 # Get drones pitch velocity
                 current_pitch_velocity = -vehicle.velocity[0]
                 # Update vehicles current pitch with new pitch
@@ -129,10 +136,11 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 # Get drones roll velocity
                 current_roll_velocity = vehicle.velocity[1]
                 # update vehicles current pitch with new roll
-                vehicle.channels.overrides[ROLL_CHANNEL] = RollPID.update(
-                current_roll_velocity)
+                RollPID.update(current_roll_velocity)
+                RollPWM += RollPID.output
+                vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM
                 # update graphs
-                roll_graph.update(current_roll_velocity)
+                #roll_graph.update(current_roll_velocity)
                 '''
 
                 # Get drones yaw angle
@@ -151,21 +159,19 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 # print("Actual roll:   %s" % current_roll_velocity)
                 print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
                 print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
-
-                if (abs(current_yaw_angle-desired_yaw_angle) <= 0.1):
-                    PitchPID.SetPoint = 0.3
-
+                '''
                 os.system('clear')
                 
         except KeyboardInterrupt:
-            #testRoll(RollPID)
-            #test_forwards(desired_alt)
+            #test_Roll(RollPID)
+            test_forwards(desired_alt)
+
+            # for x in range(0, 1):
+            #     test_roll_alt(ThrottlePID,ThrottlePWM, RollPID, x)
             shutdown(vehicle)
             #display_graphs(graphs_list)
+            
             break
-        if testing is False:
-            shutdown(vehicle)
-            graph_test.display()
     return
 
 
@@ -178,9 +184,14 @@ def get_pitch_pwm(angle):
 
 
 def get_yaw_radians(angle):
-    if angle < 180:
+    if angle < 180.0:
+        if angle <= 0.0:
+            angle = 0.1
         return math.radians(angle)
     else:
+        if angle >= 180.0:
+            angle = 179.00
+            return math.radians(angle)
         return math.radians(angle-180) - PI
 
 
@@ -256,39 +267,31 @@ def test_forwards(highest_alt):
             os.system("clear")
     pass
 
-
-def tune_pid(setpoint, vel_index, channel, interval, PID_P, PID_I, PID_D, ThrottlePID, ThrottlePWM):
-    
-    t_end = time.time() + 60 * interval
-    curr_vel = vehicle.velocity[vel_index]
-    AxisPID = PID.PID(PID_P, PID_I, PID_D)
-    AxisPID.setSampleTime(PID_UPDATE_TIME)
-    AxisPID.SetPoint = setpoint
-    AxisPWM = PITCH_MID
-    graph = PID_Graph(setpoint, "Test")
-    ThrottlePID.SetPoint = 0
-    while time.time() < t_end:
-        time.sleep(0.1)
-        curr_vel = vehicle.velocity[vel_index]
-        ThrottlePID.update(vehicle.velocity[2])
-        AxisPID.update(curr_vel)
-        AxisPWM += AxisPID.output
-        ThrottlePWM += ThrottlePID.output
-        vehicle.channels.overrides[channel] = AxisPWM
-        vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
-        graph.update(curr_vel)
-        print("AxisPWM: %s " % AxisPWM)
-        print("Throttle: %s" % ThrottlePWM )
-        print("Desired: %s" % setpoint)
-        print("Actual: %s " % curr_vel)
-        print(t_end - time.time())
-        os.system("clear")
-    return graph
-    pass
-'''
-for x in range(-314, 314):
-    print(getBetterYaw(float(x)/100.0))
-    '''
+def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
+    if direction == 0:
+        rollPID.setpoint = -0.3
+    else:
+        rollPID.setpoint = 0.3
+    rollPWM = 1495
+    vels = [-0.3, 0.3]
+    alts = [0.3,3]
+    current_alt = vehicle.location.global_relative_frame.alt
+    for x in range (0,2):
+        throttlePID.SetPoint = vels[x]
+        while abs(current_alt -alts[x]) >= 0.1:
+            current_throttle_velocity = vehicle.velocity [2]
+            current_roll_velocity = vehicle.velocity [0]
+            throttlePID.update(current_throttle_velocity)
+            throttlePWM += throttlePID.output
+            vehicle.channels.overrides[THROTTLE_CHANNEL] = throttlePWM
+            current_roll_velocity = vehicle.velocity [1]
+            rollPID.update(current_roll_velocity)
+            rollPWM += rollPID.output
+            vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
+            print("Desired Alt: %s" % alts[x])
+            print("Actual Alt: %s" % current_alt)
+            time.sleep(0.1)
+            current_alt = vehicle.location.global_relative_frame.alt
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
