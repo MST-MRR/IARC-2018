@@ -29,8 +29,6 @@ class VehicleStates(object):
   hover = "HOVER"
   hover_adjusting = "HOVER (Adjusting vehicle's yaw or altitude)"
   hover_yaw_achieved = "HOVER (Yaw Achieved)"
-  flying_pitching = "FLYING (Pitch)"
-  flying_rolling = "FLYING (Roll)"
   flying = "FLYING"
   takeoff = "TAKEOFF"
   unknown = "UNKNOWN"
@@ -236,10 +234,6 @@ class Tower(object):
 
     if((desired_vector.x != 0 and desired_vector.y != 0)):
       self.STATE = VehicleStates.flying
-    elif(desired_vector.x):
-      self.STATE = VehicleStates.flying_pitching
-    elif(desired_vector.y):
-      self.STATE = VehicleStates.flying_rolling
 
     #TODO Remove check. This check is here in case the someone asks for a Z axis change only. 
     #This will not change the vehicle's state because the Z axis controller is not finished/enabled yet.
@@ -274,10 +268,10 @@ class Tower(object):
   
     #Wait for vehicle to slow down via PID if it was previous flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    while("FLYING" in self.STATE and 
-        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
-        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-      sleep(self.STANDARD_SLEEP_TIME)
+    # while("FLYING" in self.STATE and 
+    #     (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+    #     and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+    #   sleep(self.STANDARD_SLEEP_TIME)
 
     #Re-send the hover vector with angle.
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)

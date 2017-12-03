@@ -142,17 +142,12 @@ class PIDFlightController(object):
   def update_controllers(self):
 
     #Start by updating our z-axis controllers regardless of state and updating the PWM value.
-    #Vehicle states such as landing or takeoff can adversly affect the pitch, roll, or yaw controllers.
-    #Those controllers will not be activated in these states.
     self.Altitude_PID.update(self.atc.get_altitude())
     self.Altitude_PWM = self.convert_altitude_to__PWM(self.Altitude_PID.output)
 
     # self.Throttle_PID.update(self.atc.vehicle.velocity[2])
     # self.Throttle_PWM += self.constrain_rc_values(self.Throttle_PID.output)
 
-
-    #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover. 
-    #This may be caused by the tuning of the respective PID controllers or too much noise in accelerometer data.
     #In any case, LOITER mode will stop the vehicle if we return the Pitch and Roll channel to neutral.
     #TODO Figure out why VehicleStates can't be imported here.
 
@@ -160,12 +155,14 @@ class PIDFlightController(object):
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
 
-    #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
-    if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
-      vehicle_x_velocity *=-1.0
-      vehicle_y_velocity *=-1.0
+    # #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
+    # if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
+    #   vehicle_x_velocity *=-1.0
+    #   vehicle_y_velocity *=-1.0
 
     if("HOVER" in self.atc.STATE):
+      #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover. 
+      #This is likely caused by too much noise in accelerometer data.
       self.Pitch_PID.output = 0.0
       self.Roll_PID.output = 0.0
       self.Pitch_PWM = self.PITCH_MID
@@ -175,22 +172,20 @@ class PIDFlightController(object):
       if("(Yaw Achieved)" in self.atc.STATE):
         self.Yaw_PID.output = 0.0
         self.Yaw_PWM = self.YAW_MID
-    elif("FLYING (Pitch)" in self.atc.STATE):
-      self.Pitch_PID.update(vehicle_x_velocity)
-      self.Pitch_PWM -= self.Pitch_PID.output
-      self.Roll_PWM = self.ROLL_MID
-      #Roll will take the ROLL_MID value as set above. This ensures that the vehicle only travels along the requested axis.
-    elif("FLYING (Roll)" in self.atc.STATE):
-      self.Roll_PID.update(vehicle_y_velocity)
-      self.Roll_PWM += self.Roll_PID.output
-      self.Pitch_PWM = self.PITCH_MID
-      #Pitch will take the PITCH_MID value as set above. This ensures that the vehicle only travels along requested axis.
     elif("FLYING" in self.atc.STATE):
-      self.Pitch_PID.update(vehicle_x_velocity)
-      self.Roll_PID.update(vehicle_y_velocity)
-      self.Pitch_PWM -= self.Pitch_PID.output
-      self.Roll_PWM += self.Roll_PID.output
-    
+      if(self.Pitch_PID.SetPoint == 0.00):
+        self.Pitch_PID.output = 0.0
+        self.Pitch_PWM = self.PITCH_MID
+      else:
+        self.Pitch_PID.update(vehicle_x_velocity)
+        self.Pitch_PWM -= self.Pitch_PID.output
+      if(self.Roll_PID.SetPoint == 0.00):
+        self.Roll_PID.output = 0.0
+        self.Roll_PWM = self.ROLL_MID
+      else:
+        self.Roll_PID.update(vehicle_y_velocity)
+        self.Roll_PWM += self.Roll_PID.output
+
     self.Pitch_PWM = self.constrain_rc_values(self.Pitch_PWM)
     self.Roll_PWM = self.constrain_rc_values(self.Roll_PWM)
     self.Yaw_PWM = self.constrain_rc_values(self.Yaw_PWM)
@@ -239,10 +234,8 @@ class PIDFlightController(object):
 
   def get_debug_string(self):
     vehicle_x_velocity = (self.atc.vehicle.velocity[0])
-    vehicle_y_velocity = (self.atc.vehicle.velocity[1])    #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
-    if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
-      vehicle_x_velocity *=-1.0
-      vehicle_y_velocity *=-1.0
+    vehicle_y_velocity = (self.atc.vehicle.velocity[1])
+
     debug_string = ("Vehicle State: " + self.atc.STATE + 
     # "\n\nZ Velocity Controller Out: " + str(self.Throttle_PID.output) + 
     # "\nZ Velocity RC Out: " + str(self.Throttle_PWM) + 

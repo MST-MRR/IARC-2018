@@ -6,7 +6,7 @@ t = Tower()
 
 t.initialize()
 
-t.takeoff(1.0)
+t.takeoff(2.0)
 sleep(5)
 
 t.fly(FlightVector(0.33, 0, 0))
