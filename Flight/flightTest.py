@@ -11,23 +11,23 @@ YAW_MID = 1494
 PITCH_MID = 1494
 ROLL_MID = 1494
 THRUST_LOW = 986.0
-PITCH_P = 10.0
+PITCH_P = 3.0
 PITCH_I = 0.0
-PITCH_D = 15.0
-ROLL_P = 10.0
+PITCH_D = 2.9
+ROLL_P = 0.0
 ROLL_I = 0.0
-ROLL_D = 15.0
-YAW_P = 2.0
+ROLL_D = 0.0
+YAW_P = 0.0
 YAW_I = 0.0
-YAW_D = 9.0
-THROTTLE_P = 15.0
-THROTTLE_I = 0.0
-THROTTLE_D = 10.0
+YAW_D = 0.0
+THROTTLE_P = 2.5
+THROTTLE_I = 0.4
+THROTTLE_D = 0.5
 ROLL_CHANNEL = '1'
 PITCH_CHANNEL = '2'
 THROTTLE_CHANNEL = '3'
 YAW_CHANNEL = '4'
-PID_UPDATE_TIME = 0.00
+PID_UPDATE_TIME = 0.01
 PI = math.pi
 
 SIM = "tcp:127.0.0.1:5762"
@@ -56,13 +56,13 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
     PitchPID.SetPoint = desired_pitch_velocity
     PitchPID.setSampleTime(PID_UPDATE_TIME)
-
+    PitchPWM = PITCH_MID
     # PitchPID = flightControl.PIDController(desired_pitch_velocity, PITCH_MID,
     #                                        PID_UPDATE_TIME, PITCH_P, PITCH_I,
     #                                        PITCH_D)
     #PitchPWM = get_pitch_pwm(desired_pitch_velocity)
 
-    #pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
+    pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
 
     # Initialize Roll PID Controller
     RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
@@ -74,7 +74,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     #                                       ROLL_D)
     # RollPWM = get_pitch_pwm(desired_roll_velocity)
 
-    #roll_graph = PID_Graph(desired_roll_velocity, "Roll")
+    roll_graph = PID_Graph(desired_roll_velocity, "Roll")
 
     # Initialize Yaw PID Controller
     #desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
@@ -85,7 +85,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     #                                      PID_UPDATE_TIME, YAW_P, YAW_I, YAW_D)
     # YawPWM = YAW_MID
 
-    # yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
+    yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
 
     # Circle Stuffs
     # yawVPID = PID.PID(10 ,0 ,15)
@@ -98,11 +98,11 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     ThrottlePID.setSampleTime(PID_UPDATE_TIME)
     ThrottlePWM = THRUST_LOW
     vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
-    #throttle_graph = PID_Graph(desired_speed, "Throttle")
-    #graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
+    throttle_graph = PID_Graph(desired_speed, "Throttle")
+    graphs_list = [roll_graph, pitch_graph, throttle_graph, yaw_graph]
     while True:
         try:
-            time.sleep(.1)
+            time.sleep(.01)
             current_alt = vehicle.location.global_relative_frame.alt
             
             if current_alt > (desired_alt - 0.4):
@@ -117,14 +117,14 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
             ThrottlePID.update(vehicle.velocity[2])
             ThrottlePWM += ThrottlePID.output
             vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
-            #throttle_graph.update(vehicle.velocity[2])
+            throttle_graph.update(vehicle.velocity[2])
             print("Desired Alt: %s" % desired_alt)
             print("Alt: %s" % current_alt)
 
             # Wait until the drone is at a good height to change direction
             if (current_alt > desired_alt / 2):
                 
-                '''
+                
                 # Get drones pitch velocity
                 current_pitch_velocity = -vehicle.velocity[0]
                 # Update vehicles current pitch with new pitch
@@ -132,7 +132,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 PitchPWM += PitchPID.output
                 vehicle.channels.overrides[PITCH_CHANNEL] = PitchPWM
                 # Update graphs
-                '''
+                
                 # Get drones roll velocity
                 current_roll_velocity = vehicle.velocity[1]
                 # update vehicles current pitch with new roll
@@ -141,30 +141,44 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM
                 # update graphs
                 #roll_graph.update(current_roll_velocity)
-                '''
+                
 
                 # Get drones yaw angle
-                current_yaw_angle = vehicle.attitude.yaw
+                #current_yaw_angle = vehicle.attitude.yaw
                 # update vehicles current yaw channel with new yaw
-                YawPID.update(current_yaw_angle)
-                YawPWM += YawPID.output
-                vehicle.channels.overrides[YAW_CHANNEL] = YawPWM
+                #YawPID.update(current_yaw_angle)
+                #YawPWM += YawPID.output
+                #vehicle.channels.overrides[YAW_CHANNEL] = YawPWM
                 # update graphs
-                yaw_graph.update(current_yaw_angle)
+                #yaw_graph.update(current_yaw_angle)
 
                 # Output data
                 print("Desired pitch: %s" % PitchPID.SetPoint)
                 print("Actual pitch:  %s" % current_pitch_velocity)
                 # print("Desired roll:  %s" % desired_roll_velocity)
                 # print("Actual roll:   %s" % current_roll_velocity)
-                print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
-                print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
-                '''
+                #print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
+                #print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
+                
                 os.system('clear')
                 
         except KeyboardInterrupt:
+            PitchPID.SetPoint = desired_pitch_velocity * -1.0
+            time_end = time.time() + 10
+            PitchPWM = PITCH_MID
+            while time.time() < time_end:
+                # Get drones pitch velocity
+                current_pitch_velocity = -vehicle.velocity[0]
+                # Update vehicles current pitch with new pitch
+                PitchPID.update(current_pitch_velocity)
+                PitchPWM += PitchPID.output
+                vehicle.channels.overrides[PITCH_CHANNEL] = PitchPWM
+                # Update graphs
+
+                print("Desired pitch: %s" % PitchPID.SetPoint)
+                print("Actual pitch:  %s" % current_pitch_velocity)
             #test_Roll(RollPID)
-            test_forwards(desired_alt)
+            #test_forwards(desired_alt)
 
             # for x in range(0, 1):
             #     test_roll_alt(ThrottlePID,ThrottlePWM, RollPID, x)
@@ -206,6 +220,7 @@ def display_graphs(graphs):
     os.system("clear")
     for graph in graphs:
         try:
+            print(graph.title)
             graph.display()
         except ValueError:
             print("%s has no graph" % graph.title)
@@ -233,7 +248,7 @@ def test_Roll(rollPID):
             vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
             print("Desired roll:  %s" % vels[x])
             print("Actual roll:   %s" % roll_vel)
-            time.sleep(0.1)   
+            time.sleep(0.01)   
 
 def test_forwards(highest_alt):
     alts = [0.3, highest_alt]
@@ -248,7 +263,7 @@ def test_forwards(highest_alt):
         ThrottlePWM = PITCH_MID
         time_end = time.time()+3
         while abs(curr_alt - alts[x]) > 0.1 and time.time()<time_end:
-            time.sleep(0.1)
+            time.sleep(0.01)
             current_throttle_velocity = vehicle.velocity[2]
             current_pitch_velocity = vehicle.velocity[0]
             PitchPID.update(current_pitch_velocity) 
@@ -290,9 +305,9 @@ def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
             vehicle.channels.overrides[ROLL_CHANNEL] = rollPWM
             print("Desired Alt: %s" % alts[x])
             print("Actual Alt: %s" % current_alt)
-            time.sleep(0.1)
+            time.sleep(0.01)
             current_alt = vehicle.location.global_relative_frame.alt
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 2, 0.0, 0.0, 90.0)
+test_flight(0.3, 2, 0.33, 0.0, 90.0)
