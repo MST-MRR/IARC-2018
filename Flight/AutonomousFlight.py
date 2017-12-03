@@ -63,12 +63,12 @@ class PIDFlightController(object):
   ROLL_MID = 1494.0
   THROTTLE_MIN = 982.0
   THROTTLE_MAX = 2006.0
-  PITCH_P = 10.00
-  PITCH_I = 0.00
-  PITCH_D = 15.00
-  ROLL_P = 10.00
+  PITCH_P = 3.0
+  PITCH_I = 0.0
+  PITCH_D = 2.9
+  ROLL_P = 3.0
   ROLL_I = 0.00
-  ROLL_D = 15.00
+  ROLL_D = 2.9
   YAW_P = 0.73
   YAW_I = 0.00
   YAW_D = 8.00
@@ -82,7 +82,7 @@ class PIDFlightController(object):
   PITCH_CHANNEL = '2'
   THROTTLE_CHANNEL = '3'
   YAW_CHANNEL = '4'
-  PID_SAMPLE_TIME = 0.00
+  PID_SAMPLE_TIME = 0.01
   ALT_PID_SAMPLE_TIME = 0.01
 
   def __init__(self, atc):
@@ -156,9 +156,9 @@ class PIDFlightController(object):
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
 
     # #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
-    # if(self.atc.get_yaw_deg() < -90.0 or self.atc.get_yaw_deg() > 90.0):
-    #   vehicle_x_velocity *=-1.0
-    #   vehicle_y_velocity *=-1.0
+    if(math.cos(self.atc.vehicle.attitude.yaw) <= 0.0):
+      vehicle_x_velocity *=-1.0
+      vehicle_y_velocity *=-1.0
 
     if("HOVER" in self.atc.STATE):
       #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover. 

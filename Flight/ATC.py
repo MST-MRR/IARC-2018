@@ -37,7 +37,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5760"
+  SIM = "tcp:127.0.0.1:5762"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -232,11 +232,11 @@ class Tower(object):
     @returns:
     """
 
-    if((desired_vector.x != 0 and desired_vector.y != 0)):
+    #TODO Remove both of these checks. These checks are here in case the someone asks for a Z axis change only. 
+    #This will not change the vehicle's state because the Z axis controller is not finished/enabled yet.
+    if(desired_vector.z == 0):
       self.STATE = VehicleStates.flying
 
-    #TODO Remove check. This check is here in case the someone asks for a Z axis change only. 
-    #This will not change the vehicle's state because the Z axis controller is not finished/enabled yet.
     if "FLYING" in self.STATE:
       self.pid_flight_controller.send_velocity_vector(desired_vector)
     
@@ -334,7 +334,7 @@ class FailsafeController(threading.Thread):
           self.atc.pid_flight_controller.write_to_rc_channels()
           os.system("clear")
           print(self.atc.pid_flight_controller.get_debug_string())
-      sleep(0.1) 
+      sleep(0.01) 
       #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
 
   def join(self, timeout=None):
