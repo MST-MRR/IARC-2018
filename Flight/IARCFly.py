@@ -2,6 +2,7 @@ from AutonomousFlight import FlightVector
 from ATC import Tower
 import time
 import math
+import mrrdt_vision
 
 NORMAL_FLIGHT_HEIGHT = 0.7
 NON_TRACK_LATERAL_SPEED = 2
@@ -18,9 +19,7 @@ SIMULATION_SPEED_FACTOR = 0.83
 HORIZONTAL_ROOMBA_POSITION = 0.5
 
 # Ratio of image from left of image
-VERTICAL_ROOMBA_POSITION = 1.0 / 3.0
-
-
+VERTICAL_ROOMBA_POSITION = 0.5
 
 
 # from Lucas' Test1_v4.py file
@@ -36,38 +35,44 @@ import pygazebo.msg.image_stamped_pb2
 
 # Yes, a global variable.  I don't know how else to do it. -Tanner
 image = np.ndarray(shape = (0,0,0))
+width = 0
+height = 0
+HasImage = False
 
 
 
 @trollius.coroutine
 def publish_loop():
-    print ( 'nooo2' )
     
+    print('Connecting to get image')
     manager = yield From(pygazebo.connect()) 
-    print ( 'nooo3' )
 
     def callback(data):
         print ( 'Got mail.' )
         message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
+        global width
+        global height
+        global image
         width = message.image.width
         height = message.image.height
         datalist = list ( message.image.data )
         npdatalist = np.array(datalist)
         npdatalist = np.reshape(npdatalist , (height, width, 3))
+        
+        global HasImage
+        HasImage = True
 
         image = npdatalist # added by Tanner
 
         
     
-    print ( 'nooo4' )
-    # originally /gazebo/default/iris_demo/gimbal_small_2d/tilt_link/camera/image
+    # originally /gazebo/default/iris/iris_demo/gimbal_small_2d/tilt_link/camera/image
     subscriber = manager.subscribe('/gazebo/default/iris/iris_demo/gimbal_small_2d/tilt_link/camera/image',
                      'gazebo.msgs.ImageStamped',
                      callback)
-    print ( 'nooo5' )
 
     yield From(subscriber.wait_for_connection())
-    print ( 'nooo6' )
+    print ( 'Entering Yield Loop' )
     while(True):
         print ( 'fire' )
         yield From(trollius.sleep(1.00))
@@ -83,15 +88,6 @@ logging.basicConfig()
 
 
 
-def InitializeScreenScraping ( ) :
-    # Some screen scraping stuff here
-    pass
-
-def InitializeScreenScraping ( ) :
-    # Some screen scraping stuff here
-    return
-
-
 def InitializeConnection ( ) :
     t = Tower ( )
     return t
@@ -101,8 +97,7 @@ def InitializeDrone ( t ) :
     print ( 'Has Initialized' )
 
 def InitialTakeoff ( t ) :
-    t . takeoff ( NORMAL_FLIGHT_HEIGHT )
-    t . hover ( NORMAL_FLIGHT_HEIGHT )
+    t . takeoff ( NORMAL_FLIGHT_HEIGHT * 2 )
 
 def InitialFlyToMiddle ( t ) :
     t . fly ( FlightVector ( NON_TRACK_LATERAL_SPEED , 0 , 0 ) )
@@ -110,24 +105,30 @@ def InitialFlyToMiddle ( t ) :
     time . sleep ( TimeToTravel / SIMULATION_SPEED_FACTOR )
 
 def ReadyHover ( t ) :
-    DroneHover ( t , NORMAL_FLIGHT_HEIGHT )
+    DroneHover ( t , NORMAL_FLIGHT_HEIGHT * 2 )
 
 def DroneHover ( t , FlightHeight ) :
     t . hover ( FlightHeight , desired_angle=0.01 )
 
-def CalcDegreesFromBestOrientation ( Roomba ) :
-    if Roomba . Direction > REVERSE_DEGREES :
-        RoombaOrientation = math . abs ( CIRCLE_DEGREES - Roomba . Direction )
-    else :
-        RoombaOrientation = math . abs ( Roomba . Direction )
+def CalcDistFromPointInImage ( Roomba , Width , Height ) :
+    RoombaCenterX = Roomba.center[0]
+    RoombaCenterY = Roomba.center[1]
+    DesiredXPosition = CalcDesiredXPosition ( Width )
+    DesiredYPosition = CalcDesiredYPosition ( Height )
+    A = DesiredXPosition - RoombaCenterX
+    B = DesiredYPosition - RoombaCenterY
+    DistFromRoombaPixels = math . sqrt ( A * A + B * B )
+    
+    return DistFromRoombaPixels
 
-def FindBestOrientedRoomba ( Roombas ) :
-    BestOrientation = REVERSE_DEGREES
+def FindBestPositionedRoomba ( Roombas , Width , Height ) :
+    BestRoomba = None
+    BestImageDistFromRoomba = 99999999
     for Roomba in Roombas :
-        RoombaOrientation = CalcDegreesFromBestOrientation ( Roomba )
+        ImageDistFromRoomba = CalcDistFromPointInImage ( Roomba , Width , Height )
         
-        if RoombaOrientation < BestOrientation :
-            BestOrientation = RoombaOrientation
+        if ImageDistFromRoomba < BestImageDistFromRoomba :
+            BestImageDistFromRoomba = ImageDistFromRoomba
             BestRoomba = Roomba
     return BestRoomba
 
@@ -136,33 +137,35 @@ def ScreenScrape ( WindowName ) :
     Image = Scrape ( ImageWindow )
     return Image
 
-def CalcDesiredXPosition ( Image ) :
-    DesiredXPosition = Image . Width * HORIZONTAL_ROOMBA_POSITION
+def CalcDesiredXPosition ( Width ) :
+    DesiredXPosition = Width * HORIZONTAL_ROOMBA_POSITION
     return DesiredXPosition
 
-def CalcDesiredYPosition ( Image ) :
-    DesiredYPosition = Image . Height * VERTICAL_ROOMBA_POSITION
+def CalcDesiredYPosition ( Height ) :
+    DesiredYPosition = Height * VERTICAL_ROOMBA_POSITION
     return DesiredYPosition
 
 def CalcDroneXMovement ( Roomba , DesiredYPosition ) :
     XMovement = NO_SPEED
-    if Roomba . Y < DesiredYPosition :
-        XMovement = TRACK_LATERAL_SPEED
-    else :
-        XMovement = - TRACK_LATERAL_SPEED
+    if Roomba != None :
+        if Roomba . center [ 1 ] < DesiredYPosition :
+            XMovement = TRACK_LATERAL_SPEED
+        else :
+            XMovement = - TRACK_LATERAL_SPEED
     return XMovement
 
 def CalcDroneYMovement ( Roomba , DesiredXPosition ) :
     YMovement = NO_SPEED
-    if Roomba . X < DesiredXPosition :
-        YMovement = - TRACK_LATERAL_SPEED
-    else :
-        YMovement = TRACK_LATERAL_SPEED
+    if Roomba != None :
+        if Roomba . center [ 0 ] < DesiredXPosition :
+            YMovement = - TRACK_LATERAL_SPEED
+        else :
+            YMovement = TRACK_LATERAL_SPEED
     return YMovement
 
-def MoveToFollowRoomba ( Roomba , Image , t ) :
-    DesiredXPosition = CalcDesiredXPosition ( Image )
-    DesiredYPosition = CalcDesiredYPosition ( Image )
+def MoveToFollowRoomba ( Roomba , width , height , t ) :
+    DesiredXPosition = CalcDesiredXPosition ( width )
+    DesiredYPosition = CalcDesiredYPosition ( height )
     XMovement = CalcDroneXMovement ( Roomba , DesiredYPosition )
     YMovement = CalcDroneYMovement ( Roomba , DesiredXPosition )
     DroneFlightVector = FlightVector ( XMovement , YMovement , 0 )
@@ -172,49 +175,57 @@ def MoveToFollowRoomba ( Roomba , Image , t ) :
 ############## The main program ##################
 @trollius.coroutine
 def main():
+    yield From(trollius.sleep(2.00))
     # Do neccesary initializations
-    InitializeScreenScraping ( )
     t = InitializeConnection ( )
     InitializeDrone ( t )
+    global image
 
     # Take off
     InitialTakeoff ( t )
 
     # Fly to middle of field
-    InitialFlyToMiddle ( t )
-
+    # InitialFlyToMiddle ( t )
+    
     # Stop
-    ReadyHover ( t )
-
-
+    # ReadyHover ( t )
+    # print('ReadyHover( t ) done')
+    
     # At this point, we expect the roombas to start moving ..
-
+    
     # Now chase after roomba whose orientation is closest to drone orientation in image
     # We will eventually change this infinite loop to check for out of bounds
+    global width
+    global height
+    global HasImage
     while ( True == True ) :
-        # Tanner made image lowercase because we have a library named Image    
-        #image = ScreenScrape ( GAZEBO_IMAGE_WINDOW_NAME )
-        img = Image.fromarray(image, 'RGB')
-        img.save('my2.png')
-        print("Tanner was here")
+        yield From(trollius.sleep(0.1)) # added by Tanner
         
-        # Not sure of Vision's api.  Hopefully its something close to this.
+        while HasImage == False :
+            time . sleep ( 0.1 )
+            print ( 'No Image Yet' )
+       
+        print('about to create roomba detector')
         DroneRoombaDetector = RoombaDetector ( )
+        print('about to detect roombas')
         TargetRoombas = DroneRoombaDetector . detect ( image )
-        TargetRoomba = FindBestOrientedRoomba ( TargetRoombas )
+        print('about to find best roomba')
+        TargetRoomba = FindBestPositionedRoomba ( TargetRoombas , width , height )
         
         # Now set drone to move to correct position
-        MoveToFollowRoomba ( TargetRoomba , image , t )
-
-        yield From(trollius.sleep(1.00)) # added by Tanner
+        print('about to follow best roomba')
+        MoveToFollowRoomba ( TargetRoomba , width , height , t )
+        
+        print ( 'successful' )
 
 
 
 
 
 tasks = []
-tasks.append(trollius.Task(publish_loop()))
 tasks.append(trollius.Task(main()))
+tasks.append(trollius.Task(publish_loop()))
 loop = trollius.get_event_loop()
+print('hello')
 loop.run_until_complete(trollius.wait(tasks))
 

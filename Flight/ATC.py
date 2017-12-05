@@ -39,7 +39,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5763"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -269,15 +269,15 @@ class Tower(object):
     hover_vector = deepcopy(StandardFlightVectors.hover)
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude)
 
-    # #Wait for vehicle to slow before sending next vector with yaw. (For when PID based slowing is disabled.)
-    # sleep(1)
+    #Wait for vehicle to slow before sending next vector with yaw. (For when PID based slowing is disabled.)
+    sleep(1)
   
     #Wait for vehicle to slow down via PID if it was previous flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    while("FLYING" in self.STATE and 
+    '''while("FLYING" in self.STATE and 
         (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
         and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-      sleep(self.STANDARD_SLEEP_TIME)
+      sleep(self.STANDARD_SLEEP_TIME)'''
 
     #Re-send the hover vector with angle.
     self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
@@ -338,8 +338,8 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          os.system("clear")
-          print(self.atc.pid_flight_controller.get_debug_string())
+          #os.system("clear")
+          #print(self.atc.pid_flight_controller.get_debug_string())
       sleep(0.1) 
       #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
 
