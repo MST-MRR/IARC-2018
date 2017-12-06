@@ -12,7 +12,7 @@ sleep(5)
 t.fly(FlightVector(0.33, 0, 0))
 sleep(10)
 
-t.hover(desired_angle=-120)
+t.hover(1.0)
 sleep(5)
 
 t.fly(FlightVector(0.33, 0, 0))

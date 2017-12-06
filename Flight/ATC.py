@@ -24,6 +24,8 @@ import AutonomousFlight
 
 class StandardFlightVectors(object):
   hover = AutonomousFlight.FlightVector(0.000, 0.000, 0.000)
+  ascent = AutonomousFlight.FlightVector(0.000, 0.000, 0.30)
+  descent = AutonomousFlight.FlightVector(0.000, 0.000, -0.30)
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -37,15 +39,15 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
   MESSAGE_SLEEP_TIME = 0.01
-  STANDARD_SLEEP_TIME = 1
+  STANDARD_SLEEP_TIME = 0.01
   LAND_ALTITUDE = 0.25
-  ALT_PID_THRESHOLD = 0.05
-  VEL_PID_THRESHOLD = 0.09
+  ALT_PID_THRESHOLD = 0.38
+  VEL_PID_THRESHOLD = 0.15
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
@@ -214,7 +216,7 @@ class Tower(object):
     self.arm_drone()
 
     self.STATE = VehicleStates.takeoff
-    self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.hover, desired_altitude)
+    self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.ascent)
 
     while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
       sleep(self.STANDARD_SLEEP_TIME)
@@ -232,13 +234,8 @@ class Tower(object):
     @returns:
     """
 
-    #TODO Remove both of these checks. These checks are here in case the someone asks for a Z axis change only. 
-    #This will not change the vehicle's state because the Z axis controller is not finished/enabled yet.
-    if(desired_vector.z == 0):
-      self.STATE = VehicleStates.flying
-
-    if "FLYING" in self.STATE:
-      self.pid_flight_controller.send_velocity_vector(desired_vector)
+    self.pid_flight_controller.send_velocity_vector(desired_vector)
+    self.STATE = VehicleStates.flying
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
@@ -261,31 +258,44 @@ class Tower(object):
 
     #Send the hover vector without an angle first to stop the vehicle.
     hover_vector = deepcopy(StandardFlightVectors.hover)
-    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude)
-
-    # #Wait for vehicle to slow before sending next vector with yaw. (For when PID based slowing is disabled.)
-    # sleep(1)
+    correction_velocity_vector = deepcopy(StandardFlightVectors.hover)
+    self.pid_flight_controller.send_velocity_vector(hover_vector)
   
-    #Wait for vehicle to slow down via PID if it was previous flying. 
+    #Wait for vehicle to slow down via PID if it was previously flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
-    # while("FLYING" in self.STATE and 
-    #     (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
-    #     and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
-    #   sleep(self.STANDARD_SLEEP_TIME)
+    while("FLYING" in self.STATE and 
+        (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[0])
+        and (not self.in_range(self.VEL_PID_THRESHOLD, 0.00, self.vehicle.velocity[1])))):
+      sleep(self.STANDARD_SLEEP_TIME)
 
-    #Re-send the hover vector with angle.
-    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude, desired_angle)
-
-    #Check if vehicle's altitude or yaw are not correct and set state appropriately.
-    if(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))
-      or (desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg())))):
+    #Check if vehicle's altitude is not correct and set state appropriately.
+    if(self.get_altitude() <= desired_altitude and not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
+      correction_velocity_vector = deepcopy(StandardFlightVectors.ascent)
+      self.STATE = VehicleStates.hover_adjusting
+    elif(self.get_altitude() >= desired_altitude and not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
+      correction_velocity_vector = deepcopy(StandardFlightVectors.descent)
       self.STATE = VehicleStates.hover_adjusting
     else:
       self.STATE = VehicleStates.hover
 
+    #Check if vehicle's yaw is not correct and set state appropriately.
+    if(desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
+      self.STATE = VehicleStates.hover_adjusting
+    else:
+      self.STATE = VehicleStates.hover
+
+    #Re-send the hover vector with angle.
+    self.pid_flight_controller.send_velocity_vector(correction_velocity_vector, desired_yaw = desired_angle)
+
     #Wait for the vehicle to correct.
     while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
       sleep(self.STANDARD_SLEEP_TIME)
+    else:
+      self.STATE = VehicleStates.hover
+      self.pid_flight_controller.send_velocity_vector(hover_vector) 
+      sleep(1) #Wait for AutonomousFlight to query the state.
+
+    #Wait for the vehicle to correct.
     while(desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
@@ -298,9 +308,10 @@ class Tower(object):
     @args:
     @returns:
     """
+    self.hover()
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
-    self.pid_flight_controller.send_velocity_vector(deepcopy(StandardFlightVectors.hover), desired_altitude=0)
+
     
     self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
 
@@ -335,7 +346,6 @@ class FailsafeController(threading.Thread):
           os.system("clear")
           print(self.atc.pid_flight_controller.get_debug_string())
       sleep(0.01) 
-      #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
