@@ -36,6 +36,7 @@ import pygazebo.msg.image_stamped_pb2
 
 # Yes, a global variable.  I don't know how else to do it. -Tanner
 image = np.ndarray(shape = (0,0,0))
+hasImage = False
 
 
 
@@ -54,8 +55,10 @@ def publish_loop():
         datalist = list ( message.image.data )
         npdatalist = np.array(datalist)
         npdatalist = np.reshape(npdatalist , (height, width, 3))
-
+        global image
+        global hasImage
         image = npdatalist # added by Tanner
+        hasImage = True
 
         
     
@@ -172,6 +175,7 @@ def MoveToFollowRoomba ( Roomba , Image , t ) :
 ############## The main program ##################
 @trollius.coroutine
 def main():
+    """
     # Do neccesary initializations
     InitializeScreenScraping ( )
     t = InitializeConnection ( )
@@ -185,8 +189,8 @@ def main():
 
     # Stop
     ReadyHover ( t )
-
-
+    """
+    
     # At this point, we expect the roombas to start moving ..
 
     # Now chase after roomba whose orientation is closest to drone orientation in image
@@ -194,8 +198,12 @@ def main():
     while ( True == True ) :
         # Tanner made image lowercase because we have a library named Image    
         #image = ScreenScrape ( GAZEBO_IMAGE_WINDOW_NAME )
-        img = Image.fromarray(image, 'RGB')
-        img.save('my2.png')
+        
+        global image
+        global hasImage
+        if hasImage:
+            img = Image.fromarray(image, 'RGB')
+            img.save('my2.png')
         print("Tanner was here")
         
         # Not sure of Vision's api.  Hopefully its something close to this.
