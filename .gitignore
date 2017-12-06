@@ -107,7 +107,12 @@ ENV/
 
 #Flight/Tests
 Vision/examples/roomba_detection/IARC.mp4
+Vision/mrrdt_vision/mrrdt_vision/data/roombaRed.mp4
+Vision/mrrdt_vision/mrrdt_vision/data/IARC.mp4
+Vision/mrrdt_vision/mrrdt_vision/data/training_set/**
+Vision/mrrdt_vision/mrrdt_vision/data/training_set/
+Vision/mrrdt_vision/mrrdt_vision/data/validation_set/**
+Vision/mrrdt_vision/mrrdt_vision/data/validation_set/
 
 #VSCode
 .vscode/
-
