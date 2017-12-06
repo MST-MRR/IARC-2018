@@ -14,12 +14,12 @@ THRUST_LOW = 986.0
 PITCH_P = 3.0
 PITCH_I = 0.0
 PITCH_D = 2.9
-ROLL_P = 0.0
+ROLL_P = 3.0
 ROLL_I = 0.0
-ROLL_D = 0.0
-YAW_P = 0.0
+ROLL_D = 2.9
+YAW_P = .5
 YAW_I = 0.0
-YAW_D = 0.0
+YAW_D = 1.5
 THROTTLE_P = 2.5
 THROTTLE_I = 0.4
 THROTTLE_D = 0.5
@@ -77,13 +77,13 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     roll_graph = PID_Graph(desired_roll_velocity, "Roll")
 
     # Initialize Yaw PID Controller
-    #desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
-    # YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
-    # YawPID.SetPoint = desired_yaw_angle
-    # YawPID.setSampleTime(PID_UPDATE_TIME)
-    # YawPID = flightControl.PIDController(desired_yaw_angle, YAW_MID,
-    #                                      PID_UPDATE_TIME, YAW_P, YAW_I, YAW_D)
-    # YawPWM = YAW_MID
+    desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
+    YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
+    YawPID.SetPoint = desired_yaw_angle
+    YawPID.setSampleTime(PID_UPDATE_TIME)
+    #YawPID = flightControl.PIDController(desired_yaw_angle, YAW_MID,
+     #                                     PID_UPDATE_TIME, YAW_P, YAW_I, YAW_D)
+    YawPWM = YAW_MID
 
     yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
 
@@ -144,21 +144,21 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 
 
                 # Get drones yaw angle
-                #current_yaw_angle = vehicle.attitude.yaw
+                current_yaw_angle = vehicle.attitude.yaw
                 # update vehicles current yaw channel with new yaw
-                #YawPID.update(current_yaw_angle)
-                #YawPWM += YawPID.output
-                #vehicle.channels.overrides[YAW_CHANNEL] = YawPWM
+                YawPID.update(current_yaw_angle)
+                YawPWM += YawPID.output
+                vehicle.channels.overrides[YAW_CHANNEL] = YawPWM
                 # update graphs
                 #yaw_graph.update(current_yaw_angle)
 
                 # Output data
                 print("Desired pitch: %s" % PitchPID.SetPoint)
                 print("Actual pitch:  %s" % current_pitch_velocity)
-                # print("Desired roll:  %s" % desired_roll_velocity)
-                # print("Actual roll:   %s" % current_roll_velocity)
-                #print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
-                #print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
+                print("Desired roll:  %s" % desired_roll_velocity)
+                print("Actual roll:   %s" % current_roll_velocity)
+                print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
+                print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
                 
                 os.system('clear')
                 
@@ -310,4 +310,4 @@ def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 2, 0.33, 0.0, 90.0)
+test_flight(0.3, 2, 0, 0.00, 0.0)
