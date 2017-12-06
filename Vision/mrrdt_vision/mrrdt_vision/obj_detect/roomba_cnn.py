@@ -70,7 +70,7 @@ class Roomba():
         cv2.rectangle(img, (x_min, y_min), (x_max, y_max), self._bounding_box_color, self._bounding_box_thickness)
 
         if show_orientation:
-            cv2.arrowedLine(img, tuple(self.center.astype(int)), tuple((self.center+ARROW_LENGTH*self.orientation).astype(int)), ARROW_COLOR, ARROW_THICKNESS)
+            cv2.line(img, tuple(self.center.astype(int)), tuple((self.center+ARROW_LENGTH*self.orientation).astype(int)), ARROW_COLOR, ARROW_THICKNESS)
 
 class RoombaDetector():
     def __init__(self, threshold=DEFAULT_THRESHOLD):
