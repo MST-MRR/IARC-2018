@@ -1,0 +1,87 @@
+#!/bin/bash
+# -------------------------------------------------------------------------
+# Multi-Rotor Robot Design Team
+# Missouri University of Science and Technology
+# Fall 2017
+# Christopher O'Toole
+#
+# -------------------------------------------------------------------------
+# Purpose: Builds and installs OpenCV 3.3.0 and its Python 3.5 bindings.
+#
+# Note: If Python 3.5 bindings are not built after an otherwise
+# successful build and installation, check to make sure that all 
+# the CMake path variables are correct for your system's setup.
+# -------------------------------------------------------------------------
+
+OPENCV_FOLDER="opencv"
+OPENCV_CONTRIB_FOLDER="opencv_contrib"
+OPENCV_GIT_URL="https://github.com/opencv/opencv.git"
+OPENCV_CONTRIB_GIT_URL="https://github.com/opencv/opencv_contrib.git"
+
+
+# opencv 3.3.0 release id
+OPENCV_COMMIT_ID="4af3ca4e4d7be246a49d751a79c6392e848ac2aa"
+# opencv_contrib 3.3.0 release id
+OPENCV_CONTRIB_COMMIT_ID="2a9d1b22ed76eb22fad1a5edf6faf4d05f207b13"
+
+OPENCV_BUILD_DIR="release"
+# use all available cores to compile OpenCV
+NUM_CORES=`nproc --all`
+
+# required cmake variables
+OPENCV_EXTRA_MODULES_PATH="~/opencv_contrib/modules"
+PYTHON3_EXECUTABLE="/usr/bin/python3.5"
+PYTHON_INCLUDE_DIR="/usr/include/python3.5"
+PYTHON_LIBRARY="/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu/libpython3.5.so"
+PYTHON_NUMPY_INCLUDE_DIRS="/usr/local/lib/python3.5/dist-packages/numpy/core/include"
+
+# -------------------------------------------------------------------------
+# change to home directory
+cd ~/
+
+# install prerequisites (source: https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html)
+sudo apt-get install build-essential
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+
+# clone the latest release of opencv and opencv_contrib
+if [ ! -d "$OPENCV_FOLDER" ]; then
+    git clone "$OPENCV_GIT_URL"
+    cd "$OPENCV_FOLDER"
+    git reset --hard "$OPENCV_COMMIT_ID"
+    cd ..
+fi
+
+if [ ! -d "$OPENCV_CONTRIB_FOLDER" ]; then
+    git clone "$OPENCV_CONTRIB_GIT_URL"
+    cd "$OPENCV_CONTRIB_FOLDER"
+    git reset --hard "$OPENCV_CONTRIB_COMMIT_ID"
+    cd ..
+fi
+
+# prepare to build opencv
+cd "$OPENCV_FOLDER"
+
+if [ ! -d "$OPENCV_BUILD_DIR" ]; then
+    mkdir "$OPENCV_BUILD_DIR"
+fi
+
+cd "$OPENCV_BUILD_DIR"
+
+# generate build configuration files
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D OPENCV_EXTRA_MODULES_PATH="$OPENCV_EXTRA_MODULES_PATH" \
+      -D PYTHON3_EXECUTABLE="$PYTHON3_EXECUTABLE" \
+      -D PYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" \
+      -D INSTALL_PYTHON_EXAMPLES=ON \
+      -D INSTALL_C_EXAMPLES=OFF \
+      -D BUILD_EXAMPLES=ON \
+      -D PYTHON_LIBRARY="$PYTHON_LIBRARY" \
+      -D PYTHON_NUMPY_INCLUDE_DIRS="$PYTHON_NUMPY_INCLUDE_DIRS" ..
+
+# compile OpenCV with all available processor cores
+make -j"$NUM_CORES"
+
+# install OpenCV
+sudo make install
+sudo ldconfig
