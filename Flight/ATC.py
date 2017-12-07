@@ -39,14 +39,14 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 0.01
   LAND_ALTITUDE = 0.25
-  ALT_PID_THRESHOLD = 0.27
+  ALT_PID_THRESHOLD = 0.37
   VEL_PID_THRESHOLD = 0.15
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
@@ -343,9 +343,9 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          #os.system("clear")
-          #print(self.atc.pid_flight_controller.get_debug_string())
-      sleep(0.1) 
+          os.system("clear")
+          print(self.atc.pid_flight_controller.get_debug_string())
+      sleep(0.01) 
       #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
 
   def join(self, timeout=None):

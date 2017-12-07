@@ -63,18 +63,18 @@ class PIDFlightController(object):
   ROLL_MID = 1494.0
   THROTTLE_MIN = 982.0
   THROTTLE_MAX = 2006.0
-  PITCH_P = 1.39
+  PITCH_P = 1.45
   PITCH_I = 0.0
   PITCH_D = 3.70
-  ROLL_P = 1.30
+  ROLL_P = 1.45
   ROLL_I = 0.00
   ROLL_D = 3.70
   YAW_P = 0.73
   YAW_I = 0.00
   YAW_D = 8.00
-  THROTTLE_P = 2.95
+  THROTTLE_P = 3.70
   THROTTLE_I = 0.00
-  THROTTLE_D = 2.75
+  THROTTLE_D = 1.45
   ALTITUDE_P = 0.39
   ALTITUDE_I = 0.09
   ALTITUDE_D = 0.05
@@ -117,7 +117,7 @@ class PIDFlightController(object):
 
       self.Throttle_PID = PID.PID(self.THROTTLE_P, self.THROTTLE_I, self.THROTTLE_D)
       self.Throttle_PID.SetPoint = 0.00
-      self.Throttle_PID.setSampleTime(self.YAW_PID_SAMPLE_TIME)
+      self.Throttle_PID.setSampleTime(self.PID_SAMPLE_TIME)
 
       self.Altitude_PID = PID.PID(self.ALTITUDE_P, self.ALTITUDE_I, self.ALTITUDE_D)
       self.Altitude_PID.SetPoint = 0.00
