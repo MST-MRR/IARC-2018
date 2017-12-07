@@ -10,7 +10,7 @@ from setuptools import find_packages
 from setuptools import setup
 from mrrdt_vision.__init__ import __version__
 
-REQUIRED_PACKAGES = ['h5py>=2.7.0', 'Keras>=2.0.6', 'Theano>=0.9.0', 'matplotlib>=2.0.2', 'scikit-learn>=0.18', 'hyperopt>=0.1']
+REQUIRED_PACKAGES = []
 PACKAGE_NAME = 'mrrdt_vision'
 
 setup(
@@ -25,3 +25,5 @@ setup(
     author_email='cdocq9@mst.edu',
     license='MIT'
 )
+
+#TODO: download tensorflow model files

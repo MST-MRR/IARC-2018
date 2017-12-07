@@ -148,7 +148,7 @@ class Window():
         Returns
         -------
         out: str
-        Returns the string representation of the pressed key, or ÿ if no key was pressed.
+        Returns the string representation of the pressed key, or xFF if no key was pressed.
         """
 
         return chr(cv2.waitKey(1) & 0xFF)

@@ -564,10 +564,10 @@
         <pose frame=''>0 0 10 0 -0 0</pose>
       </light>
       <light name='user_point_light_0'>
-        <pose frame=''>-5.64563 0.094983 9.74242 0 -0 0</pose>
+        <pose frame=''>-5.64563 0.094983 3.74242 0 -0 0</pose>
       </light>
       <light name='user_point_light_1'>
-        <pose frame=''>3.78787 -0.036533 9.80346 0 -0 0</pose>
+        <pose frame=''>3.78787 -0.036533 3.80346 0 -0 0</pose>
       </light>
     </state>
     <gui fullscreen='0'>
@@ -583,7 +583,7 @@
       <specular>0.1 0.1 0.1 1</specular>
       <attenuation>
         <range>20</range>
-        <constant>0.5</constant>
+        <constant>0.3</constant>
         <linear>0.01</linear>
         <quadratic>0.001</quadratic>
       </attenuation>
@@ -591,12 +591,12 @@
       <direction>0 0 -1</direction>
     </light>
     <light name='user_point_light_1' type='point'>
-      <pose frame=''>3.78787 -0.036533 1 0 -0 0</pose>
+      <pose frame=''>3.78787 0.036533 1 0 -0 0</pose>
       <diffuse>0.5 0.5 0.5 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
       <attenuation>
         <range>20</range>
-        <constant>0.5</constant>
+        <constant>0.3</constant>
         <linear>0.01</linear>
         <quadratic>0.001</quadratic>
       </attenuation>

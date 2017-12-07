@@ -32,7 +32,7 @@ QUIT_KEY = 'q'
 # image(s) for this file's unit test
 TEST_VIDEO_PATH = '../data/IARC.mp4'
 
-CWD_PATH = os.getcwd()
+CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = 'ssd'
 PATH_TO_CKPT = os.path.join(CWD_PATH, DATA_DIR, 'ssd_300_roomba_v2.pb')
 PATH_TO_LABELS = os.path.join(CWD_PATH, DATA_DIR, 'object-detection.pbtext')
