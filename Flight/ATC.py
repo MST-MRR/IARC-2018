@@ -95,10 +95,10 @@ class Tower(object):
       self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
       self.pid_flight_controller.initialize_controllers()
 
-      if(self.get_altitude() < self.LAND_ALTITUDE):
-        self.STATE = VehicleStates.landed
-      else:
-        self.land()
+      # if(self.get_altitude() > self.LAND_ALTITUDE):
+      #   self.land()
+      # else:
+      #   self.STATE = VehicleStates.landed
 
       self.switch_control()
 
