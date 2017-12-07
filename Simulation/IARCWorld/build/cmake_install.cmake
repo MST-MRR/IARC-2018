@@ -1,4 +1,4 @@
-# Install script for directory: /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld
+# Install script for directory: /home/christopher/Simulation/IARC-2018/Simulation/IARCWorld
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/christopher/Simulation/IARC-2018/Simulation/IARCWorld/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

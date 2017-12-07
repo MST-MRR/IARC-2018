@@ -22,6 +22,7 @@ import logging
 
 import trollius
 from trollius import From
+from timeit import default_timer as timer
 
 import mrrdt_vision
 from mrrdt_vision.obj_detect.roomba_cnn import RoombaDetector
@@ -37,14 +38,29 @@ class SimpleDroneAI():
     # camera message type
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # speed to follow roombas with in m/s
-    ROOMBA_TRACKING_SPEED = .33
+    ROOMBA_TRACKING_SPEED = .4
     # altitude to hover at after takeoff in meters
     TAKEOFF_HEIGHT = 1.5
+    # time in seconds we can go without finding a roomba before going into hover mode
+    MAX_LOST_TARGET_TIME = 3
 
     def __init__(self):
         self._tower = Tower()
         self._tower.initialize()
         self._detector = RoombaDetector()
+        self._time_since_last_roomba = 0
+        self._hovering = True
+
+    @property
+    def hovering(self):
+        return self._hovering
+
+    @hovering.setter
+    def hovering(self, value):
+        self._hovering = value
+
+        if self.hovering:
+            self._tower.hover()
 
     def _takeoff(self):
         """
@@ -86,6 +102,10 @@ class SimpleDroneAI():
 
             velocity_vector = self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
             self._tower.fly(velocity_vector)
+            self.hovering = False
+            self._time_since_last_roomba = timer()
+        elif timer() - self._time_since_last_roomba >= SimpleDroneAI.MAX_LOST_TARGET_TIME and not self.hovering:
+            self.hovering = True
 
     def _update(self, data):
         """
