@@ -1,246 +1,134 @@
+#!/usr/bin/env python2.7
+############################################
+# Multirotor Robot Design Team
+# Missouri University of Science and Technology
+# Fall 2017
+# Christopher O'Toole
+
+'''
+A simple quadcopter AI which follows the nearest roomba in an IARC arena simulated by Gazebo
+'''
+
 from AutonomousFlight import FlightVector
 from ATC import Tower
-import time
-import math
-import mrrdt_vision
-
-NORMAL_FLIGHT_HEIGHT = 0.7
-NON_TRACK_LATERAL_SPEED = 2
-FLY_TO_MIDDLE_DIST = 12
-DRONE_START_HEIGHT = 0
-REVERSE_DEGREES = 180
-CIRCLE_DEGREES = 360
-GAZEBO_IMAGE_WINDOW_NAME = 'Gazebo: Image View'
-TRACK_LATERAL_SPEED = 0.6
-NO_SPEED = 0
-SIMULATION_SPEED_FACTOR = 0.83
-
-# Ratio of image from top of image
-HORIZONTAL_ROOMBA_POSITION = 0.5
-
-# Ratio of image from left of image
-VERTICAL_ROOMBA_POSITION = 0.5
-
-
-# from Lucas' Test1_v4.py file
-import trollius
-from trollius import From
-import sys
-from PIL import Image
+import cv2
 import numpy as np
+import time
+from sklearn.preprocessing import normalize
 
 import pygazebo
 import pygazebo.msg.image_stamped_pb2
-
-
-# Yes, a global variable.  I don't know how else to do it. -Tanner
-image = np.ndarray(shape = (0,0,0))
-hasImage = False
-
-width = 0
-height = 0
-
-
-
-@trollius.coroutine
-def publish_loop():
-    
-    print('Connecting to get image')
-    manager = yield From(pygazebo.connect()) 
-
-    def callback(data):
-        print ( 'Got mail.' )
-        message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
-        global width
-        global height
-        global image
-        width = message.image.width
-        height = message.image.height
-        datalist = list ( message.image.data )
-        npdatalist = np.array(datalist)
-        npdatalist = np.reshape(npdatalist , (height, width, 3))
-
-        global image
-        global hasImage
-
-        image = npdatalist # added by Tanner
-        hasImage = True
-
-        
-    
-    # originally /gazebo/default/iris/iris_demo/gimbal_small_2d/tilt_link/camera/image
-    subscriber = manager.subscribe('/gazebo/default/iris/iris_demo/gimbal_small_2d/tilt_link/camera/image',
-                     'gazebo.msgs.ImageStamped',
-                     callback)
-
-    yield From(subscriber.wait_for_connection())
-    print ( 'Entering Yield Loop' )
-    while(True):
-        print ( 'fire' )
-        yield From(trollius.sleep(1.00))
-    print(dir(manager))
-
 import logging
+
+import trollius
+from trollius import From
+
+import mrrdt_vision
+from mrrdt_vision.obj_detect.roomba_cnn import RoombaDetector
 
 logging.basicConfig()
 
-# Deleted Trollius stuff here.  Put Trollius stuff at bottom. -Tanner
+# displays a live stream of footage from the drone in the simulator, set to False for slightly better runtime performance
+_DEBUG = True
 
-# end of code from Lucas' Test1_v4.py file -Tanner
+class SimpleDroneAI():
+    # camage image message location
+    CAMERA_MSG_LOCATION = '/gazebo/default/iris/iris_demo/gimbal_small_2d/tilt_link/camera/image'
+    # camera message type
+    CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
+    # speed to follow roombas with in m/s
+    ROOMBA_TRACKING_SPEED = .33
+    # altitude to hover at after takeoff in meters
+    TAKEOFF_HEIGHT = 1.5
 
+    def __init__(self):
+        self._tower = Tower()
+        self._tower.initialize()
+        self._detector = RoombaDetector()
 
+    def _takeoff(self):
+        """
+        @purpose: Takeoff and hover at an altitude of `SimpleDroneAI.TAKEOFF_HEIGHT` meters
+        @args:
+        @returns:
+        """
+        self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
 
-def InitializeConnection ( ) :
-    t = Tower ( )
-    return t
+    def _get_velocity_vector2d(self, start, goal, speed):
+        """
+        @purpose: 
+            Takeoff and hover at an altitude of `SimpleDroneAI.TAKEOFF_HEIGHT` meters
+            Note: This function will dampen the speed based on the distance we are away from the target
+        @args:
+            start, np.array: 2D position vector corresponding to the start point
+            goal, np.array: 2D position vector corresponding to the destination point
+            speed, float: speed limit in m/s
+        @returns: 
+            A FlightVector pointed in the direction of `goal` with speed less than or equal to `speed`.
+        """
+        dist = np.sqrt(np.sum((goal-start)**2))
+        x_vel, y_vel = min(dist, SimpleDroneAI.ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
+        return FlightVector(-y_vel, x_vel, 0)
 
-def InitializeDrone ( t ) :
-    t . initialize ( )
-    print ( 'Has Initialized' )
+    def _follow_nearest_roomba(self, roombas, drone_midpoint):
+        """
+        @purpose: 
+            Attempts to follow the roomba closest to the drone
+        @args:
+            roombas, collection of Roomba instances: A list of detected roombas
+            drone_midpoint, np.array: Midpoint of the drone, we navigate relative to this point
+        @returns: 
+        """
+        if roombas:
+            roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
+            target_idx = np.argmin(np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
+            target = roombas[target_idx]
 
-def InitialTakeoff ( t ) :
-    t . takeoff ( NORMAL_FLIGHT_HEIGHT * 2 )
+            velocity_vector = self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
+            self._tower.fly(velocity_vector)
 
-def InitialFlyToMiddle ( t ) :
-    t . fly ( FlightVector ( NON_TRACK_LATERAL_SPEED , 0 , 0 ) )
-    TimeToTravel = FLY_TO_MIDDLE_DIST / NON_TRACK_LATERAL_SPEED
-    time . sleep ( TimeToTravel / SIMULATION_SPEED_FACTOR )
-
-def ReadyHover ( t ) :
-    DroneHover ( t , NORMAL_FLIGHT_HEIGHT * 2 )
-
-def DroneHover ( t , FlightHeight ) :
-    t . hover ( FlightHeight , desired_angle=0.01 )
-
-def CalcDistFromPointInImage ( Roomba , Width , Height ) :
-    RoombaCenterX = Roomba.center[0]
-    RoombaCenterY = Roomba.center[1]
-    DesiredXPosition = CalcDesiredXPosition ( Width )
-    DesiredYPosition = CalcDesiredYPosition ( Height )
-    A = DesiredXPosition - RoombaCenterX
-    B = DesiredYPosition - RoombaCenterY
-    DistFromRoombaPixels = math . sqrt ( A * A + B * B )
-    
-    return DistFromRoombaPixels
-
-def FindBestPositionedRoomba ( Roombas , Width , Height ) :
-    BestRoomba = None
-    BestImageDistFromRoomba = 99999999
-    for Roomba in Roombas :
-        ImageDistFromRoomba = CalcDistFromPointInImage ( Roomba , Width , Height )
+    def _update(self, data):
+        """
+        @purpose: 
+            Event handler which updates relevant state variables and issues commands to the drone
+        @args:
+            data, protobuf: A message containing an image from the drone's camera.
+        @returns: 
+        """
+        message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
+        h, w = (message.image.height, message.image.width)
+        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
+        roombas = self._detector.detect(img)
         
-        if ImageDistFromRoomba < BestImageDistFromRoomba :
-            BestImageDistFromRoomba = ImageDistFromRoomba
-            BestRoomba = Roomba
-    return BestRoomba
+        drone_midpoint = np.asarray([w/2, h/2])
+        self._follow_nearest_roomba(roombas, drone_midpoint)
 
-def ScreenScrape ( WindowName ) :
-    ImageWindow = GetWindow ( WindowName )
-    Image = Scrape ( ImageWindow )
-    return Image
+        if _DEBUG:
+            bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            
+            for roomba in roombas:
+                roomba.draw(bgr_img)
+            
+            cv2.imshow('debug', bgr_img)
+            cv2.waitKey(1)
 
-def CalcDesiredXPosition ( Width ) :
-    DesiredXPosition = Width * HORIZONTAL_ROOMBA_POSITION
-    return DesiredXPosition
-
-def CalcDesiredYPosition ( Height ) :
-    DesiredYPosition = Height * VERTICAL_ROOMBA_POSITION
-    return DesiredYPosition
-
-def CalcDroneXMovement ( Roomba , DesiredYPosition ) :
-    XMovement = NO_SPEED
-    if Roomba != None :
-        if Roomba . center [ 1 ] < DesiredYPosition :
-            XMovement = TRACK_LATERAL_SPEED
-        else :
-            XMovement = - TRACK_LATERAL_SPEED
-    return XMovement
-
-def CalcDroneYMovement ( Roomba , DesiredXPosition ) :
-    YMovement = NO_SPEED
-    if Roomba != None :
-        if Roomba . center [ 0 ] < DesiredXPosition :
-            YMovement = - TRACK_LATERAL_SPEED
-        else :
-            YMovement = TRACK_LATERAL_SPEED
-    return YMovement
-
-def MoveToFollowRoomba ( Roomba , width , height , t ) :
-    DesiredXPosition = CalcDesiredXPosition ( width )
-    DesiredYPosition = CalcDesiredYPosition ( height )
-    XMovement = CalcDroneXMovement ( Roomba , DesiredYPosition )
-    YMovement = CalcDroneYMovement ( Roomba , DesiredXPosition )
-    DroneFlightVector = FlightVector ( XMovement , YMovement , 0 )
-    t . fly ( DroneFlightVector )
-    
-
-############## The main program ##################
-@trollius.coroutine
-def main():
-
-    # Do neccesary initializations
-    t = InitializeConnection ( )
-    InitializeDrone ( t )
-    global image
-
-    # Take off
-    InitialTakeoff ( t )
-
-    # Fly to middle of field
-    # InitialFlyToMiddle ( t )
-    
-    # Stop
-    ReadyHover ( t )
-    
-
-    # ReadyHover ( t )
-    # print('ReadyHover( t ) done')
-
-    
-    # At this point, we expect the roombas to start moving ..
-    
-    # Now chase after roomba whose orientation is closest to drone orientation in image
-    # We will eventually change this infinite loop to check for out of bounds
-    global width
-    global height
-    global HasImage
-    while ( True == True ) :
-        # Tanner made image lowercase because we have a library named Image    
-        #image = ScreenScrape ( GAZEBO_IMAGE_WINDOW_NAME )
+    @trollius.coroutine
+    def run(self):
+        """
+        @purpose: 
+            Gazebo simulator event loop, forwards messages and state information to self._update
+        @args:
+        @returns: 
+        """
+        self._takeoff()
+        manager = yield From(pygazebo.connect()) 
         
-        global image
-        global hasImage
-        if hasImage:
-            img = Image.fromarray(image, 'RGB')
-            img.save('my2.png')
-        print("Tanner was here")
-        yield From(trollius.sleep(0.1)) # added by Tanner
-        
-        while HasImage == False :
-            time . sleep ( 0.1 )
-            print ( 'No Image Yet' )
-       
-        print('about to create roomba detector')
-        DroneRoombaDetector = RoombaDetector ( )
-        print('about to detect roombas')
-        TargetRoombas = DroneRoombaDetector . detect ( image )
-        print('about to find best roomba')
-        TargetRoomba = FindBestPositionedRoomba ( TargetRoombas , width , height )
-        
-        # Now set drone to move to correct position
-        print('about to follow best roomba')
-        MoveToFollowRoomba ( TargetRoomba , width , height , t )
-        
-        print ( 'successful' )
+        subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._update)
+        yield From(subscriber.wait_for_connection())
 
+        while True:
+            yield From(trollius.sleep(1.00))
 
-
-
-
-tasks = []
-tasks.append(trollius.Task(main()))
-tasks.append(trollius.Task(publish_loop()))
+ai = SimpleDroneAI()
 loop = trollius.get_event_loop()
-print('hello')
-loop.run_until_complete(trollius.wait(tasks))
-
+loop.run_until_complete(ai.run())

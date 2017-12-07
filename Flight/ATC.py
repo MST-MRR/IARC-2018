@@ -94,12 +94,6 @@ class Tower(object):
       self.pid_flight_controller = AutonomousFlight.PIDFlightController(self)
       self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
       self.pid_flight_controller.initialize_controllers()
-
-      if(self.get_altitude() < self.LAND_ALTITUDE):
-        self.STATE = VehicleStates.landed
-      else:
-        self.land()
-
       self.switch_control()
 
       print("\nSuccessfully connected to vehicle.")

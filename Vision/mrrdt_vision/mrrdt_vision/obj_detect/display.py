@@ -82,7 +82,7 @@ class Window():
         """
 
         self.title = new_title
-        #cv2.setWindowTitle(self.name, self.title) commented out by Tanner
+        cv2.setWindowTitle(self.name, self.title)
 
     def is_key_down(self, key):
         """
@@ -148,7 +148,7 @@ class Window():
         Returns
         -------
         out: str
-        Returns the string representation of the pressed key, or y with 2 dots over it if no key was pressed. (Tanner was here)
+        Returns the string representation of the pressed key, or xFF if no key was pressed.
         """
 
         return chr(cv2.waitKey(1) & 0xFF)
