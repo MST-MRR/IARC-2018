@@ -113,17 +113,15 @@ class SimpleDroneAI():
         elif timer() - self._time_since_last_roomba >= SimpleDroneAI.MAX_LOST_TARGET_TIME and not self.hovering:
             self.hovering = True
 
-    def _update(self, data):
+    def _update(self, img):
         """
         @purpose: 
             Event handler which updates relevant state variables and issues commands to the drone
         @args:
-            data, protobuf: A message containing an image from the drone's camera.
+            img: A frame from the RealSense.
         @returns: 
         """
-        message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
-        h, w = (message.image.height, message.image.width)
-        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
+        h, w = (img.height, img.width)
         roombas = self._detector.detect(img)
         
         drone_midpoint = np.asarray([w/2, h/2])
@@ -155,8 +153,8 @@ class SimpleDroneAI():
         while True:
             try:
                 for _ in range(SimpleDroneAI.REALSENSE_FRAMERATE):
-                    self.cam.wait_for_frames()
-                    self._update(self.cam.color)
+                    self._cam.wait_for_frames()
+                    self._update(self._cam.color)
             except KeyboardInterrupt:
                 self._shutdown()
 
