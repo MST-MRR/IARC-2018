@@ -52,6 +52,12 @@ class SimpleDroneAI():
         self._detector = RoombaDetector()
         self._time_since_last_roomba = 0
         self._hovering = True
+        
+        ## start the service - also available as context manager
+        serv = pyrs.Service()
+
+        ## create a device from device id and streams of interest
+        cam = serv.Device(device_id = 0, streams = [pyrs.stream.ColorStream(fps = 60)])
 
     @property
     def hovering(self):
@@ -144,17 +150,8 @@ class SimpleDroneAI():
         """
         self._takeoff()
         
-        ## start the service - also available as context manager
-        serv = pyrs.Service()
-
-        ## create a device from device id and streams of interest
-        cam = serv.Device(device_id = 0, streams = [pyrs.stream.ColorStream(fps = 60)])
-        
         cam.wait_for_frames()
         self.update(cam.color)
-        
-        cam.stop()
-        serv.stop()
         
 
         while True:
@@ -163,3 +160,6 @@ class SimpleDroneAI():
 ai = SimpleDroneAI()
 loop = trollius.get_event_loop()
 loop.run_until_complete(ai.run())
+
+ai.cam.stop()
+ai.serv.stop()
