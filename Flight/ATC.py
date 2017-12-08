@@ -46,7 +46,7 @@ class Tower(object):
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 0.01
   LAND_ALTITUDE = 0.25
-  ALT_PID_THRESHOLD = 0.24
+  ALT_PID_THRESHOLD = 0.21
   VEL_PID_THRESHOLD = 0.15
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
@@ -207,7 +207,7 @@ class Tower(object):
 
   def takeoff(self, desired_altitude, desired_angle=None):
     """
-    @purpose: Initiate a takeoff using the altitude based PID.
+    @purpose: Initiate a takeoff using the throttle based PID.
     @args: 
       desired_altitude: Altitude to hover at when the takeoff operation is finished.
     @returns:
@@ -311,7 +311,6 @@ class Tower(object):
     self.hover()
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
-
     
     self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
 
@@ -346,7 +345,6 @@ class FailsafeController(threading.Thread):
           os.system("clear")
           print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
-      #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:

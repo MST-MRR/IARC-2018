@@ -134,7 +134,7 @@ class PIDFlightController(object):
     if(desired_yaw is not None and 
       requested_flight_vector.x == 0.00 and 
       requested_flight_vector.y ==0):
-      # By checking the magnitude, we ensure that the vehicle will only yaw while it is not moving horizontally.
+      # By checking the magnitude, we ensure that the vehicle will only yaw while stationary.
       # There is a similar check below in update_controllers.
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
 
@@ -154,7 +154,7 @@ class PIDFlightController(object):
     self.Throttle_PID.update(vehicle_z_velocity)
     self.Throttle_PWM += self.Throttle_PID.output
 
-    # #This flips the velocity reeadings so that they are relative to the vehicle and not the world.
+    # #This flips the velocity readings so that they are relative to the vehicle and not the world.
     if(math.cos(self.atc.vehicle.attitude.yaw) <= 0.0):
       vehicle_x_velocity *=-1.0
       vehicle_y_velocity *=-1.0
