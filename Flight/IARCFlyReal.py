@@ -45,19 +45,17 @@ class SimpleDroneAI():
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
     MAX_LOST_TARGET_TIME = 3
+    # RealSense framerate
+    REALSENSE_FRAMERATE = 30
 
     def __init__(self):
         self._tower = Tower()
         self._tower.initialize()
+        self._serv = pyrs.Service()
+        self._cam = self._serv.Device(device_id = 0, streams = [pyrs.stream.ColorStream(SimpleDroneAI.REALSENSE_FRAMERATE)])
         self._detector = RoombaDetector()
         self._time_since_last_roomba = 0
         self._hovering = True
-        
-        ## start the service - also available as context manager
-        serv = pyrs.Service()
-
-        ## create a device from device id and streams of interest
-        cam = serv.Device(device_id = 0, streams = [pyrs.stream.ColorStream(fps = 60)])
 
     @property
     def hovering(self):
@@ -140,7 +138,11 @@ class SimpleDroneAI():
             cv2.imshow('debug', bgr_img)
             cv2.waitKey(1)
 
-    @trollius.coroutine
+    def _shutdown(self):
+        self._tower.land()
+        self._cam.stop()
+        self._serv.stop()
+
     def run(self):
         """
         @purpose: 
@@ -150,16 +152,13 @@ class SimpleDroneAI():
         """
         self._takeoff()
         
-        cam.wait_for_frames()
-        self.update(cam.color)
-        
-
         while True:
-            yield From(trollius.sleep(1.00))
+            try:
+                for _ in range(SimpleDroneAI.REALSENSE_FRAMERATE):
+                    self.cam.wait_for_frames()
+                    self._update(self.cam.color)
+            except KeyboardInterrupt:
+                self._shutdown()
 
 ai = SimpleDroneAI()
-loop = trollius.get_event_loop()
-loop.run_until_complete(ai.run())
-
-ai.cam.stop()
-ai.serv.stop()
+ai.run()
