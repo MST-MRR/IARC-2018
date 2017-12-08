@@ -72,9 +72,9 @@ class PIDFlightController(object):
   YAW_P = 0.73
   YAW_I = 0.00
   YAW_D = 8.00
-  THROTTLE_P = 3.70
+  THROTTLE_P = 1.45
   THROTTLE_I = 0.00
-  THROTTLE_D = 1.45
+  THROTTLE_D = 3.70
   ALTITUDE_P = 0.39
   ALTITUDE_I = 0.09
   ALTITUDE_D = 0.05

@@ -147,7 +147,7 @@ class SimpleDroneAI():
         yield From(subscriber.wait_for_connection())
 
         while True:
-            yield From(trollius.sleep(1.00))
+            yield From(trollius.sleep(0.01))
 
 ai = SimpleDroneAI()
 loop = trollius.get_event_loop()
