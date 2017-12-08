@@ -27,10 +27,12 @@ from timeit import default_timer as timer
 import mrrdt_vision
 from mrrdt_vision.obj_detect.roomba_cnn import RoombaDetector
 
+import pyrealsense as pyrs
+
 logging.basicConfig()
 
 # displays a live stream of footage from the drone in the simulator, set to False for slightly better runtime performance
-_DEBUG = True
+_DEBUG = False
 
 class SimpleDroneAI():
     # camage image message location
@@ -38,7 +40,7 @@ class SimpleDroneAI():
     # camera message type
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # speed to follow roombas with in m/s
-    ROOMBA_TRACKING_SPEED = .5
+    ROOMBA_TRACKING_SPEED = .4
     # altitude to hover at after takeoff in meters
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
@@ -50,6 +52,12 @@ class SimpleDroneAI():
         self._detector = RoombaDetector()
         self._time_since_last_roomba = 0
         self._hovering = True
+        
+        ## start the service - also available as context manager
+        serv = pyrs.Service()
+
+        ## create a device from device id and streams of interest
+        cam = serv.Device(device_id = 0, streams = [pyrs.stream.ColorStream(fps = 60)])
 
     @property
     def hovering(self):
@@ -141,14 +149,17 @@ class SimpleDroneAI():
         @returns: 
         """
         self._takeoff()
-        manager = yield From(pygazebo.connect()) 
         
-        subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._update)
-        yield From(subscriber.wait_for_connection())
+        cam.wait_for_frames()
+        self.update(cam.color)
+        
 
         while True:
-            yield From(trollius.sleep(0.01))
+            yield From(trollius.sleep(1.00))
 
 ai = SimpleDroneAI()
 loop = trollius.get_event_loop()
 loop.run_until_complete(ai.run())
+
+ai.cam.stop()
+ai.serv.stop()

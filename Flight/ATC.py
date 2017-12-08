@@ -46,7 +46,7 @@ class Tower(object):
   MESSAGE_SLEEP_TIME = 0.01
   STANDARD_SLEEP_TIME = 0.01
   LAND_ALTITUDE = 0.25
-  ALT_PID_THRESHOLD = 0.27
+  ALT_PID_THRESHOLD = 0.21
   VEL_PID_THRESHOLD = 0.15
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
@@ -207,7 +207,7 @@ class Tower(object):
 
   def takeoff(self, desired_altitude, desired_angle=None):
     """
-    @purpose: Initiate a takeoff using the altitude based PID.
+    @purpose: Initiate a takeoff using the throttle based PID.
     @args: 
       desired_altitude: Altitude to hover at when the takeoff operation is finished.
     @returns:
@@ -293,14 +293,14 @@ class Tower(object):
     else:
       self.STATE = VehicleStates.hover
       self.pid_flight_controller.send_velocity_vector(hover_vector) 
-      sleep(1) #Wait for AutonomousFlight to query the state.
+      sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
 
     #Wait for the vehicle to correct.
     while(desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
       self.STATE = VehicleStates.hover_yaw_achieved
-      sleep(1) #Wait for AutonomousFlight to query the state.
+      sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
 
   def land(self):
     """
@@ -311,7 +311,6 @@ class Tower(object):
     self.hover()
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
-
     
     self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
 
@@ -345,8 +344,7 @@ class FailsafeController(threading.Thread):
           self.atc.pid_flight_controller.write_to_rc_channels()
           os.system("clear")
           print(self.atc.pid_flight_controller.get_debug_string())
-      sleep(0.1) 
-      #DO NOT CHANGE THIS SLEEP TIME, PID LOOPS IN AUTONOMOUSFLIGHT.PY WILL BECOME UNSTABLE.
+      sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
