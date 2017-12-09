@@ -39,7 +39,7 @@ class VehicleStates(object):
   landed = "LANDED"
 
 class Tower(object):
-  SIM = "tcp:127.0.0.1:5762"
+  SIM = "tcp:127.0.0.1:5760"
   USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
   UDP = "192.168.12.1:14550"
   MAC = "/dev/cu.usbmodem1"
@@ -259,7 +259,7 @@ class Tower(object):
     #Send the hover vector without an angle first to stop the vehicle.
     hover_vector = deepcopy(StandardFlightVectors.hover)
     correction_velocity_vector = deepcopy(StandardFlightVectors.hover)
-    self.pid_flight_controller.send_velocity_vector(hover_vector)
+    self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude = desired_altitude)
   
     #Wait for vehicle to slow down via PID if it was previously flying. 
     #Once we set the vehicle's state to HOVER, we will completely disable/cutoff the controllers and reset the RC channels.
@@ -285,7 +285,7 @@ class Tower(object):
       self.STATE = VehicleStates.hover
 
     #Re-send the hover vector with angle.
-    self.pid_flight_controller.send_velocity_vector(correction_velocity_vector, desired_yaw = desired_angle)
+    self.pid_flight_controller.send_velocity_vector(correction_velocity_vector, desired_altitude = desired_altitude, desired_yaw = desired_angle)
 
     #Wait for the vehicle to correct.
     while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
