@@ -2,12 +2,12 @@ from time import sleep
 from altscan import LIDAR
 import dronekit
 
-vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
+#vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
 
 def send_lidar_message(min_dist, max_dist, current_dist, sector):
    
     print("Distance :" + str(current_dist) + " Quad: " + str(sector))
-    message = vehicle.message_factory.distance_sensor_encode(
+    '''message = vehicle.message_factory.distance_sensor_encode(
     0,                                             # time since system boot, not used
     min_dist,                                      # min distance cm
     max_dist,                                      # max distance cm
@@ -18,7 +18,7 @@ def send_lidar_message(min_dist, max_dist, current_dist, sector):
     0                                              # covariance, not used
     )
     vehicle.send_mavlink(message)
-    vehicle.commands.upload()
+    vehicle.commands.upload()'''
 
 blah = LIDAR()
 blah.connect_to_lidar()
