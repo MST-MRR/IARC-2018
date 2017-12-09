@@ -1,12 +1,14 @@
 import dronekit
 import PID
-import flightControl
 import math
 import os
 import time
+import RPi.GPIO as GPIO
 from dronekit import VehicleMode
-from graph_class import Graph as PID_Graph
+import Sonar
+# from graph_class import Graph as PID_Graph
 
+MAV_SENSOR_ROTATION_PITCH_270 = 25
 YAW_MID = 1494
 PITCH_MID = 1494
 ROLL_MID = 1494
@@ -33,19 +35,39 @@ PI = math.pi
 SIM = "tcp:127.0.0.1:5762"
 USB = "/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00"
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+MIN_SONAR_DISTANCE = 3
+MAX_SONAR_DISTANCE = 4000
+TRIG_PIN = 2
+ECHO_PIN = 3
+
+downward_sonar = Sonar.Sonar(TRIG_PIN, ECHO_PIN)
+
 vehicle = dronekit.connect(SIM, wait_ready=True)
 
 print("\n Connected")
 
+def send_distance_message(distance_to_ground):
+    print("Distance: %f" % distance_to_ground)
+    message = vehicle.message_factory.distance_sensor_encode(
+        0,                                             # time since system boot, not used
+        MIN_SONAR_DISTANCE,                            # min distance cm
+        MAX_SONAR_DISTANCE,                            # max distance cm
+        distance_to_ground,                            # current distance, must be int
+        0,                                             # type = laser
+        0,                                             # onboard id, not used
+        MAV_SENSOR_ROTATION_PITCH_270,                 # Downward facing range sensor.
+        0                                              # covariance, not used
+    )
+    vehicle.send_mavlink(message)
+    vehicle.commands.upload()
+    
 
 def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 desired_roll_velocity, desired_yaw_angle):
-    print("Waiting for pre-arm checks")
-
-    while not vehicle.is_armable:
-        print("Waiting...\n")
-        time.sleep(1.0)
-
+    
     print("Arming motors\n")
     vehicle.mode = VehicleMode("LOITER")
     vehicle.armed = True
@@ -53,9 +75,9 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     time.sleep(1.0)
 
     # Initialize Pitch Pid Controller
-    PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
-    PitchPID.SetPoint = desired_pitch_velocity
-    PitchPID.setSampleTime(PID_UPDATE_TIME)
+    # PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
+    # PitchPID.SetPoint = desired_pitch_velocity
+    # PitchPID.setSampleTime(PID_UPDATE_TIME)
 
     # PitchPID = flightControl.PIDController(desired_pitch_velocity, PITCH_MID,
     #                                        PID_UPDATE_TIME, PITCH_P, PITCH_I,
@@ -65,10 +87,10 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     #pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
 
     # Initialize Roll PID Controller
-    RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
-    RollPID.SetPoint = desired_roll_velocity
-    RollPID.setSampleTime(PID_UPDATE_TIME)
-    RollPWM = ROLL_MID
+    # RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
+    # RollPID.SetPoint = desired_roll_velocity
+    # RollPID.setSampleTime(PID_UPDATE_TIME)
+    # RollPWM = ROLL_MID
     # RollPID = flightControl.PIDController(desired_roll_velocity, ROLL_MID,
     #                                       PID_UPDATE_TIME, ROLL_P, ROLL_I,
     #                                       ROLL_D)
@@ -103,6 +125,11 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     while True:
         try:
             time.sleep(.1)
+            distance_to_ground = downward_sonar.get_distance()
+            if(distance_to_ground < 5):
+                send_distance_message(5)
+            else:
+                send_distance_message(distance_to_ground)
             current_alt = vehicle.location.global_relative_frame.alt
             
             if current_alt > (desired_alt - 0.4):
@@ -117,7 +144,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
             ThrottlePID.update(vehicle.velocity[2])
             ThrottlePWM += ThrottlePID.output
             vehicle.channels.overrides[THROTTLE_CHANNEL] = ThrottlePWM
-            #throttle_graph.update(vehicle.velocity[2])
+            # throttle_graph.update(vehicle.velocity[2])
             print("Desired Alt: %s" % desired_alt)
             print("Alt: %s" % current_alt)
 
@@ -136,9 +163,9 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 # Get drones roll velocity
                 current_roll_velocity = vehicle.velocity[1]
                 # update vehicles current pitch with new roll
-                RollPID.update(current_roll_velocity)
-                RollPWM += RollPID.output
-                vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM
+                # RollPID.update(current_roll_velocity)
+                # RollPWM += RollPID.output
+                # vehicle.channels.overrides[ROLL_CHANNEL] = RollPWM
                 # update graphs
                 #roll_graph.update(current_roll_velocity)
                 '''
@@ -163,8 +190,8 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 os.system('clear')
                 
         except KeyboardInterrupt:
-            #test_Roll(RollPID)
-            test_forwards(desired_alt)
+            # test_Roll(RollPID)
+            #test_forwards(desired_alt)
 
             # for x in range(0, 1):
             #     test_roll_alt(ThrottlePID,ThrottlePWM, RollPID, x)
@@ -295,4 +322,4 @@ def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 2, 0.0, 0.0, 90.0)
+test_flight(0.3, 1.5, 0.0, 0.0, 0.0)
