@@ -419,10 +419,7 @@
           <always_on>1</always_on>
           <update_rate>10</update_rate>
           <visualize>true</visualize>
-
-          <plugin name="irlock" filename="libArduCopterIRLockPlugin.so">
-              <fiducial>irlock_beacon_01</fiducial>
-          </plugin>
+          
         </sensor>
       </link>
 
@@ -441,48 +438,7 @@
         </axis>
       </joint>
     </model>
-
-    <model name="irlock_beacon_01">
-      <pose>1.0 -1.0 0.005 0 0 0</pose>
-      <link name="link">
-         <inertial>
-          <pose>0 0 0 0 0 0</pose>
-          <mass>3.0</mass>
-          <inertia>
-            <ixx>0.019</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.01</iyy>
-            <iyz>0</iyz>
-            <izz>0.01</izz>
-          </inertia>
-        </inertial>
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>1.0 1.0 0.02</size>
-            </box>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>1.0</mu>
-                <mu2>1.0</mu2>
-                <fdir1>1 0 0</fdir1>
-              </ode>
-            </friction>
-            <contact>
-              <ode>
-                <kp>1e+12</kp>
-                <kd>1</kd>
-                <max_vel>10</max_vel>
-                <min_depth>0.003</min_depth>
-              </ode>
-            </contact>
-          </surface>
-        </collision>
-      </link>
-    </model>
+    
     <state world_name='default'>
       <sim_time>601 184000000</sim_time>
       <real_time>304 186674687</real_time>
