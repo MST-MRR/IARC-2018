@@ -1,9 +1,13 @@
 If you want the plugin to move roombas to work you must first run in the terminal window:
 
 cd build
+
 cmake ..
+
 make -j3
+
 cd ..
+
 export GAZEBO_PLUGIN_PATH=$HOME/Desktop/IARCWorld/build:$GAZEBO_PLUGIN_PATH
 
 where $HOME/Desktop/IARCWorld/build is the path to the *build* folder in the *IARCWorld* folder on your machine.

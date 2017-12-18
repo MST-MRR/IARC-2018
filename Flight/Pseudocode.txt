@@ -1,0 +1,14 @@
+This is the pseudocode for the drone in the 3D Simulation.
+
+Initialize
+
+Takeoff
+
+Fly to middle of field
+
+Hover
+
+// Match Starts
+
+while roomba closest to facing drone direction is not turning around
+    Fly so that the center of that roomba remains in the middle of the image vertically and horizontally

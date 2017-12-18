@@ -6,4 +6,7 @@
   battery:
     full_voltage: 12.30
     failsafe_voltage: 10.5
-    
+- name: Simulator
+  battery:
+    full_voltage: 12.30
+    failsafe_voltage: 10.5    

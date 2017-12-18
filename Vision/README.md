@@ -1,1 +1,0 @@
-# DroneKit - Vision
