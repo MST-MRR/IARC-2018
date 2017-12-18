@@ -19,6 +19,9 @@ import math
 import os
 import time
 import threading
+import Sonar
+import RPi.GPIO as GPIO
+
 
 import AutonomousFlight
 
@@ -51,6 +54,11 @@ class Tower(object):
   YAW_PID_THRESHOLD = 1.00
   BATTERY_FAILSAFE_VOLTAGE_PANIC = 9.25
   BATTERY_FAILSAFE_VOLTAGE_SENTINEL = 13.25
+  TRIG_PIN = 2
+  ECHO_PIN = 3
+  MIN_SONAR_DISTANCE = 3
+  MAX_SONAR_DISTANCE = 4000
+  MAV_SENSOR_ROTATION_PITCH_270 = 25
 
   def __init__(self):
     """
@@ -82,7 +90,7 @@ class Tower(object):
       
       try:
         print("\nConnecting to vehicle...")        
-        self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
+        self.vehicle = dronekit.connect(self.USB, wait_ready=True)
       except:
         print("\nUnable to connect to vehicle.")
         exit()
@@ -90,6 +98,7 @@ class Tower(object):
       self.start_time = int(time.time())
       self.vehicle_initialized = True
       self.failsafes = FailsafeController(self)
+      self.downward_sonar = Sonar.Sonar(self.TRIG_PIN, self.ECHO_PIN)
       self.failsafes.start()
       self.pid_flight_controller = AutonomousFlight.PIDFlightController(self)
       self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
@@ -328,6 +337,21 @@ class Tower(object):
     if(self.vehicle.battery.voltage < self.BATTERY_FAILSAFE_VOLTAGE_PANIC):
         self.land()
 
+  def send_distance_message(self, distance_to_ground):
+      # print("Distance: %f" % distance_to_ground)
+      message = self.vehicle.message_factory.distance_sensor_encode(
+          0,                                             # time since system boot, not used
+          self.MIN_SONAR_DISTANCE,                            # min distance cm
+          self.MAX_SONAR_DISTANCE,                            # max distance cm
+          distance_to_ground,                            # current distance, must be int
+          0,                                             # type = laser
+          0,                                             # onboard id, not used
+          self.MAV_SENSOR_ROTATION_PITCH_270,                 # Downward facing range sensor.
+          0                                              # covariance, not used
+      )
+      self.vehicle.send_mavlink(message)
+      self.vehicle.commands.upload()
+
 class FailsafeController(threading.Thread):
 
   def __init__(self, atc_instance):
@@ -337,6 +361,11 @@ class FailsafeController(threading.Thread):
 
   def run(self):
     while not self.stoprequest.isSet():
+      distance_to_ground = self.atc.downward_sonar.get_distance()
+      if(distance_to_ground < 5):
+          self.atc.send_distance_message(5)
+      else:
+          self.atc.send_distance_message(distance_to_ground)
       if self.atc.flight_prereqs_clear():
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
