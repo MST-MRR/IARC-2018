@@ -95,10 +95,10 @@ class Tower(object):
       self.pid_flight_controller.write_to_rc_channels(should_flush_channels=True)
       self.pid_flight_controller.initialize_controllers()
 
-      # if(self.get_altitude() > self.LAND_ALTITUDE):
-      #   self.land()
-      # else:
-      #   self.STATE = VehicleStates.landed
+      if(self.get_altitude() > self.LAND_ALTITUDE):
+        self.land()
+      else:
+        self.STATE = VehicleStates.landed
 
       self.switch_control()
 
@@ -216,7 +216,7 @@ class Tower(object):
     self.arm_drone()
 
     self.STATE = VehicleStates.takeoff
-    self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.ascent)
+    self.pid_flight_controller.send_velocity_vector(StandardFlightVectors.ascent, desired_altitude = desired_altitude)
 
     while(not (self.in_range(self.ALT_PID_THRESHOLD, desired_altitude, self.get_altitude()))):
       sleep(self.STANDARD_SLEEP_TIME)
@@ -292,7 +292,7 @@ class Tower(object):
       sleep(self.STANDARD_SLEEP_TIME)
     else:
       self.STATE = VehicleStates.hover
-      self.pid_flight_controller.send_velocity_vector(hover_vector) 
+      self.pid_flight_controller.send_velocity_vector(hover_vector, desired_altitude) 
       sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
 
     #Wait for the vehicle to correct.
@@ -342,8 +342,8 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          # os.system("clear")
-          # print(self.atc.pid_flight_controller.get_debug_string())
+          os.system("clear")
+          print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):

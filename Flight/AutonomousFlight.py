@@ -61,8 +61,12 @@ class PIDFlightController(object):
   YAW_MID = 1494.0
   PITCH_MID = 1494.0
   ROLL_MID = 1494.0
+  THROTTLE_MID = 1550.0
   THROTTLE_MIN = 982.0
   THROTTLE_MAX = 2006.0
+  ORIGINAL_P = 1.45
+  ORIGINAL = 0.00
+  ORIGINAL_D = 3.70
   PITCH_P = 2.175
   PITCH_I = 0.0
   PITCH_D = 5.55
@@ -72,9 +76,9 @@ class PIDFlightController(object):
   YAW_P = 0.73
   YAW_I = 0.00
   YAW_D = 8.00
-  THROTTLE_P = 2.175
+  THROTTLE_P = 2.9
   THROTTLE_I = 0.00
-  THROTTLE_D = 5.55
+  THROTTLE_D = 7.4
   ALTITUDE_P = 0.39
   ALTITUDE_I = 0.09
   ALTITUDE_D = 0.05
@@ -139,10 +143,13 @@ class PIDFlightController(object):
       # There is a similar check below in update_controllers.
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
 
-    if(desired_altitude):
-      #Only use the desired altitude arguemnt if the Altitude_PID controller is enabled.
+    if(requested_flight_vector.z == 0.00 and desired_altitude):
+      #Only use the altitude controller if the desired_altitude argument is passed.
       self.Altitude_PID.SetPoint = desired_altitude
       self.alt_hold_enabled = True
+    elif("TAKEOFF" in self.atc.STATE):
+      self.Altitude_PID.SetPoint = desired_altitude
+      self.alt_hold_enabled = False
     else:
       self.alt_hold_enabled = False
 
@@ -151,9 +158,13 @@ class PIDFlightController(object):
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
 
-    #Start by updating our z-axis controllers regardless of state and updating the PWM value.
-    self.Altitude_PID.update(self.atc.get_altitude())
-    self.Altitude_PWM = self.convert_altitude_to_pwm(self.Altitude_PID.output)
+    if (not self.atc.in_range(self.atc.VEL_PID_THRESHOLD, 0.00, vehicle_z_velocity) and not self.alt_hold_enabled and "TAKEOFF" not in self.atc.STATE):
+      self.Altitude_PID.SetPoint = self.atc.get_altitude()
+
+    if(self.alt_hold_enabled or "TAKEOFF" in self.atc.STATE):
+      #Start by updating our z-axis controllers regardless of state and updating the PWM value.
+      self.Altitude_PID.update(self.atc.get_altitude())
+      self.Altitude_PWM = self.convert_altitude_to_pwm(self.Altitude_PID.output)
 
     self.Throttle_PID.update(vehicle_z_velocity)
     self.Throttle_PWM += self.Throttle_PID.output
@@ -244,22 +255,23 @@ class PIDFlightController(object):
     vehicle_x_velocity = (self.atc.vehicle.velocity[0])
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
 
-    debug_string = ("\nVehicle State: " + self.atc.STATE + 
+    debug_string = ("Vehicle State: " + self.atc.STATE + 
     # "\n\nZ Velocity Controller Out: " + str(self.Throttle_PID.output) + 
     "\n\nZ Velocity RC Out: " + str(self.Throttle_PWM) + 
     "\nVehicle Z Velocity: " + str(self.atc.vehicle.velocity[2]) + 
     "\nTarget Z Velocity: " + str(self.Throttle_PID.SetPoint) + 
-    "\n\nAltitude Controller Out: " + str(self.Altitude_PID.output) + 
-    "\nAltitude RC Out: " + str(self.Altitude_PWM) + 
+    # "\n\nAltitude Controller Out: " + str(self.Altitude_PID.output) + 
+    "\n\nAltitude RC Out: " + str(self.Altitude_PWM) + 
     "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
-    "\nTarget Alt: " + str(self.Altitude_PID.SetPoint) + 
+    "\nTarget Altitude: " + str(self.Altitude_PID.SetPoint) + 
+    "\n\nAltitude Hold Enabled: " + str(self.alt_hold_enabled) + 
     "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
-    "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
-    "\nPitch RC Out: " + str(self.Pitch_PWM) + 
+    # "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
+    "\n\nPitch RC Out: " + str(self.Pitch_PWM) + 
     "\nVehicle X Velocity: " + str(vehicle_x_velocity) + 
     "\nTarget X Velocity: " + str(self.Pitch_PID.SetPoint) + 
-    "\n\nRoll Controller Out: " + str(self.Roll_PID.output) + 
-    "\nRoll RC Out: " + str(self.Roll_PWM) + 
+    # "\n\nRoll Controller Out: " + str(self.Roll_PID.output) + 
+    "\n\nRoll RC Out: " + str(self.Roll_PWM) + 
     "\nVehicle Y Velocity: " + str(vehicle_y_velocity) + 
     "\nTarget Y Velocity: " + str(self.Roll_PID.SetPoint) + 
     # "\n\nYaw Controller Out: " + str(self.Yaw_PID.output) + 
