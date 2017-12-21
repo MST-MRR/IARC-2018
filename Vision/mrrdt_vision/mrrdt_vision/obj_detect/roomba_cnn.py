@@ -1,8 +1,10 @@
 import os
+import sys
 import cv2
 import numpy as np
 import tensorflow as tf
 
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import display
 
 from sklearn.preprocessing import normalize
@@ -15,12 +17,6 @@ from object_detection.utils import visualization_utils as vis_util
 DEFAULT_BOUNDING_BOX_COLOR = (0, 255, 0)
 # default bounding box thickness
 DEFAULT_BOUNDING_BOX_THICKNESS = 3
-# GPU-accelerated module path
-GPU_MODULE_PATH = 'threshold_gpu.so'
-# whether or not to enable GPU-accelerated thresholding 
-GPU_ACCELERATED = os.path.isfile(GPU_MODULE_PATH)
-# parameter that determines the precision of the polygon approximation.
-EPSILON = .03
 # length of directional arrow
 ARROW_LENGTH = 50
 # color of directional arrow
@@ -34,16 +30,11 @@ TEST_VIDEO_PATH = '../data/IARC.mp4'
 
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = 'ssd'
-PATH_TO_CKPT = os.path.join(CWD_PATH, DATA_DIR, 'ssd_300_roomba_v2.pb')
+PATH_TO_CKPT = os.path.join(CWD_PATH, DATA_DIR, 'ssd_300_roomba_v3.pb')
 PATH_TO_LABELS = os.path.join(CWD_PATH, DATA_DIR, 'object-detection.pbtext')
 NUM_CLASSES = 1
 DEFAULT_THRESHOLD = .5
 ROOMBA_CATEGORY_NAME = 'roomba'
-
-label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
-categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES)
-category_index = label_map_util.create_category_index(categories)
-name_to_id = {properties['name']: id for id, properties in category_index.items()}
 
 class Roomba():
     def __init__(self, bounding_box, center, orientation=np.zeros(2)):
@@ -74,6 +65,11 @@ class Roomba():
 
 class RoombaDetector():
     def __init__(self, threshold=DEFAULT_THRESHOLD):
+        label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
+        categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES)
+        category_index = label_map_util.create_category_index(categories)
+        name_to_id = {properties['name']: id for id, properties in category_index.items()}
+
         self._detection_graph = tf.Graph()
         self._threshold = threshold
         self._target_id = name_to_id[ROOMBA_CATEGORY_NAME]

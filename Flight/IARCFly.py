@@ -14,6 +14,7 @@ from ATC import Tower
 import cv2
 import numpy as np
 import time
+import threading
 from sklearn.preprocessing import normalize
 
 import pygazebo
@@ -50,6 +51,8 @@ class SimpleDroneAI():
         self._detector = RoombaDetector()
         self._time_since_last_roomba = 0
         self._hovering = True
+        self._lock = threading.RLock()
+        self._last_image_retrieved = None
 
     @property
     def hovering(self):
@@ -107,17 +110,15 @@ class SimpleDroneAI():
         elif timer() - self._time_since_last_roomba >= SimpleDroneAI.MAX_LOST_TARGET_TIME and not self.hovering:
             self.hovering = True
 
-    def _update(self, data):
+    def _update(self, img):
         """
         @purpose: 
             Event handler which updates relevant state variables and issues commands to the drone
         @args:
-            data, protobuf: A message containing an image from the drone's camera.
+            img, np.ndarray: An image from the drone's camera.
         @returns: 
         """
-        message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
-        h, w = (message.image.height, message.image.width)
-        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
+        h, w = img.shape[:2]
         roombas = self._detector.detect(img)
         
         drone_midpoint = np.asarray([w/2, h/2])
@@ -132,6 +133,21 @@ class SimpleDroneAI():
             cv2.imshow('debug', bgr_img)
             cv2.waitKey(1)
 
+    def _event_handler(self, data):
+        """
+        @purpose: 
+            Event handler which updates relevant state variables
+        @args:
+            data, protobuf: A message containing an image from the drone's camera.
+        @returns: 
+        """
+        message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
+        h, w = (message.image.height, message.image.width)
+        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
+
+        with self._lock:
+            self._last_image_retrieved = img
+
     @trollius.coroutine
     def run(self):
         """
@@ -143,10 +159,14 @@ class SimpleDroneAI():
         self._takeoff()
         manager = yield From(pygazebo.connect()) 
         
-        subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._update)
+        subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
         yield From(subscriber.wait_for_connection())
 
         while True:
+            with self._lock:
+                if self._last_image_retrieved is not None:
+                    self._update(self._last_image_retrieved)
+            
             yield From(trollius.sleep(0.01))
 
 ai = SimpleDroneAI()

@@ -20,6 +20,8 @@ const double ROOMBA_ROTATE_NOISE_MAX_DURATION = 0.238888889 ;
 const double ROOBA_WHEEL_SPEED = 0.330 / 0.033 ;
 const double SPEED_MULTIPLIER = 1 ;
 
+const double NOISE_WHEEL_SPEED_MULTIPLIER = 0.75 ;
+
 const unsigned int MOVEMENT_STATE_FORWARD = 0 ;
 const unsigned int MOVEMENT_STATE_180_ROTATE = 1 ;
 const unsigned int MOVEMENT_STATE_NOISE_ROTATE = 2 ;
@@ -68,7 +70,7 @@ namespace gazebo
     MyState.MovementState = MOVEMENT_STATE_180_ROTATE ;
     return MyState ;
   }
-  
+
   RoombaState & SetRotate45State ( RoombaState & MyState )
   {
     common::Time CurrentTime = GetCurrentTime ( ) ;
@@ -76,47 +78,47 @@ namespace gazebo
     MyState.MovementState = MOVEMENT_STATE_45_ROTATE ;
     return MyState ;
   }
-  
+
   RoombaState & SetRotateNoiseState ( RoombaState & MyState )
   {
     common::Time CurrentTime = GetCurrentTime ( ) ;
     MyState.LastNoiseRotateStartTime = CurrentTime ;
-    MyState.NoiseRotateFrames = ( ((double)rand()) / RAND_MAX * ROOMBA_ROTATE_NOISE_MAX_DURATION ) / SPEED_MULTIPLIER ;
+    MyState.NoiseRotateFrames = ( ((double)rand()) / RAND_MAX * ROOMBA_ROTATE_NOISE_MAX_DURATION ) / SPEED_MULTIPLIER / ( ( 1 - NOISE_WHEEL_SPEED_MULTIPLIER ) / 2 ) ;
     MyState.NoiseRotateDirection = (bool)round(((double)rand()) / RAND_MAX) ;
     MyState.MovementState = MOVEMENT_STATE_NOISE_ROTATE ;
     return MyState ;
   }
-  
+
   RoombaState & SetForwardState ( RoombaState & MyState )
   {
     MyState.MovementState = MOVEMENT_STATE_FORWARD ;
     return MyState ;
   }
-  
+
   class ModelPush : public ModelPlugin
   {
     private: RoombaState MyState ;
-    
+
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
     {
       srand(time(NULL));
-      
+
       // Store the pointer to the model
       this->model = _parent;
-      
+
       //this->model->SetAngularVel(math::Vector3(0, 0, -3));
 
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
-      
+
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&ModelPush::OnUpdate, this, _1));
-          
+
       InitializeSensors ( ) ;
-      
+
       SetStartMatchRoombaState ( MyState ) ;
     }
-    
+
     private: void InitializeSensors ( )
     {
       unsigned int SensorIndex = 0 ;
@@ -134,33 +136,33 @@ namespace gazebo
         SensorIndex = SensorIndex + 1 ;
       }
     }
-    
+
     private: void SetForwardMotorPowers ( )
     {
       this->model->GetJoint("right_wheel")->SetVelocity(0, ROOBA_WHEEL_SPEED * SPEED_MULTIPLIER);
       this->model->GetJoint("left_wheel")->SetVelocity(0, ROOBA_WHEEL_SPEED * SPEED_MULTIPLIER);
     }
-    
+
     private: void SetRightTurnMotorPowers ( )
     {
       this->model->GetJoint("right_wheel")->SetVelocity(0, ( -ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
       this->model->GetJoint("left_wheel")->SetVelocity(0, ( ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
     }
-    
+
     private: void SetNoiseTurnMotorPowers ( RoombaState & MyState )
     {
       if ( MyState.NoiseRotateDirection == ROTATE_RIGHT )
       {
-        this->model->GetJoint("right_wheel")->SetVelocity(0, ( -ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
+        this->model->GetJoint("right_wheel")->SetVelocity(0, NOISE_WHEEL_SPEED_MULTIPLIER * ( ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
         this->model->GetJoint("left_wheel")->SetVelocity(0, ( ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
       }
       else
       {
         this->model->GetJoint("right_wheel")->SetVelocity(0, ( ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
-        this->model->GetJoint("left_wheel")->SetVelocity(0, ( -ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
+        this->model->GetJoint("left_wheel")->SetVelocity(0, NOISE_WHEEL_SPEED_MULTIPLIER * ( ROOBA_WHEEL_SPEED / 2 ) * SPEED_MULTIPLIER);
       }
     }
-    
+
     bool GetFrontTouchSensorState ( )
     {
       //std::cout << "Getting touch sensor state" << std::endl;
@@ -183,7 +185,7 @@ namespace gazebo
       }
       return Output ;
     }
-    
+
     bool GetTopTouchSensorState ( )
     {
       //std::cout << "Getting touch sensor state" << std::endl;
@@ -216,23 +218,23 @@ namespace gazebo
       // Apply a small linear velocity to the model.
       //this->model->SetLinearVel(math::Vector3(3, 0, 0));
       //this->model->SetAngularVel(math::Vector3(3, 0, 0));
-      
+
       if ( MyState.MovementState == MOVEMENT_STATE_FORWARD )
       {
         SetForwardMotorPowers ( ) ;
-        
+
         common::Time NextRotate180Time = MyState.Last180RotateStartTime + ROOMBA_TIME_BETWEEN_180 / SPEED_MULTIPLIER ;
         if ( GetCurrentTime ( ) > NextRotate180Time )
         {
           MyState = SetRotate180State ( MyState ) ;
         }
-        
+
         common::Time NextRotateNoiseTime = MyState.LastNoiseRotateStartTime + ROOMBA_TIME_BETWEEN_NOISE / SPEED_MULTIPLIER ;
         if ( GetCurrentTime ( ) > NextRotateNoiseTime )
         {
           MyState = SetRotateNoiseState ( MyState ) ;
         }
-        
+
         if ( GetFrontTouchSensorState ( ) == true )
         {
           MyState = SetRotate180State ( MyState ) ;
@@ -241,13 +243,13 @@ namespace gazebo
         {
           MyState = SetRotate45State ( MyState ) ;
         }
-        
-        
+
+
       }
       if ( MyState.MovementState == MOVEMENT_STATE_180_ROTATE )
       {
         SetRightTurnMotorPowers ( ) ;
-        
+
         common::Time Rotate180Duration = ( ROOMBA_ROTATE_180_TURN_DURATION / SPEED_MULTIPLIER ) ;
         common::Time EndRotateTime = MyState.Last180RotateStartTime + Rotate180Duration;
         if ( GetCurrentTime ( ) > EndRotateTime )
@@ -258,7 +260,7 @@ namespace gazebo
       if ( MyState.MovementState == MOVEMENT_STATE_45_ROTATE )
       {
         SetRightTurnMotorPowers ( ) ;
-        
+
         common::Time Rotate45Duration = ( ROOMBA_ROTATE_45_TURN_DURATION / SPEED_MULTIPLIER ) ;
         common::Time EndRotateTime = MyState.Last45RotateStartTime + Rotate45Duration;
         if ( GetCurrentTime ( ) > EndRotateTime )
@@ -269,20 +271,20 @@ namespace gazebo
       if ( MyState.MovementState == MOVEMENT_STATE_NOISE_ROTATE )
       {
         SetNoiseTurnMotorPowers ( MyState ) ;
-        
+
         common::Time RotateNoiseDuration = MyState.NoiseRotateFrames ;
         common::Time EndRotateTime = MyState.LastNoiseRotateStartTime + RotateNoiseDuration;
         if ( GetCurrentTime ( ) > EndRotateTime )
         {
           MyState = SetForwardState ( MyState ) ;
         }
-        
+
         if ( GetFrontTouchSensorState ( ) == true )
         {
           MyState = SetRotate180State ( MyState ) ;
         }
       }
-        
+
     }
 
     // Pointer to the model
