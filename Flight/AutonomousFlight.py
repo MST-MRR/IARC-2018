@@ -67,18 +67,18 @@ class PIDFlightController(object):
   ORIGINAL_P = 1.45
   ORIGINAL = 0.00
   ORIGINAL_D = 3.70
-  PITCH_P = 2.175
+  PITCH_P = 1.45
   PITCH_I = 0.0
-  PITCH_D = 5.55
-  ROLL_P = 2.175
+  PITCH_D = 3.70
+  ROLL_P = 1.45
   ROLL_I = 0.00
-  ROLL_D = 5.55
+  ROLL_D = 3.70
   YAW_P = 0.73
   YAW_I = 0.00
   YAW_D = 8.00
-  THROTTLE_P = 2.9
+  THROTTLE_P = 1.45
   THROTTLE_I = 0.00
-  THROTTLE_D = 7.4
+  THROTTLE_D = 3.70
   ALTITUDE_P = 0.39
   ALTITUDE_I = 0.09
   ALTITUDE_D = 0.05
@@ -144,10 +144,11 @@ class PIDFlightController(object):
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
 
     if(requested_flight_vector.z == 0.00 and desired_altitude):
-      #Only use the altitude controller if the desired_altitude argument is passed.
+      #Only use the altitude controller if the desired_altitude argument is passed and we haven't been given a z velocity.
       self.Altitude_PID.SetPoint = desired_altitude
       self.alt_hold_enabled = True
     elif("TAKEOFF" in self.atc.STATE):
+      #TAKEOFF allows both controllers to run so that the altitude controller can get a stable hover value.
       self.Altitude_PID.SetPoint = desired_altitude
       self.alt_hold_enabled = False
     else:
@@ -158,13 +159,16 @@ class PIDFlightController(object):
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
 
-    if (not self.atc.in_range(self.atc.VEL_PID_THRESHOLD, 0.00, vehicle_z_velocity) and not self.alt_hold_enabled and "TAKEOFF" not in self.atc.STATE):
-      self.Altitude_PID.SetPoint = self.atc.get_altitude()
-
     if(self.alt_hold_enabled or "TAKEOFF" in self.atc.STATE):
-      #Start by updating our z-axis controllers regardless of state and updating the PWM value.
+      #If altitude hold mode is enabled or we're in the takeoff state then allow the altitude controller to run.
       self.Altitude_PID.update(self.atc.get_altitude())
       self.Altitude_PWM = self.convert_altitude_to_pwm(self.Altitude_PID.output)
+    elif(not self.atc.in_range(self.atc.VEL_PID_THRESHOLD_THROTTLE, 0.00, vehicle_z_velocity)):
+      #Altitude hold is disabled, we're not in takeoff, and someone gave us a Z vector (the vehicle has some programmatically induced velocity).
+      #The idea then is to basically pause (not update) the altitude controller and continually set it's setpoint to whatever our current altitude is.
+      #This will always keep the altitude controller paused at the last value needed to hover the vehicle.
+      #We use a more smaller velocity threshold here so that the setpoint is updated more often and therefore more in line with the vehicle's current altitude.
+      self.Altitude_PID.SetPoint = self.atc.get_altitude()
 
     self.Throttle_PID.update(vehicle_z_velocity)
     self.Throttle_PWM += self.Throttle_PID.output
@@ -265,7 +269,7 @@ class PIDFlightController(object):
     "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
     "\nTarget Altitude: " + str(self.Altitude_PID.SetPoint) + 
     "\n\nAltitude Hold Enabled: " + str(self.alt_hold_enabled) + 
-    "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
+    # "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
     # "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
     "\n\nPitch RC Out: " + str(self.Pitch_PWM) + 
     "\nVehicle X Velocity: " + str(vehicle_x_velocity) + 
