@@ -61,6 +61,7 @@ class Tower(object):
     """
     self.start_time = 0
     self.flight_log = None
+    self.last_hover_altitude = 0
     self.vehicle_initialized = False
     self.vehicle = None
     self.failsafes = None
@@ -230,12 +231,18 @@ class Tower(object):
   def fly(self, desired_vector):
     """
     @purpose: Fly the vehicle in a direction with a certain speed.
+    This method will lock the current altitude if Z is zero.
     @args: 
       desired_vector: FlightVector with direction/speed.
     @returns:
     """
 
-    self.pid_flight_controller.send_velocity_vector(desired_vector)
+    if(not self.in_range(self.ALT_PID_THRESHOLD, self.last_hover_altitude, self.get_altitude())):
+      desired_altitude = self.get_altitude()
+    else:
+      desired_altitude = self.last_hover_altitude
+
+    self.pid_flight_controller.send_velocity_vector(desired_vector, desired_altitude = desired_altitude)
     self.STATE = VehicleStates.flying
     
   def hover(self, desired_altitude=None, desired_angle=None):
@@ -257,6 +264,8 @@ class Tower(object):
     if desired_angle is None:
       desired_angle = self.get_yaw_deg()
 
+    self.last_hover_altitude = desired_altitude
+    
     #Send the hover vector without an angle first to stop the vehicle.
     hover_vector = deepcopy(StandardFlightVectors.hover)
     correction_velocity_vector = deepcopy(StandardFlightVectors.hover)
@@ -303,13 +312,15 @@ class Tower(object):
       self.STATE = VehicleStates.hover_yaw_achieved
       sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
 
-  def land(self):
+  def land(self, should_stop_vehicle=False):
     """
     @purpose: Initiate a landing using the built-in ArduPilot mode.
     @args:
     @returns:
     """
-    self.hover()
+    if(should_stop_vehicle):
+      self.hover()
+
     self.vehicle.mode = dronekit.VehicleMode("LAND")
     self.STATE = VehicleStates.landing
     
@@ -350,7 +361,7 @@ class FailsafeController(threading.Thread):
   def join(self, timeout=None):
     if self.atc.vehicle.armed:
       if self.atc.STATE != VehicleStates.landed or self.atc.vehicle.mode.name != "LAND":
-        self.atc.land()
+        self.atc.land(should_stop_vehicle=True)
 
     self.stoprequest.set()
     super(FailsafeController, self).join(timeout)
