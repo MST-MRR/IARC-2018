@@ -14,15 +14,15 @@ REQUIRED_PACKAGES = ['opencv-python>=3.3.0', 'scikit-learn>=0.19.1', 'numpy>=1.1
 PACKAGE_NAME = 'mrrdt_vision'
 
 setup(
-    name=PACKAGE_NAME,
-    version=__version__,
+    name = PACKAGE_NAME,
+    version = __version__,
     install_requires = REQUIRED_PACKAGES,
     packages = find_packages(),
     include_package_data = True,
-    description='%s %s' % (PACKAGE_NAME, __version__),
+    description = '%s %s' % (PACKAGE_NAME, __version__),
     package_data = {'': ['*.pb', '*.pbtext']},
-    url='https://github.com/MST-MRR/IARC-2018',
-    author="Christopher O'Toole",
-    author_email='cdocq9@mst.edu',
-    license='MIT'
+    url = 'https://github.com/MST-MRR/IARC-2018',
+    author = "Christopher O'Toole",
+    author_email = 'cdocq9@mst.edu',
+    license = 'MIT'
 )

@@ -11,10 +11,12 @@ A simple quadcopter AI which follows the nearest roomba in an IARC arena simulat
 
 from AutonomousFlight import FlightVector
 from ATC import Tower
+import os
 import cv2
 import numpy as np
 import time
 import threading
+import datetime
 from sklearn.preprocessing import normalize
 
 import pygazebo
@@ -44,6 +46,8 @@ class SimpleDroneAI():
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
     MAX_LOST_TARGET_TIME = 3
+    # folder to log images and drone attributes to
+    LOG_FOLDER = 'log'
 
     def __init__(self):
         self._tower = Tower()
@@ -53,6 +57,7 @@ class SimpleDroneAI():
         self._hovering = True
         self._lock = threading.RLock()
         self._last_image_retrieved = None
+        self._log_folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), SimpleDroneAI.LOG_FOLDER)
 
     @property
     def hovering(self):
@@ -125,7 +130,9 @@ class SimpleDroneAI():
         self._follow_nearest_roomba(roombas, drone_midpoint)
 
         if _DEBUG:
+            timestamp = str(datetime.datetime.now()).replace(' ', '_')
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(os.path.join(self._log_folder_path, timestamp + '.jpg'), bgr_img)
             
             for roomba in roombas:
                 roomba.draw(bgr_img)
