@@ -1,17 +1,19 @@
 import os
 import sys
+import argparse
 import cv2
 import numpy as np
 import matplotlib
 
 from matplotlib import pyplot as plt
 
-from sklearn import linear_model, cluster
+from sklearn import linear_model
 from sklearn.neighbors.kde import KernelDensity
 from scipy.signal import argrelextrema
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import display
+import line_annotator
 
 TEST_IMAGES_PATH = '../../../../Flight/log/'
 TEST_IMAGE_KEYWORD = '.jpg'
@@ -68,8 +70,6 @@ class Grid:
         blur = cv2.medianBlur(gray, self._median_blur_size)
         thresholded_img = cv2.bitwise_and(blur, blur, mask=cv2.inRange(blur, 245, 255))
         edges = cv2.Canny(thresholded_img, self._canny_min, self._canny_max)
-        cv2.imshow('blur', blur)
-        cv2.imshow('edges', edges)
         return edges
     
     def _hough_line_transform(self, edges):
@@ -120,14 +120,13 @@ class Grid:
 
         if lines is not None:
             self._filter_lines(lines)
-            self._draw_lines(lines[:, 0, :], img, color=(255, 0, 255))
-            self._draw_lines(self.longitudinal_lines[:, 0, :], img, color=(255, 0, 0))
-            self._draw_lines(self.latitudinal_lines[:, 0, :], img, color=(0, 255, 0))
             self._longitudinal_lines = self._cluster(self.longitudinal_lines, self._longitudinal_rho)
             self._latitudinal_lines = self._cluster(self.latitudinal_lines, self._latitudinal_rho)
+            self._longitudinal_lines = self.longitudinal_lines[np.argsort(self.longitudinal_lines[:, 0]), :]
+            self._latitudinal_lines = self.latitudinal_lines[np.argsort(self.latitudinal_lines[:, 0]), :]
             self._longitudinal_rho, self._longitudinal_theta = (self.longitudinal_lines[:, 0], self.longitudinal_lines[:, 1])
             self._latitudinal_rho, self._latitudinal_theta = (self.latitudinal_lines[:, 0], self.latitudinal_lines[:, 1])
-    
+
     def _draw_lines(self, lines, img, color=(0, 0, 0), thickness=2):
         max_dist = np.sqrt(np.sum(np.asarray(img.shape[:2])**2))
 
@@ -148,6 +147,12 @@ def process(img):
     grid.detect(img)
     grid.draw(img)
 
+
 if __name__ == '__main__':
-    #unit test
-    display.visualizer(TEST_IMAGES, process)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-m', '--mode', required=True, help='mode to start application in. use "test" to run the unit test')
+    args = vars(arg_parser.parse_args())
+
+    if args['mode'] == 'test':
+        #unit test
+        display.visualizer(TEST_IMAGES, process)
