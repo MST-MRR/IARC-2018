@@ -103,7 +103,7 @@ I had to run `sudo su` then run `make install`.
 
 Then you should be able to add a RealSense in gazebo.
 
-![](assets/RealSense in Gazebo Insert Tab.png)
+![](assets/realsense_gazebo_insert.png)
 
-![](assets/RealSense in Gazebo.png)
+![](assets/realsense_gazebo.png)
 
