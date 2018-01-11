@@ -4,7 +4,6 @@
 
 ### Table of Contents
 
-* [Introduction](README.md)
 * [Overview](overview.md)
 * [Software Setup](software-setup.md)
 * [Flight](flight.md)
