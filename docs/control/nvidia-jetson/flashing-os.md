@@ -23,25 +23,25 @@ Once you have all of the items you are one step closer to getting the board flas
 
    2. In a terminal window, head to the location of the file and enter  `chmod +x jetpack-${VERSION}.run`
 
-      ![](/assets/run permissions)
+      ![](../../assets/run_permissions.png)
 
    3. Once that completes, you can now type `./jetpack-${VERSION}`to open the JetPack application
 
-      ![](/assets/run_it.png)
+      ![](../../assets/run_it.png)
 
-3. In the JetPack application,  it will select the installation directory![](/assets/install_location.png)
+3. In the JetPack application,  it will select the installation directory![](../../assets/install_location.png)
 
-4. Select the board that you are using, the TX2![](/assets/board.png)
+4. Select the board that you are using, the TX2![](../../assets/board.png)
 
 5. The application will ask for sudo permissions, enter your sudo password and hit authenticate
 
-   ![](/assets/sudo.png)
+   ![](../../assets/sudo.png)
 
 6. Once it has those permissions you will be presented with the Component Manager.
 
    1. Here you can select any component that you would like to install to the board. For this section's purposes, we will only be using the "`Linux for Tegra Host Side Image Setup`" package
 
-7. In the Component Manager, select the option "Custom" and click the "clear Actions" button![](/assets/components.png)
+7. In the Component Manager, select the option "Custom" and click the "clear Actions" button![](../../assets/components.png)
 
 8. To install just the OS and drivers:
 
@@ -49,17 +49,17 @@ Once you have all of the items you are one step closer to getting the board flas
 
    2. Click on the "Action" element of the "Linux for Tegra Host Side Image Setup" and select the "install" option
 
-   3. Repeat step ii for the "Flash OS to Target" package and your manager should look like this:![](/assets/install_OS.png)
+   3. Repeat step ii for the "Flash OS to Target" package and your manager should look like this:![](../../assets/install_OS.png)
 
    4. Click "Next" and accept all of the agreements
 
    5. Downloading the packages may take a few minutes but once they are done you should be prompted with a dialog that requires you are present for the next steps
 
-   6. Your machine will take some time to install the necessary files and then you should be prompted with this screen![](/assets/host_done.png)
+   6. Your machine will take some time to install the necessary files and then you should be prompted with this screen![](../../assets/host_done.png)
 
    7. Click the "Next" button and it will show you a list of actions that it will perform.
 
-   8. Hitting next on that screen will bring up a this prompt:![](/assets/Force_USB.png)
+   8. Hitting next on that screen will bring up a this prompt:![](../../assets/Force_USB.png)
 
    9. Once it is in Force USB Recovery Mode and appears with the `lsusb` command, hit enter in the "Post Installation" terminal and it should start the install process
 

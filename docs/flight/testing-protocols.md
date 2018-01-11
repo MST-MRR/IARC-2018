@@ -5,7 +5,7 @@ This section covers procedures and protocols for testing your flight code on a r
 ### General Proverbs
 
 1. Simulator first, vehicle second.
-   1. **Any line of code that makes a motor move should be tested in a simulator first. **
+   1. **Any line of code that makes a motor move should be tested in a simulator first.**
       1. Even if you're doing tuning outside and only changing values by fractions of a decimal you should test first in a simulator. I often pre-test my testing values in the simulator. If, for instance I'm changing a value from 0.10 to 0.15 and I want to test every step in between, I test that in the simulator first. 
       2. **While I develop code in a simulator, I try to anticipate test cases and changes I may want to make while running on a real vehicle.**
 2. Poke the hell out of your code.

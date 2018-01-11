@@ -2,7 +2,7 @@
 
 #### Introduction
 
-When we originally began working on building an autonomous quadcopter we were overwhelmed. There are multiple software systems at varying abstraction levels that blend together into one symphony of software. As a club, we had a relatively simply goal. The computer science division was to produce software that would autonomously takeoff, fly a very short distance, and then land. Unfortunately, we had no idea where to even start. Worse, Panic took so long to design and build that we only had a few months to write the software before our deadline. We poured over research papers, YouTube videos, and other resources to find a direction. A lot of research papers implemented their own quadcopter flight controller software, and as a result, we briefly tried to create our own flight controller by implementing an Estimated Kalman Filter, PID Controllers, and various other pieces of software all on an ATMega 2560 with an off-the-shelf IMU. This proved to be especially difficult with our manpower and lack of general familiarity with such high level concepts. None of our attempts that year ever _took off_,** **both literally and metaphorically, we just didn't have the expertise or the time. So, we went back to the drawing board and looked at the broader community around DIY drones.
+When we originally began working on building an autonomous quadcopter we were overwhelmed. There are multiple software systems at varying abstraction levels that blend together into one symphony of software. As a club, we had a relatively simply goal. The computer science division was to produce software that would autonomously takeoff, fly a very short distance, and then land. Unfortunately, we had no idea where to even start. Worse, Panic took so long to design and build that we only had a few months to write the software before our deadline. We poured over research papers, YouTube videos, and other resources to find a direction. A lot of research papers implemented their own quadcopter flight controller software, and as a result, we briefly tried to create our own flight controller by implementing an Estimated Kalman Filter, PID Controllers, and various other pieces of software all on an ATMega 2560 with an off-the-shelf IMU. This proved to be especially difficult with our manpower and lack of general familiarity with such high level concepts. None of our attempts that year ever _took off_, both literally and metaphorically, we just didn't have the expertise or the time. So, we went back to the drawing board and looked at the broader community around DIY drones.
 
 We also decided to reinvent the structure of the computer science division. For the IARC competition, the computer science division is split into multiple sub-sections, each with a specific focus. While members are generally assigned to sub-sections, they are free to collaborate and move between subsections.
 
@@ -18,7 +18,7 @@ We also decided to reinvent the structure of the computer science division. For 
 
 * Collision Avoidance
 
-  * Responsible for defining and implementing techniques\) to identify obstacles, as well as coordinating with Flight Control to determine maneuvers to avoid obstacles.
+  * Responsible for defining and implementing techniques to identify obstacles, as well as coordinating with Flight Control to determine maneuvers to avoid obstacles.
 
 * Control
 

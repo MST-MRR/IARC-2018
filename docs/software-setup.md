@@ -48,7 +48,7 @@ vagrant up
 
 This command will **fail** with Authentication failure. Just press CTRL-C, even on Mac.
 
-![](/assets/auth_failure_vagrant.png)
+![](assets/auth_failure_vagrant.png)
 
 After you return to a prompt, run the following command:
 
@@ -60,7 +60,7 @@ Now, close your terminal or PowersShell window and open VirtualBox.
 
 You should see a VM with the name of the folder it is in. In this case, it's **dronedev**. Start the VM.
 
-![](/assets/import.png)
+![](assets/import.png)
 
 Once the VM comes up, you will be prompted to login as the user Vagrant. The password is also **vagrant**, but in all lowercase. After you are logged in, open terminal and run the following commands:
 
@@ -90,7 +90,7 @@ Then type:
 start_simulators
 ```
 
-The first time you start the simulator will take some time because it will have to first compile the program. Subsequent starts should be much faster. Look** **for **Ready to Fly!** to appear in the terminal window.
+The first time you start the simulator will take some time because it will have to first compile the program. Subsequent starts should be much faster. Look for **Ready to Fly!** to appear in the terminal window.
 
 You should also see a program called Gazebo launch with a drone in the viewport. Congratulations, you're all set up!
 
