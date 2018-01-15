@@ -408,8 +408,8 @@
           <camera>
             <horizontal_fov>1.0472</horizontal_fov>
             <image>
-              <width>320</width>
-              <height>200</height>
+              <width>640</width>
+              <height>480</height>
             </image>
             <clip>
               <near>0.05</near>
@@ -417,7 +417,7 @@
             </clip>
           </camera>
           <always_on>1</always_on>
-          <update_rate>10</update_rate>
+          <update_rate>60</update_rate>
           <visualize>true</visualize>
           
         </sensor>
@@ -667,7 +667,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -695,7 +695,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -723,7 +723,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -769,7 +769,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -815,7 +815,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -855,22 +855,22 @@
       <pose frame=''>1 0 0 0 -0 0</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create2'>
       <link name='base'>
         <inertial>
@@ -968,7 +968,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -996,7 +996,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1024,7 +1024,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1070,7 +1070,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1116,7 +1116,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1156,22 +1156,22 @@
       <pose frame=''>0.809016994 0.587785252 0 0 -0 0.63</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create3'>
       <link name='base'>
         <inertial>
@@ -1269,7 +1269,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1297,7 +1297,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1325,7 +1325,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1371,7 +1371,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1417,7 +1417,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1457,17 +1457,17 @@
       <pose frame=''>0.309016994 0.951056516 0 0 -0 1.26</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
     <model name='create4'>
       <link name='base'>
         <inertial>
@@ -1565,7 +1565,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1593,7 +1593,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1621,7 +1621,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1667,7 +1667,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1713,7 +1713,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1753,17 +1753,17 @@
       <pose frame=''>-0.309016994 0.951056516 0 0 -0 1.88</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
     <model name='create5'>
       <link name='base'>
         <inertial>
@@ -1861,7 +1861,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1889,7 +1889,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -1917,7 +1917,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -1963,7 +1963,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2009,7 +2009,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2049,20 +2049,20 @@
       <pose frame=''>-0.809016994 0.587785252 0 0 -0 2.51</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create6'>
       <link name='base'>
         <inertial>
@@ -2160,7 +2160,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2188,7 +2188,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2216,7 +2216,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2262,7 +2262,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2308,7 +2308,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2348,18 +2348,18 @@
       <pose frame=''>-1 0 0 0 0 3.14</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create7'>
       <link name='base'>
         <inertial>
@@ -2457,7 +2457,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2485,7 +2485,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2513,7 +2513,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2559,7 +2559,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2605,7 +2605,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2645,23 +2645,23 @@
       <pose frame=''>-0.809016994 -0.587785252 0 0 0 3.77</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create8'>
       <link name='base'>
         <inertial>
@@ -2759,7 +2759,7 @@
             <collision>top_flap_collision</collision>
           </contact>
         </sensor>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2787,7 +2787,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -2815,7 +2815,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2861,7 +2861,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2907,7 +2907,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -2947,23 +2947,23 @@
       <pose frame=''>-0.309016994 -0.951056516 0 0 0 4.4</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create9'>
-      
+
       <link name='base'>
         <inertial>
           <inertia>
@@ -3060,7 +3060,7 @@
             </mesh>
           </geometry>
         </visual>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -3088,7 +3088,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -3116,7 +3116,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3162,7 +3162,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3208,7 +3208,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3248,29 +3248,29 @@
       <pose frame=''>0.309016994 -0.951056516 0 0 0 5.03</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='create10'>
-      
+
       <link name='base'>
         <inertial>
           <inertia>
@@ -3348,14 +3348,6 @@
             </friction>
           </surface>
         </collision>
-        <visual name='top_flap_visual'>
-          <pose frame=''>0 0 0.1 0 -0 0</pose>
-          <geometry>
-            <box>
-              <size> 0.1 0.1 0.01 </size>
-            </box>
-          </geometry>
-        </visual>
         <sensor name='my_contact' type='contact'>
           <contact>
             <collision>bumper_collision</collision>
@@ -3375,7 +3367,7 @@
             </mesh>
           </geometry>
         </visual>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -3403,7 +3395,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -3431,7 +3423,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3477,7 +3469,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3523,7 +3515,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3560,30 +3552,30 @@
           </dynamics>
         </axis>
       </joint>
-      
+
       <pose frame=''>0.809016994 -0.587785252 0 0 0 5.65</pose>
       <plugin name="model_push" filename="libmodel_push.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='Obstacle1'>
-      
+
       <link name='base'>
         <inertial>
           <inertia>
@@ -3676,7 +3668,7 @@
             </mesh>
           </geometry>
         </visual>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -3704,7 +3696,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -3732,7 +3724,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3778,7 +3770,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3824,7 +3816,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -3861,29 +3853,29 @@
           </dynamics>
         </axis>
       </joint>
-      
+
       <pose frame=''>5 0 0 0 0 1.570796327</pose>
       <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='Obstacle2'>
-      
+
       <link name='base'>
         <inertial>
           <inertia>
@@ -3976,7 +3968,7 @@
             </mesh>
           </geometry>
         </visual>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -4004,7 +3996,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -4032,7 +4024,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4078,7 +4070,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4124,7 +4116,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4161,28 +4153,28 @@
           </dynamics>
         </axis>
       </joint>
-      
+
       <pose frame=''>0 5 0 0 0 3.141592654</pose>
       <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='Obstacle3'>
-      
+
       <link name='base'>
         <inertial>
           <inertia>
@@ -4275,7 +4267,7 @@
             </mesh>
           </geometry>
         </visual>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -4303,7 +4295,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -4331,7 +4323,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4377,7 +4369,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4423,7 +4415,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4460,30 +4452,30 @@
           </dynamics>
         </axis>
       </joint>
-      
+
       <pose frame=''>-5 0 0 0 0 4.71238898</pose>
       <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
     </model>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <model name='Obstacle4'>
-      
+
       <link name='base'>
         <inertial>
           <inertia>
@@ -4576,7 +4568,7 @@
             </mesh>
           </geometry>
         </visual>
-        
+
         <collision name='front_wheel_collision'>
           <pose frame=''>0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -4604,7 +4596,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <collision name='rear_wheel_collision'>
           <pose frame=''>-0.13 0 0.017 -0 1.5707 1.5707</pose>
           <geometry>
@@ -4632,7 +4624,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4678,7 +4670,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4724,7 +4716,7 @@
           </surface>
           <max_contacts>10</max_contacts>
         </collision>
-        
+
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
@@ -4761,12 +4753,12 @@
           </dynamics>
         </axis>
       </joint>
-      
+
       <pose frame=''>0 -5 0 0 0 6.283185307</pose>
       <plugin name="ObstacleControl" filename="libObstacleControl.so"/>
     </model>
-    
-    
-    
+
+
+
   </world>
 </sdf>

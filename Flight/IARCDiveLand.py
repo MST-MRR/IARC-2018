@@ -10,10 +10,11 @@ A simple quadcopter AI which follows the nearest roomba in an IARC arena simulat
 '''
 
 from AutonomousFlight import FlightVector
-from ATC import Tower
+from ATC import Tower, VehicleStates
 import cv2
 import numpy as np
 import time
+import threading
 from sklearn.preprocessing import normalize
 
 import pygazebo
@@ -27,12 +28,10 @@ from timeit import default_timer as timer
 import mrrdt_vision
 from mrrdt_vision.obj_detect.roomba_cnn import RoombaDetector
 
-import pyrealsense as pyrs
-
 logging.basicConfig()
 
 # displays a live stream of footage from the drone in the simulator, set to False for slightly better runtime performance
-_DEBUG = False
+_DEBUG = True
 
 class SimpleDroneAI():
     # camage image message location
@@ -45,17 +44,25 @@ class SimpleDroneAI():
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
     MAX_LOST_TARGET_TIME = 3
-    # RealSense framerate
-    REALSENSE_FRAMERATE = 30
+    # the number of frames with the drone right over a roomba before the AI tries to land/dive -Tanner
+    LAND_CONFIDENCE = 150
+    DIVE_CONFIDENCE = 25
+    # diving just means that the velocity vector is multiplied by this
+    DIVE_FACTOR = 3
+    # the AI considers itself right over a roomba iff it sees a roomba whose distance from the center of the image is less than this ratio times the geometric mean of image width and image height -Tanner
+    RIGHT_OVER_ROOMBA_RATIO = 2 # so "right over roomba" means "sees roomba"
+
 
     def __init__(self):
         self._tower = Tower()
         self._tower.initialize()
-        self._serv = pyrs.Service()
-        self._cam = self._serv.Device(device_id = 0, streams = [pyrs.stream.ColorStream(SimpleDroneAI.REALSENSE_FRAMERATE)])
         self._detector = RoombaDetector()
         self._time_since_last_roomba = 0
         self._hovering = True
+        self._lock = threading.RLock()
+        self._last_image_retrieved = None
+        self._confidence = 0
+        self._dive_scalar = 1
 
     @property
     def hovering(self):
@@ -74,18 +81,19 @@ class SimpleDroneAI():
         @args:
         @returns:
         """
+
         self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
 
     def _get_velocity_vector2d(self, start, goal, speed):
         """
-        @purpose: 
+        @purpose:
             Takeoff and hover at an altitude of `SimpleDroneAI.TAKEOFF_HEIGHT` meters
             Note: This function will dampen the speed based on the distance we are away from the target
         @args:
             start, np.array: 2D position vector corresponding to the start point
             goal, np.array: 2D position vector corresponding to the destination point
             speed, float: speed limit in m/s
-        @returns: 
+        @returns:
             A FlightVector pointed in the direction of `goal` with speed less than or equal to `speed`.
         """
         dist = np.sqrt(np.sum((goal-start)**2))
@@ -94,19 +102,20 @@ class SimpleDroneAI():
 
     def _follow_nearest_roomba(self, roombas, drone_midpoint):
         """
-        @purpose: 
+        @purpose:
             Attempts to follow the roomba closest to the drone
         @args:
             roombas, collection of Roomba instances: A list of detected roombas
             drone_midpoint, np.array: Midpoint of the drone, we navigate relative to this point
-        @returns: 
+        @returns:
         """
         if roombas:
             roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
             target_idx = np.argmin(np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
             target = roombas[target_idx]
 
-            velocity_vector = self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
+            velocity_vector = self._dive_scalar * self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
+
             self._tower.fly(velocity_vector)
             self.hovering = False
             self._time_since_last_roomba = timer()
@@ -115,48 +124,80 @@ class SimpleDroneAI():
 
     def _update(self, img):
         """
-        @purpose: 
+        @purpose:
             Event handler which updates relevant state variables and issues commands to the drone
         @args:
-            img: A frame from the RealSense.
-        @returns: 
+            img, np.ndarray: An image from the drone's camera.
+        @returns:
         """
-        h, w = (img.height, img.width)
+        h, w = img.shape[:2]
         roombas = self._detector.detect(img)
-        
+
         drone_midpoint = np.asarray([w/2, h/2])
         self._follow_nearest_roomba(roombas, drone_midpoint)
 
+        if roombas:
+            roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
+            target_idx = np.argmin(np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
+            target = roombas[target_idx]
+            if np.sqrt(np.sum((roomba_midpoints[target_idx]-drone_midpoint)**2)) / np.sqrt(h * w) < SimpleDroneAI.RIGHT_OVER_ROOMBA_RATIO:
+                self._confidence = self._confidence + 1
+
+            if self._confidence > SimpleDroneAI.DIVE_CONFIDENCE:
+                self._dive_scalar = SimpleDroneAI.DIVE_FACTOR
+                self._confidence = self._confidence + 1
+            else:
+                self._dive_scalar = 1
+            if self._confidence > SimpleDroneAI.LAND_CONFIDENCE:
+                self._tower.land()
+        if self._tower.STATE == VehicleStates.landed:
+            self._confidence = 0
+            self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            
+
             for roomba in roombas:
                 roomba.draw(bgr_img)
-            
+
             cv2.imshow('debug', bgr_img)
             cv2.waitKey(1)
 
-    def _shutdown(self):
-        self._tower.land()
-        self._cam.stop()
-        self._serv.stop()
+    def _event_handler(self, data):
+        """
+        @purpose:
+            Event handler which updates relevant state variables
+        @args:
+            data, protobuf: A message containing an image from the drone's camera.
+        @returns:
+        """
+        message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
+        h, w = (message.image.height, message.image.width)
+        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
 
+        with self._lock:
+            self._last_image_retrieved = img
+
+    @trollius.coroutine
     def run(self):
         """
-        @purpose: 
+        @purpose:
             Gazebo simulator event loop, forwards messages and state information to self._update
         @args:
-        @returns: 
+        @returns:
         """
         self._takeoff()
-        
+        manager = yield From(pygazebo.connect())
+
+        subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
+        yield From(subscriber.wait_for_connection())
+
         while True:
-            try:
-                for _ in range(SimpleDroneAI.REALSENSE_FRAMERATE):
-                    self._cam.wait_for_frames()
-                    self._update(self._cam.color)
-            except KeyboardInterrupt:
-                self._shutdown()
+            with self._lock:
+                if self._last_image_retrieved is not None:
+                    self._update(self._last_image_retrieved)
+
+            yield From(trollius.sleep(0.01))
 
 ai = SimpleDroneAI()
-ai.run()
+loop = trollius.get_event_loop()
+loop.run_until_complete(ai.run())

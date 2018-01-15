@@ -61,20 +61,24 @@ class PIDFlightController(object):
   YAW_MID = 1494.0
   PITCH_MID = 1494.0
   ROLL_MID = 1494.0
+  THROTTLE_MID = 1550.0
   THROTTLE_MIN = 982.0
   THROTTLE_MAX = 2006.0
-  PITCH_P = 1.45 * 1.5
+  ORIGINAL_P = 1.45
+  ORIGINAL = 0.00
+  ORIGINAL_D = 3.70
+  PITCH_P = 1.8125
   PITCH_I = 0.0
-  PITCH_D = 3.70 * 1.5
-  ROLL_P = 1.45 * 1.5
+  PITCH_D = 4.625
+  ROLL_P = 1.8125
   ROLL_I = 0.00
-  ROLL_D = 3.70 * 1.5
+  ROLL_D = 4.625
   YAW_P = 0.73
   YAW_I = 0.00
   YAW_D = 8.00
-  THROTTLE_P = 1.45
+  THROTTLE_P = 1.8125
   THROTTLE_I = 0.00
-  THROTTLE_D = 3.70
+  THROTTLE_D = 4.625
   ALTITUDE_P = 0.39
   ALTITUDE_I = 0.09
   ALTITUDE_D = 0.05
@@ -88,6 +92,7 @@ class PIDFlightController(object):
   def __init__(self, atc):
     self.atc = atc
     self.controllers_initialized = False
+    self.alt_hold_enabled = False
 
     self.Throttle_PID = None
     self.Altitude_PID = None
@@ -133,26 +138,40 @@ class PIDFlightController(object):
 
     if(desired_yaw is not None and 
       requested_flight_vector.x == 0.00 and 
-      requested_flight_vector.y ==0):
+      requested_flight_vector.y == 0.00):
       # By checking the magnitude, we ensure that the vehicle will only yaw while stationary.
       # There is a similar check below in update_controllers.
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
 
-    if(desired_altitude):
-      #Only use the desired altitude arguemnt if the Altitude_PID controller is enabled.
+    if(requested_flight_vector.z == 0.00 and desired_altitude):
+      #Only use the altitude controller if the desired_altitude argument is passed and we haven't been given a z velocity.
       self.Altitude_PID.SetPoint = desired_altitude
+      self.alt_hold_enabled = True
+    elif("TAKEOFF" in self.atc.STATE):
+      #TAKEOFF allows both controllers to run so that the altitude controller can get a stable hover value.
+      self.Altitude_PID.SetPoint = desired_altitude
+      self.alt_hold_enabled = False
+    else:
+      self.alt_hold_enabled = False
 
   def update_controllers(self):
     vehicle_x_velocity = (self.atc.vehicle.velocity[0])
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
 
-    #Start by updating our z-axis controllers regardless of state and updating the PWM value.
-    self.Altitude_PID.update(self.atc.get_altitude())
-    self.Altitude_PWM = self.convert_altitude_to__PWM(self.Altitude_PID.output)
+    if(self.alt_hold_enabled or "TAKEOFF" in self.atc.STATE):
+      #If altitude hold mode is enabled or we're in the takeoff state then allow the altitude controller to run.
+      self.Altitude_PID.update(self.atc.get_altitude())
+      self.Altitude_PWM = self.convert_altitude_to_pwm(self.Altitude_PID.output)
+    elif(not self.atc.in_range(self.atc.VEL_PID_THRESHOLD_THROTTLE, 0.00, vehicle_z_velocity)):
+      #Altitude hold is disabled, we're not in takeoff, and someone gave us a Z vector (the vehicle has some programmatically induced velocity).
+      #The idea then is to basically pause (not update) the altitude controller and continually set it's setpoint to whatever our current altitude is.
+      #This will always keep the altitude controller paused at the last value needed to hover the vehicle.
+      #We use a more smaller velocity threshold here so that the setpoint is updated more often and therefore more in line with the vehicle's current altitude.
+      self.Altitude_PID.SetPoint = self.atc.get_altitude()
 
-    # self.Throttle_PID.update(vehicle_z_velocity)
-    # self.Throttle_PWM += self.Throttle_PID.output
+    self.Throttle_PID.update(vehicle_z_velocity)
+    self.Throttle_PWM += self.Throttle_PID.output
 
     # #This flips the velocity readings so that they are relative to the vehicle and not the world.
     if(math.cos(self.atc.vehicle.attitude.yaw) <= 0.0):
@@ -205,8 +224,10 @@ class PIDFlightController(object):
     self.atc.vehicle.channels.overrides[self.ROLL_CHANNEL] = self.Roll_PWM
     self.atc.vehicle.channels.overrides[self.YAW_CHANNEL] = self.Yaw_PWM
 
-    # self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Throttle_PWM
-    self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Altitude_PWM
+    if(self.alt_hold_enabled):
+      self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Altitude_PWM
+    else:
+      self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Throttle_PWM
 
   def get_yaw_radians(self, angle):
     if angle < 180.0:
@@ -219,7 +240,7 @@ class PIDFlightController(object):
             return math.radians(angle)
         return math.radians(angle-180.0) - math.pi
 
-  def convert_altitude_to__PWM(self, desired_altitude):
+  def convert_altitude_to_pwm(self, desired_altitude):
     rc_out =  340.0 * desired_altitude + 986.0
     if(rc_out < self.THROTTLE_MIN):
       rc_out = self.THROTTLE_MIN
@@ -240,24 +261,26 @@ class PIDFlightController(object):
 
     debug_string = ("Vehicle State: " + self.atc.STATE + 
     # "\n\nZ Velocity Controller Out: " + str(self.Throttle_PID.output) + 
-    # "\nZ Velocity RC Out: " + str(self.Throttle_PWM) + 
-    # "\nVehicle Z Velocity: " + str(self.atc.vehicle.velocity[2]) + 
-    # "\nTarget Z Velocity: " + str(self.Throttle_PID.SetPoint) + 
-    "\n\nAltitude Controller Out: " + str(self.Altitude_PID.output) + 
-    "\nAltitude RC Out: " + str(self.Altitude_PWM) + 
+    "\n\nZ Velocity RC Out: " + str(self.Throttle_PWM) + 
+    "\nVehicle Z Velocity: " + str(self.atc.vehicle.velocity[2]) + 
+    "\nTarget Z Velocity: " + str(self.Throttle_PID.SetPoint) + 
+    # "\n\nAltitude Controller Out: " + str(self.Altitude_PID.output) + 
+    "\n\nAltitude RC Out: " + str(self.Altitude_PWM) + 
     "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
-    "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
-    "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
-    "\nPitch RC Out: " + str(self.Pitch_PWM) + 
+    "\nTarget Altitude: " + str(self.Altitude_PID.SetPoint) + 
+    "\n\nAltitude Hold Enabled: " + str(self.alt_hold_enabled) + 
+    # "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
+    # "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
+    "\n\nPitch RC Out: " + str(self.Pitch_PWM) + 
     "\nVehicle X Velocity: " + str(vehicle_x_velocity) + 
     "\nTarget X Velocity: " + str(self.Pitch_PID.SetPoint) + 
-    "\n\nRoll Controller Out: " + str(self.Roll_PID.output) + 
-    "\nRoll RC Out: " + str(self.Roll_PWM) + 
+    # "\n\nRoll Controller Out: " + str(self.Roll_PID.output) + 
+    "\n\nRoll RC Out: " + str(self.Roll_PWM) + 
     "\nVehicle Y Velocity: " + str(vehicle_y_velocity) + 
     "\nTarget Y Velocity: " + str(self.Roll_PID.SetPoint) + 
-    "\n\nYaw Controller Out: " + str(self.Yaw_PID.output) + 
-    "\nYaw RC Out: " + str(self.Yaw_PWM) + 
-    "\nVehicle Yaw: " + str(self.atc.get_yaw_deg()) + 
-    "\nTarget Yaw: " + str(math.degrees(self.Yaw_PID.SetPoint)) +
-    "\nWithin Yaw Threshold: " + str(self.atc.in_range(self.atc.YAW_PID_THRESHOLD, math.degrees(self.Yaw_PID.SetPoint), self.atc.get_yaw_deg())))
+    # "\n\nYaw Controller Out: " + str(self.Yaw_PID.output) + 
+    # "\nYaw RC Out: " + str(self.Yaw_PWM) + 
+    "\n\nVehicle Yaw: " + str(self.atc.get_yaw_deg()))
+    # "\nTarget Yaw: " + str(math.degrees(self.Yaw_PID.SetPoint)) +
+    # "\nWithin Yaw Threshold: " + str(self.atc.in_range(self.atc.YAW_PID_THRESHOLD, math.degrees(self.Yaw_PID.SetPoint), self.atc.get_yaw_deg())))
     return debug_string
