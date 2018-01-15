@@ -1,7 +1,7 @@
 ############################################
 # This file contains a wrapper class
 # for DroneKit related operations
-# for our drone.
+# for our vehicle.
 ############################################
 # Multi-Rotor Robot Design Team
 # Missouri University of Science Technology

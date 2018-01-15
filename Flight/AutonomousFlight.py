@@ -1,3 +1,12 @@
+############################################
+# This file contains a wrapper around PID
+# based flight operations for our vehicle.
+############################################
+# Multi-Rotor Robot Design Team
+# Missouri University of Science Technology
+# IARC 2018
+# pylint: disable=C, F, I, R, W
+
 import PID, time, math
 
 class FlightVector(object):
@@ -144,11 +153,11 @@ class PIDFlightController(object):
       self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
 
     if(requested_flight_vector.z == 0.00 and desired_altitude):
-      #Only use the altitude controller if the desired_altitude argument is passed and we haven't been given a z velocity.
+      #Only use the altitude controller if there is a desired_altitude and we haven't been given a z velocity.
       self.Altitude_PID.SetPoint = desired_altitude
       self.alt_hold_enabled = True
     elif("TAKEOFF" in self.atc.STATE):
-      #TAKEOFF allows both controllers to run so that the altitude controller can get a stable hover value.
+      #TAKEOFF is an exception to the above, both controllers are allowed to run so that the altitude controller can get a stable hover value.
       self.Altitude_PID.SetPoint = desired_altitude
       self.alt_hold_enabled = False
     else:
@@ -268,7 +277,7 @@ class PIDFlightController(object):
     "\n\nAltitude RC Out: " + str(self.Altitude_PWM) + 
     "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
     "\nTarget Altitude: " + str(self.Altitude_PID.SetPoint) + 
-    "\n\nAltitude Hold Enabled: " + str(self.alt_hold_enabled) + 
+    "\nAltitude Hold Enabled: " + str(self.alt_hold_enabled) + 
     # "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
     # "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
     "\n\nPitch RC Out: " + str(self.Pitch_PWM) + 

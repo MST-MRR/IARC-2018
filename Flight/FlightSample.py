@@ -6,22 +6,16 @@ t = Tower()
 
 t.initialize()
 
-t.takeoff(2.0)
+t.takeoff(1.5)
 sleep(10)
 
-t.fly(FlightVector(0.5, 0.0, 0.50))
+t.fly(FlightVector(1.00, 0.00, 0.00))
 sleep(10)
 
-t.hover(2.0)
+t.hover(1.0)
 sleep(10)
 
-t.fly(FlightVector(-0.5, 0.0, -0.25))
-sleep(5)
-
-t.fly(FlightVector(-0.5, 0.0, -0.0))
-sleep(10)
-
-t.fly(FlightVector(0.50, 0.0, 0.30))
+t.fly(FlightVector(-1.00, 0.00, 0.00))
 sleep(10)
 
 t.land()
