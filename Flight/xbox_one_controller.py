@@ -98,6 +98,12 @@ class XboxOneController():
 
             self._listeners[key].append(callback)
 
+    def get_button_state(self, button_id):
+        return self._joystick.get_button(button_id)
+    
+    def get_axis_state(self, axis_id):
+        return self._joystick.get_axis(axis_id)
+
     def quit():
         with self._lock:
             pygame.quit()
