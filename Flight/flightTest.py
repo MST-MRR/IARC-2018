@@ -322,4 +322,4 @@ def test_roll_alt(throttlePID, throttlePWM, rollPID, direction):
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 1.5, 0.0, 0.0, 0.0)
+test_flight(0.3, 1.0, 0.0, 0.0, 0.0)
