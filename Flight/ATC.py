@@ -354,8 +354,8 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          # os.system("clear")
-          # print(self.atc.pid_flight_controller.get_debug_string())
+          os.system("clear")
+          print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):
