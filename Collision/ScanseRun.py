@@ -66,7 +66,7 @@ def send_lidar_message(min_dist, max_dist, current_dist, sector):
     vehicle.send_mavlink(message)
     vehicle.commands.upload()
     
- def send_distance_message(distance_to_ground):
+def send_distance_message(distance_to_ground):
     message = self.vehicle.message_factory.distance_sensor_encode(
         0,                                             # time since system boot, not used
         MIN_SONAR_DISTANCE,                            # min distance cm
