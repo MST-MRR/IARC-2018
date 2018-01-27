@@ -14,6 +14,7 @@ class LIDAR():
     #self.lidar_sensor = "/dev/cu.usbserial-DO00867Q" #this is for Mac OS X 
     self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
     self.sweep = Sweep(self.lidar_sensor)
+    #print "SCANSE INIT"
     #self.sweep = None
 
   def connect_to_lidar(self):
@@ -33,6 +34,7 @@ class LIDAR():
   def get_lidar_data(self):
     # Starts scanning as soon as the motor is ready
     lidar_data = [ [], [], [], [], [], [], [], [] ]
+    #print "check"
     # get_scans is coroutine-based generator lazily returning scans
     for scan in itertools.islice(self.sweep.get_scans(), 1): #for every sector
       all_points = []
@@ -45,8 +47,7 @@ class LIDAR():
         
         distance = sample.distance
         angle_deg = (sample.angle / 1000.0) % 360.0
-        sector = abs((((angle_deg % 360.0) - 360) // self.QUADRANT_SIZE) + 1)
-        #Account for sector swap
+        sector = (int)((angle_deg % 360.0) // self.QUADRANT_SIZE)
         
         if (distance < self.MAX_SAFE_DISTANCE and distance > self.MIN_SAFE_DISTANCE):
           sector_lists[(int)(sector)].append( (distance, angle_deg, sector) )
