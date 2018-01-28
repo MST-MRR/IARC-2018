@@ -24,6 +24,7 @@ import trollius
 from trollius import From
 from timeit import default_timer as timer
 from xbox_one_controller import XboxOneController
+from ardupilot_gazebo_monitor import ArdupilotGazeboMonitor
 
 logging.basicConfig()
 
@@ -188,13 +189,18 @@ class SimpleDroneAI():
             cv2.destroyAllWindows()
 
 while True:
+    ardupilot_connection = ArdupilotGazeboMonitor()
+
     try:
+        while not ardupilot_connection.ready_to_fly():
+            time.sleep(1)
+        
         ai = SimpleDroneAI()
         loop = trollius.get_event_loop()
         loop.run_until_complete(ai.run())
     except ResetSimulatorException:
-        # give arducopter time to rethink its life
-        time.sleep(15)
+        pass
     except KeyboardInterrupt:
-        print('\n\nQuitting...')
         break
+    finally:
+        ardupilot_connection.stop()
