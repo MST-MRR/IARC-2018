@@ -228,6 +228,7 @@ class Tower(object):
       desired_angle = self.get_yaw_deg()
       
     self.hover(desired_altitude, desired_angle)
+    self.last_flight_vector = StandardFlightVectors.hover
 
   def fly(self, desired_vector):
     """
@@ -356,8 +357,7 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          os.system("clear")
-          print(self.atc.pid_flight_controller.get_debug_string())
+          # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):

@@ -3,11 +3,17 @@ from ATC import Tower
 
 
 class Controller(object):
+    t = None
+    vector_to_fly = None
     def __init__(self):
-        t = Tower()
+        self.t = Tower()
+        
 
     def connect_to_drone(self):
         self.t.initialize()
+
+    def disarm(self):
+        self.t.disarm()
     
     def takeoff(self, desired_alt, desired_angle = None):
         self.t.takeoff(desired_alt, desired_angle)
@@ -34,6 +40,9 @@ class Controller(object):
 
     def hover(self):
         self.t.hover(self.t.last_hover_altitude)
+
+    def land(self, stop=False):
+        self.t.land(stop)
 
 
 
