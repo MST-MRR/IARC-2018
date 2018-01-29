@@ -67,6 +67,7 @@ class Tower(object):
     self.failsafes = None
     self.pid_flight_controller = None
     self.STATE = VehicleStates.unknown
+    self.last_flight_vector = None
 
   def initialize(self, should_write_to_file=False):
     """
@@ -244,6 +245,7 @@ class Tower(object):
 
     self.pid_flight_controller.send_velocity_vector(desired_vector, desired_altitude = desired_altitude)
     self.STATE = VehicleStates.flying
+    self.last_flight_vector = desired_vector
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
