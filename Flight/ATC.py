@@ -67,6 +67,7 @@ class Tower(object):
     self.failsafes = None
     self.pid_flight_controller = None
     self.STATE = VehicleStates.unknown
+    self.last_flight_vector = None
 
   def initialize(self, should_write_to_file=False):
     """
@@ -227,6 +228,7 @@ class Tower(object):
       desired_angle = self.get_yaw_deg()
       
     self.hover(desired_altitude, desired_angle)
+    self.last_flight_vector = StandardFlightVectors.hover
 
   def fly(self, desired_vector):
     """
@@ -244,6 +246,7 @@ class Tower(object):
 
     self.pid_flight_controller.send_velocity_vector(desired_vector, desired_altitude = desired_altitude)
     self.STATE = VehicleStates.flying
+    self.last_flight_vector = desired_vector
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
@@ -354,8 +357,7 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          os.system("clear")
-          print(self.atc.pid_flight_controller.get_debug_string())
+          # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):

@@ -107,6 +107,11 @@ class PIDFlightController(object):
     self.initialize_controllers()
 
   def initialize_controllers(self):
+    """
+    @purpose: Initialize all the PID controllers with the the setpoints of 0. The PIDs are also given their defined P.I.D values. controllers_initialized value set to true.
+    @args:
+    @returns: 
+    """
     if not self.controllers_initialized:
       self.Pitch_PID = PID.PID(self.PITCH_P, self.PITCH_I, self.PITCH_D)
       self.Pitch_PID.SetPoint = 0.00
@@ -131,7 +136,11 @@ class PIDFlightController(object):
       self.controllers_initialized = True
 
   def send_velocity_vector(self, requested_flight_vector, desired_altitude = None, desired_yaw = None):
-
+    """
+    @purpose: Give the drone a flight vector to fly. PID for set points for Pitch, Roll, and Yaw are changed accordingly. The altitude is switched if the z value of the vector is 0 so it can keep a stable altitude. 
+    @args: A flight vector, a desired altitude for the drone to hold, and a desired yaw for the drone
+    returns: 
+    """
     self.Pitch_PID.SetPoint = requested_flight_vector.x
     self.Roll_PID.SetPoint = requested_flight_vector.y
     self.Throttle_PID.SetPoint = requested_flight_vector.z
@@ -155,6 +164,11 @@ class PIDFlightController(object):
       self.alt_hold_enabled = False
 
   def update_controllers(self):
+    """
+    @purpose: Update the PID controllers. Get the velocities of each axis and then updates the altitude controller if it is enabled or the drone is in TAKEOFF mode. The PWM for throttle is updated and calculated since it runs at all times.
+    @args: 
+    @returns: 
+    """
     vehicle_x_velocity = (self.atc.vehicle.velocity[0])
     vehicle_y_velocity = (self.atc.vehicle.velocity[1])
     vehicle_z_velocity = (self.atc.vehicle.velocity[2])
@@ -212,6 +226,11 @@ class PIDFlightController(object):
     self.Throttle_PWM = self.constrain_rc_values(self.Throttle_PWM)
 
   def write_to_rc_channels(self, should_flush_channels=False):
+    """
+    @purpose: Write PWM values to their approriate channels.
+    @args: Flag that invokes flushing all the channels back to their default values.
+    @returns: 
+    """
     
     if(should_flush_channels):
       self.Roll_PWM = self.ROLL_MID
@@ -230,6 +249,11 @@ class PIDFlightController(object):
       self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Throttle_PWM
 
   def get_yaw_radians(self, angle):
+    """
+    @purpose: Get the yaw of a angle in radians
+    @args: A angle in degrees
+    @returns: An angle in radians that is constrained if the original angle is 0 or 180
+    """
     if angle < 180.0:
         if angle == 0.0:
             angle = 0.01
@@ -241,6 +265,11 @@ class PIDFlightController(object):
         return math.radians(angle-180.0) - math.pi
 
   def convert_altitude_to_pwm(self, desired_altitude):
+    """
+    @purpose: Convert the an altitude to a PWM value.
+    @args: A desired altitude
+    @returns: A PWM value
+    """
     rc_out =  340.0 * desired_altitude + 986.0
     if(rc_out < self.THROTTLE_MIN):
       rc_out = self.THROTTLE_MIN
@@ -249,6 +278,11 @@ class PIDFlightController(object):
     return rc_out
 
   def constrain_rc_values(self, rc_out):
+    """
+    @purpose: Constraing a given rc value to the upper or lower bounds to not spook the PID controllers
+    @args: The current PWM value
+    @returns: A constrained PWM value 
+    """
     if(rc_out < self.THROTTLE_MIN):
       rc_out = self.THROTTLE_MIN
     elif(rc_out > self.THROTTLE_MAX):

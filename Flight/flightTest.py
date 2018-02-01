@@ -1,6 +1,5 @@
 import dronekit
 import PID
-import flightControl
 import math
 import os
 import time
@@ -54,10 +53,6 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     # PitchPID = PID.PID(PITCH_P, PITCH_I, PITCH_D)
     # PitchPID.SetPoint = desired_pitch_velocity
     # PitchPID.setSampleTime(PID_UPDATE_TIME)
-
-    PitchPID = flightControl.PIDController(desired_pitch_velocity, PITCH_MID,
-                                           PID_UPDATE_TIME, PITCH_P, PITCH_I,
-                                           PITCH_D)
     # PitchPWM = get_pitch_pwm(desired_pitch_velocity)
 
     pitch_graph = PID_Graph(desired_pitch_velocity, "Pitch")
@@ -66,9 +61,6 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     # RollPID = PID.PID(ROLL_P, ROLL_I, ROLL_D)
     # RollPID.SetPoint = desired_roll_velocity
     # RollPID.setSampleTime(PID_UPDATE_TIME)
-    RollPID = flightControl.PIDController(desired_roll_velocity, ROLL_MID,
-                                          PID_UPDATE_TIME, ROLL_P, ROLL_I,
-                                          ROLL_D)
     # RollPWM = get_pitch_pwm(desired_roll_velocity)
 
     roll_graph = PID_Graph(desired_roll_velocity, "Roll")
@@ -78,8 +70,6 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
     # YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
     # YawPID.SetPoint = desired_yaw_angle
     # YawPID.setSampleTime(PID_UPDATE_TIME)
-    YawPID = flightControl.PIDController(desired_yaw_angle, YAW_MID,
-                                         PID_UPDATE_TIME, YAW_P, YAW_I, YAW_D)
     # YawPWM = YAW_MID
 
     yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
