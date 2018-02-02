@@ -68,6 +68,9 @@ class Tower(object):
     self.pid_flight_controller = None
     self.STATE = VehicleStates.unknown
     self.last_flight_vector = None
+    self.distance_traveled = 0
+    self.target_distance = 0
+    self.old_distance_velocity = 0
 
   def initialize(self, should_write_to_file=False):
     """
@@ -230,6 +233,22 @@ class Tower(object):
     self.hover(desired_altitude, desired_angle)
     self.last_flight_vector = StandardFlightVectors.hover
 
+  def pitch(self, desired_angle):
+    """
+    @purpose: Updates the pitch of the drone
+    @args: The new pitch angle that the should try to hold
+    @returns: 
+    """
+    self.pid_flight_controller.update_pith_and_roll(angle, "Pitch")
+
+  def roll(self, desired_angle):
+    """
+    @purpose: Updates the roll of the drone
+    @args: The new roll angle that the should try to hold
+    @returns: 
+    """
+    self.pid_flight_controller.update_pith_and_roll(angle, "Roll")
+
   def fly(self, desired_vector):
     """
     @purpose: Fly the vehicle in a direction with a certain speed.
@@ -356,6 +375,7 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
+
           self.atc.pid_flight_controller.write_to_rc_channels()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 

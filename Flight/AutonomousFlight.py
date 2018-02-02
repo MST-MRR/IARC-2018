@@ -163,6 +163,18 @@ class PIDFlightController(object):
     else:
       self.alt_hold_enabled = False
 
+  def update_pith_and_roll(self, desired_angle, axis):
+    """
+    @purpose: Updates just the setpoint of the pitch or roll PID controller based on the axis arg
+    @args: The deisred angle for the given axis. The axis that should have a new angle
+    @returns:
+    """
+    velocity = self.convert_angle_to_velocity(desired_angle)
+    if(axis == 'Pitch'):
+      self.Pitch_PID.SetPoint = velocity
+    else:
+      self.Roll_PID.SetPoint = velocity
+
   def update_controllers(self):
     """
     @purpose: Update the PID controllers. Get the velocities of each axis and then updates the altitude controller if it is enabled or the drone is in TAKEOFF mode. The PWM for throttle is updated and calculated since it runs at all times.
@@ -266,7 +278,7 @@ class PIDFlightController(object):
 
   def convert_altitude_to_pwm(self, desired_altitude):
     """
-    @purpose: Convert the an altitude to a PWM value.
+    @purpose: Convert an altitude to a PWM value.
     @args: A desired altitude
     @returns: A PWM value
     """
@@ -277,6 +289,19 @@ class PIDFlightController(object):
       rc_out = self.THROTTLE_MAX
     return rc_out
 
+  def convert_angle_to_velocity(self, desired_angle):
+      """
+      @purpose: Convert an angle to a velocity.
+      @args: A desired angle
+      @returns: A constrianed velocity
+      """
+      velocity_out = 0.0222222*(desired_angle)
+      if(velocity_out < 0):
+        velocity_out = 0.33
+      elif(velocity_out > 1.00):
+        velocity_out = 1.00:
+      return velocity_out
+          
   def constrain_rc_values(self, rc_out):
     """
     @purpose: Constraing a given rc value to the upper or lower bounds to not spook the PID controllers
