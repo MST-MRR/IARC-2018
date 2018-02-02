@@ -9,20 +9,9 @@ t.initialize()
 t.takeoff(2.0)
 sleep(10)
 
-t.fly(FlightVector(0.5, 0.0, 0.50))
+t.hover(5, 150)
 sleep(10)
-
-t.hover(2.0)
-sleep(10)
-
-t.fly(FlightVector(-0.5, 0.0, -0.25))
-sleep(5)
-
-t.fly(FlightVector(-0.5, 0.0, -0.0))
-sleep(10)
-
-t.fly(FlightVector(0.50, 0.0, 0.30))
-sleep(10)
+print t.get_yaw_deg()
 
 t.land()
 

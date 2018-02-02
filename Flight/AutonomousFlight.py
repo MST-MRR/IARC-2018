@@ -172,8 +172,10 @@ class PIDFlightController(object):
     velocity = self.convert_angle_to_velocity(desired_angle)
     if(axis == 'Pitch'):
       self.Pitch_PID.SetPoint = velocity
+      print self.Pitch_PID.SetPoint
     else:
       self.Roll_PID.SetPoint = velocity
+      print self.Roll_PID.SetPoint
 
   def update_controllers(self):
     """
@@ -299,7 +301,7 @@ class PIDFlightController(object):
       if(velocity_out < 0):
         velocity_out = 0.33
       elif(velocity_out > 1.00):
-        velocity_out = 1.00:
+        velocity_out = 1.00
       return velocity_out
           
   def constrain_rc_values(self, rc_out):

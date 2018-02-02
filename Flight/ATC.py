@@ -239,7 +239,8 @@ class Tower(object):
     @args: The new pitch angle that the should try to hold
     @returns: 
     """
-    self.pid_flight_controller.update_pith_and_roll(angle, "Pitch")
+    self.STATE = VehicleStates.flying 
+    self.pid_flight_controller.update_pith_and_roll(desired_angle, "Pitch")
 
   def roll(self, desired_angle):
     """
@@ -247,7 +248,8 @@ class Tower(object):
     @args: The new roll angle that the should try to hold
     @returns: 
     """
-    self.pid_flight_controller.update_pith_and_roll(angle, "Roll")
+    self.STATE = VehicleStates.flying 
+    self.pid_flight_controller.update_pith_and_roll(desired_angle, "Roll")
 
   def fly(self, desired_vector):
     """
@@ -375,7 +377,7 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
-
+          self.atc.update_distance()
           self.atc.pid_flight_controller.write_to_rc_channels()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 

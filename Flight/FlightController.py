@@ -46,7 +46,8 @@ class Controller(object):
         return self.t.get_yaw_deg()
 
     def yaw(self, desired_angle):
-        self.t.hover(self.get_altitude(), desired_angle)
+        # Don't call hover change value according 
+        self.t.hover(self.t.last_hover_altitude, desired_angle)
         
 
 
