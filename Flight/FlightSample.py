@@ -1,17 +1,16 @@
 from AutonomousFlight import FlightVector
 from ATC import Tower
 from time import sleep
+from os import system
 
 t = Tower()
 
 t.initialize()
 
 t.takeoff(2.0)
-sleep(10)
+sleep(5)
 
-t.hover(5, 150)
-sleep(10)
-print t.get_yaw_deg()
+t.pitch_forward(1)
 
-t.land()
-
+while t.target_distance > 0:
+    print t.target_distance

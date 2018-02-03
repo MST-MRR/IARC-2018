@@ -37,6 +37,7 @@ class VehicleStates(object):
   avoidance = "AVOIDANCE"
   landing = "LANDING"
   landed = "LANDED"
+  traveling = "TRAVELING"
 
 class Tower(object):
   SIM = "tcp:127.0.0.1:5762"
@@ -70,8 +71,8 @@ class Tower(object):
     self.last_flight_vector = None
     self.distance_traveled = 0
     self.target_distance = 0
-    self.old_distance_velocity = None
-    self.previous_distance_time = None
+    self.old_distance_velocity = 0
+    self.previous_distance_time = 0
 
   def initialize(self, should_write_to_file=False):
     """
@@ -245,8 +246,10 @@ class Tower(object):
 
   def pitch_forward(self, target_distance):
     self.target_distance = target_distance
+    self.previous_distance_time = time.time()
+    self.old_distance_velocity = 0
     
-  def pitch_velocity_based(self, desired_velocity):
+  def pitch_velocity_based(self, desired_velocity, channel):
     self.STATE = VehicleStates.flying
     self.pid_flight_controller.update_velocity(desired_velocity, channel)
 
@@ -269,7 +272,7 @@ class Tower(object):
     """
 
     if(not self.in_range(self.ALT_PID_THRESHOLD, self.last_hover_altitude, self.get_altitude())):
-      desired_altitude = self.get_altitude()
+          desired_altitude = self.get_altitude()
     else:
       desired_altitude = self.last_hover_altitude
 
@@ -283,13 +286,15 @@ class Tower(object):
         new_speed = 1.0
     elif (new_speed < .33):
         new_speed = 0
-    self.pitch_velocity_based(new_speed)
+    self.pitch_velocity_based(new_speed, 2)
+    new_time = time.time()
     current_velocity = self.vehicle.velocity[2]
-    elapsed_time = time.time() - previous_distance_time
+    elapsed_time = new_time - self.previous_distance_time
     self.distance_traveled = elapsed_time*(self.old_distance_velocity+current_velocity)/2
-    self.previous_distance_time = time.time()
+    self.previous_distance_time = new_time
     self.target_distance = self.target_distance - self.distance_traveled
-    
+    self.old_distance_velocity = current_velocity
+   
   def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
@@ -398,7 +403,8 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
-          self.atc.update_distance()
+          if self.atc.target_distance > 0:
+            self.atc.update_distance()
           self.atc.pid_flight_controller.write_to_rc_channels()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
