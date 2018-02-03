@@ -362,6 +362,16 @@ class Tower(object):
       self.STATE = VehicleStates.hover_yaw_achieved
       sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
 
+  def ascend_decend(self, desired_distance, velocity = 0.33):
+    if (velocity > 0):
+      new_altitude = self.get_altitude() + desired_distance
+    else:
+      new_altitude = self.get_altitude() - desired_distance
+    new_flight_vector = StandardFlightVectors.ascent
+    new_flight_vector.z = velocity
+    print new_altitude
+    self.pid_flight_controller.send_velocity_vector(new_flight_vector, new_altitude)
+
   def land(self, should_stop_vehicle=False):
     """
     @purpose: Initiate a landing using the built-in ArduPilot mode.
