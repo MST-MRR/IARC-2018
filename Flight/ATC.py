@@ -73,6 +73,8 @@ class Tower(object):
     self.target_distance = 0
     self.old_distance_velocity = 0
     self.previous_distance_time = 0
+    self.travel_time = 0
+    self.forward_stop_time = 0
 
   def initialize(self, should_write_to_file=False):
     """
@@ -242,12 +244,15 @@ class Tower(object):
     @returns: 
     """
     self.STATE = VehicleStates.flying 
-    self.pid_flight_controller.update_pith_and_roll(desired_angle, "Pitch")
+    self.pid_flight_controller.update_pitch_and_roll(desired_angle, "Pitch")
 
-  def pitch_forward(self, target_distance):
-    self.target_distance = target_distance
-    self.previous_distance_time = time.time()
-    self.old_distance_velocity = 0
+  def pitch_forward(self, target_distance, velocity = 0.33):
+    # self.target_distance = target_distance
+    # self.previous_distance_time = time.time()
+    # self.old_distance_velocity = 0
+    self.travel_time = target_distance / velocity
+    self.forward_stop_time = time.time() + self.travel_time
+    self.pid_flight_controller.update_velocity(velocity, '2')
     
   def pitch_velocity_based(self, desired_velocity, channel):
     self.STATE = VehicleStates.flying
@@ -413,8 +418,8 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
-          if self.atc.target_distance > 0:
-            self.atc.update_distance()
+          if self.atc.forward_stop_time < time.time():
+            self.atc.pid_flight_controller.update_velocity(0, '2')
           self.atc.pid_flight_controller.write_to_rc_channels()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
