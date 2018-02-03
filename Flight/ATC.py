@@ -70,7 +70,8 @@ class Tower(object):
     self.last_flight_vector = None
     self.distance_traveled = 0
     self.target_distance = 0
-    self.old_distance_velocity = 0
+    self.old_distance_velocity = None
+    self.previous_distance_time = None
 
   def initialize(self, should_write_to_file=False):
     """
@@ -242,6 +243,13 @@ class Tower(object):
     self.STATE = VehicleStates.flying 
     self.pid_flight_controller.update_pith_and_roll(desired_angle, "Pitch")
 
+  def pitch_forward(self, target_distance):
+    self.target_distance = target_distance
+    
+  def pitch_velocity_based(self, desired_velocity):
+    self.STATE = VehicleStates.flying
+    self.pid_flight_controller.update_velocity(desired_velocity, channel)
+
   def roll(self, desired_angle):
     """
     @purpose: Updates the roll of the drone
@@ -268,6 +276,19 @@ class Tower(object):
     self.pid_flight_controller.send_velocity_vector(desired_vector, desired_altitude = desired_altitude)
     self.STATE = VehicleStates.flying
     self.last_flight_vector = desired_vector
+    
+  def update_distance(self):
+    new_speed = self.target_distance * 0.1
+    if (new_speed > 1.0):
+        new_speed = 1.0
+    elif (new_speed < .33):
+        new_speed = 0
+    self.pitch_velocity_based(new_speed)
+    current_velocity = self.vehicle.velocity[2]
+    elapsed_time = time.time() - previous_distance_time
+    self.distance_traveled = elapsed_time*(self.old_distance_velocity+current_velocity)/2
+    self.previous_distance_time = time.time()
+    self.target_distance = self.target_distance - self.distance_traveled
     
   def hover(self, desired_altitude=None, desired_angle=None):
     """

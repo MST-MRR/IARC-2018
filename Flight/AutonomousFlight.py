@@ -177,6 +177,12 @@ class PIDFlightController(object):
       self.Roll_PID.SetPoint = velocity
       print self.Roll_PID.SetPoint
 
+  def update_velocity(self, velocity, channel):
+    if(channel == 1):
+      self.Roll_PID.SetPoint = velocity
+    else:
+      self.Pitch_PID.SetPoint = velocity
+
   def update_controllers(self):
     """
     @purpose: Update the PID controllers. Get the velocities of each axis and then updates the altitude controller if it is enabled or the drone is in TAKEOFF mode. The PWM for throttle is updated and calculated since it runs at all times.
