@@ -3,7 +3,12 @@ from altscan import LIDAR
 import dronekit
 import RPi.GPIO as GPIO
 
-vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
+HIGH_ALT = 2.5
+MED_ALT = 2.0
+LOW_ALT = 1.5
+
+
+#vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
 class Sonar:
 
     #default constructor
@@ -51,8 +56,23 @@ MAX_SONAR_DISTANCE = 4000
 TRIG_PIN = 2
 ECHO_PIN = 3
 
+def alt_determinate(distance, sector):
+    if ((distance > 1.0 and distance < 1.5) and (sector == 2 or sector == 3 or sector == 4 or sector == 5):
+      return LOW_ALT
+    elif((distance > 0.5 and distance < 1.0) and (sector == 1 or sector == 6)):
+      return HIGH_ALT
+    elif((sector == 1 or sector == 6) and (distance > 1.0)):
+      return MED_ALT
+    elif(((distance > 0.5) and distance <= 1.0) and (sector not 0 and sector not 7)):
+      return MED_ALT
+    else:
+      return HIGH_ALT
+
+
+
+
 def send_lidar_message(min_dist, max_dist, current_dist, sector):
-    print("Distance :" + str(current_dist) + " Quad: " + str(sector))
+    print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
     message = vehicle.message_factory.distance_sensor_encode(
     0,                                             # time since system boot, not used
     min_dist,                                      # min distance cm
@@ -65,7 +85,9 @@ def send_lidar_message(min_dist, max_dist, current_dist, sector):
     )
     vehicle.send_mavlink(message)
     vehicle.commands.upload()
-    
+
+
+
 def send_distance_message(distance_to_ground):
     message = self.vehicle.message_factory.distance_sensor_encode(
         0,                                             # time since system boot, not used
@@ -78,7 +100,8 @@ def send_distance_message(distance_to_ground):
         0                                              # covariance, not used
     )
     self.vehicle.send_mavlink(message)
-    self.vehicle.commands.upload()
+    self.vehicle.commands.upload() '''
+
     
 sleep(0.1)
 
@@ -96,7 +119,7 @@ while(1):   #constantly grab data
         if (endVal >= 5):
             for val in range(0,endVal):
                 print "Sending message"
-                send_lidar_message(10, 300, sector[val][0], ((sector[val][2]))) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
+                send_lidar_message(10, 300, sector[val][0], sector[val][2]) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
         secval += 1
         sleep(0.000001)
     send_distance_message(downward_sonar.get_distance())
