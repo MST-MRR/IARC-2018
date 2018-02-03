@@ -75,6 +75,8 @@ class Tower(object):
     self.previous_distance_time = 0
     self.travel_time = 0
     self.forward_stop_time = 0
+    self.side_travel_time = 0
+    self.side_stop_time = 0
 
   def initialize(self, should_write_to_file=False):
     """
@@ -246,14 +248,20 @@ class Tower(object):
     self.STATE = VehicleStates.flying 
     self.pid_flight_controller.update_pitch_and_roll(desired_angle, "Pitch")
 
-  def pitch_forward(self, target_distance, velocity = 0.33):
-    # self.target_distance = target_distance
-    # self.previous_distance_time = time.time()
-    # self.old_distance_velocity = 0
-    self.travel_time = target_distance / velocity
+  def pitch_forward_backward(self, target_distance, velocity = 0.33):
+    self.travel_time = target_distance / abs(velocity)
     self.forward_stop_time = time.time() + self.travel_time
-    self.pid_flight_controller.update_velocity(velocity, '2')
+    new_flight_vector = self.last_flight_vector
+    new_flight_vector.x = velocity
+    self.fly(new_flight_vector)
     
+  def move_sideways(self, target_distance, velocity = 0.33):
+        self.side_travel_time = target_distance / abs(velocity)
+        self.side_stop_time = time.time() + self.side_travel_time
+        new_flight_vector = self.last_flight_vector
+        new_flight_vector.y = velocity
+        self.fly(new_flight_vector)
+
   def pitch_velocity_based(self, desired_velocity, channel):
     self.STATE = VehicleStates.flying
     self.pid_flight_controller.update_velocity(desired_velocity, channel)
@@ -366,6 +374,7 @@ class Tower(object):
     else:
       self.STATE = VehicleStates.hover_yaw_achieved
       sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
+    self.last_flight_vector = StandardFlightVectors.hover
 
   def ascend_decend(self, desired_distance, velocity = 0.33):
     if (velocity > 0):
@@ -419,7 +428,9 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           if self.atc.forward_stop_time < time.time():
-            self.atc.pid_flight_controller.update_velocity(0, '2')
+                self.atc.pid_flight_controller.update_velocity(0, '2')
+          if self.atc.side_stop_time < time.time():
+                self.atc.pid_flight_controller.update_velocity(0, '1')
           self.atc.pid_flight_controller.write_to_rc_channels()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
