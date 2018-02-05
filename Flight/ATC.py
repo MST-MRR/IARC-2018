@@ -77,6 +77,7 @@ class Tower(object):
     self.forward_stop_time = 0
     self.side_travel_time = 0
     self.side_stop_time = 0
+    self.moving_forwards = False
 
   def initialize(self, should_write_to_file=False):
     """
@@ -249,11 +250,13 @@ class Tower(object):
     self.pid_flight_controller.update_pitch_and_roll(desired_angle, "Pitch")
 
   def pitch_forward_backward(self, target_distance, velocity = 0.33):
-    self.travel_time = target_distance / abs(velocity)
-    self.forward_stop_time = time.time() + self.travel_time
-    new_flight_vector = self.last_flight_vector
-    new_flight_vector.x = velocity
-    self.fly(new_flight_vector)
+        self.moving_forwards = True
+        self.travel_time = target_distance / abs(velocity)
+        self.forward_stop_time = time.time() + self.travel_time
+        new_flight_vector = self.last_flight_vector
+        new_flight_vector.x = velocity
+        self.fly(new_flight_vector)
+        self.pitch_velocity_based(new_flight_vector.x, 2)
     
   def move_sideways(self, target_distance, velocity = 0.33):
         self.side_travel_time = target_distance / abs(velocity)
@@ -289,25 +292,11 @@ class Tower(object):
     else:
       desired_altitude = self.last_hover_altitude
 
+    print desired_vector
     self.pid_flight_controller.send_velocity_vector(desired_vector, desired_altitude = desired_altitude)
     self.STATE = VehicleStates.flying
-    self.last_flight_vector = desired_vector
-    
-  def update_distance(self):
-    new_speed = self.target_distance * 0.1
-    if (new_speed > 1.0):
-        new_speed = 1.0
-    elif (new_speed < .33):
-        new_speed = 0
-    self.pitch_velocity_based(new_speed, 2)
-    new_time = time.time()
-    current_velocity = self.vehicle.velocity[2]
-    elapsed_time = new_time - self.previous_distance_time
-    self.distance_traveled = elapsed_time*(self.old_distance_velocity+current_velocity)/2
-    self.previous_distance_time = new_time
-    self.target_distance = self.target_distance - self.distance_traveled
-    self.old_distance_velocity = current_velocity
-   
+    self.last_flight_vector = deepcopy(desired_vector)
+     
   def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
@@ -374,17 +363,8 @@ class Tower(object):
     else:
       self.STATE = VehicleStates.hover_yaw_achieved
       sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
-    self.last_flight_vector = StandardFlightVectors.hover
+    self.last_flight_vector = deepcopy(StandardFlightVectors.hover)
 
-  def ascend_decend(self, desired_distance, velocity = 0.33):
-    if (velocity > 0):
-      new_altitude = self.get_altitude() + desired_distance
-    else:
-      new_altitude = self.get_altitude() - desired_distance
-    new_flight_vector = StandardFlightVectors.ascent
-    new_flight_vector.z = velocity
-    print new_altitude
-    self.pid_flight_controller.send_velocity_vector(new_flight_vector, new_altitude)
 
   def land(self, should_stop_vehicle=False):
     """
@@ -427,11 +407,13 @@ class FailsafeController(threading.Thread):
         self.atc.pid_flight_controller.update_controllers()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
-          if self.atc.forward_stop_time < time.time():
+          self.atc.pid_flight_controller.write_to_rc_channels()
+          #print self.atc.forward_stop_time - time.time(), self.atc.pid_flight_controller.Pitch_PID.SetPoint
+          if self.atc.forward_stop_time < time.time() and self.atc.moving_forwards:
                 self.atc.pid_flight_controller.update_velocity(0, '2')
+                self.atc.moving_forwards = False
           if self.atc.side_stop_time < time.time():
                 self.atc.pid_flight_controller.update_velocity(0, '1')
-          self.atc.pid_flight_controller.write_to_rc_channels()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 

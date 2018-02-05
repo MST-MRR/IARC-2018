@@ -11,28 +11,32 @@ t.takeoff(2.0)
 sleep(2)
 
 while True:
-    t.move_sideways(10, -0.5)
-    print "Moving Left"
-    while(t.side_stop_time > time()):
+    print "Going left"
+    t.move_sideways(5, -0.5)
+    while t.side_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(5)
-    t.pitch_forward_backward(10, -0.5)
-    print "Moving Backward"
-    while(t.forward_stop_time > time()):
+    sleep(2)
+    print "Going backwards"
+    t.pitch_forward_backward(5, -0.5)
+    while t.forward_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(5)
-    t.move_sideways(10, 0.5)
-    print "Moving Right"
-    while(t.side_stop_time > time()):
+    sleep(2)
+    print "Going right"
+    t.move_sideways(5, 0.5)
+    while t.side_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(5)
-    t.pitch_velocity_based(10, 0.5)
-    print "Moving Forward"
-    while(t.forward_stop_time > time()):
+    sleep(2) 
+    print "Going forwards"   
+    t.pitch_forward_backward(5, 0.5)
+    while t.forward_stop_time > time():
         sleep(0.00)
-    print "Hovering"
     t.hover()
-    sleep(5)
+    sleep(2)
+    
+
+
+
+sleep(10)

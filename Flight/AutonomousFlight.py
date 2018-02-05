@@ -162,8 +162,9 @@ class PIDFlightController(object):
       self.alt_hold_enabled = False
     else:
       self.alt_hold_enabled = False
+    
 
-  def update_pith_and_roll(self, desired_angle, axis):
+  def update_pitch_and_roll(self, desired_angle, axis):
     """
     @purpose: Updates just the setpoint of the pitch or roll PID controller based on the axis arg
     @args: The deisred angle for the given axis. The axis that should have a new angle
@@ -172,13 +173,11 @@ class PIDFlightController(object):
     velocity = self.convert_angle_to_velocity(desired_angle)
     if(axis == 'Pitch'):
       self.Pitch_PID.SetPoint = velocity
-      print self.Pitch_PID.SetPoint
     else:
       self.Roll_PID.SetPoint = velocity
-      print self.Roll_PID.SetPoint
 
   def update_velocity(self, velocity, channel):
-    if(channel == 1):
+    if(channel == '1'):
       self.Roll_PID.SetPoint = velocity
     else:
       self.Pitch_PID.SetPoint = velocity
