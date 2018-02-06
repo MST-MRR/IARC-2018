@@ -78,6 +78,7 @@ class Tower(object):
     self.side_travel_time = 0
     self.side_stop_time = 0
     self.moving_forwards = False
+    self.moving_sideways = False
 
   def initialize(self, should_write_to_file=False):
     """
@@ -250,24 +251,32 @@ class Tower(object):
     self.pid_flight_controller.update_pitch_and_roll(desired_angle, "Pitch")
 
   def pitch_forward_backward(self, target_distance, velocity = 0.33):
-        self.moving_forwards = True
-        self.travel_time = target_distance / abs(velocity)
-        self.forward_stop_time = time.time() + self.travel_time
-        new_flight_vector = self.last_flight_vector
-        new_flight_vector.x = velocity
-        self.fly(new_flight_vector)
-        self.pitch_velocity_based(new_flight_vector.x, 2)
+    """
+    @purpose: Estimates a time frame that the drone should be moving forwards based on the given velocity.
+              The flight vector is updated only on the x axis, the moving forward flag is set, and the estimated end time is set. A negative velocity means that the drone will move backwards.
+    @args: The target distance to travel. The velocity to travel at, 0.33 by default.
+    @returns:
+    """
+    self.moving_forwards = True
+    self.travel_time = target_distance / abs(velocity)
+    self.forward_stop_time = time.time() + self.travel_time
+    new_flight_vector = self.last_flight_vector
+    new_flight_vector.x = velocity
+    self.fly(new_flight_vector)
     
   def move_sideways(self, target_distance, velocity = 0.33):
-        self.side_travel_time = target_distance / abs(velocity)
-        self.side_stop_time = time.time() + self.side_travel_time
-        new_flight_vector = self.last_flight_vector
-        new_flight_vector.y = velocity
-        self.fly(new_flight_vector)
-
-  def pitch_velocity_based(self, desired_velocity, channel):
-    self.STATE = VehicleStates.flying
-    self.pid_flight_controller.update_velocity(desired_velocity, channel)
+    """
+    @purpose: Estimates a time frame that the drone should be moving sideways based on the given velocity. 
+              The flight vector is updated only on the y axis, the moving forward flag is set, and the estimated end time is set. A negative velocity means the drone will move to the left
+    @args: The target distance to travel. The velocity to travel at, 0.33 by default.
+    @returns:
+    """
+    self.moving_sideways = True
+    self.side_travel_time = target_distance / abs(velocity)
+    self.side_stop_time = time.time() + self.side_travel_time
+    new_flight_vector = self.last_flight_vector
+    new_flight_vector.y = velocity
+    self.fly(new_flight_vector)
 
   def roll(self, desired_angle):
     """
@@ -412,8 +421,9 @@ class FailsafeController(threading.Thread):
           if self.atc.forward_stop_time < time.time() and self.atc.moving_forwards:
                 self.atc.pid_flight_controller.update_velocity(0, '2')
                 self.atc.moving_forwards = False
-          if self.atc.side_stop_time < time.time():
+          if self.atc.side_stop_time < time.time() and self.moving_sideways:
                 self.atc.pid_flight_controller.update_velocity(0, '1')
+                self.moving_sideways = False
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 

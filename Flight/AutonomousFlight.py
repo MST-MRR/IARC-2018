@@ -181,7 +181,6 @@ class PIDFlightController(object):
       self.Roll_PID.SetPoint = velocity
     else:
       self.Pitch_PID.SetPoint = velocity
-    # print self.Pitch_PID.SetPoint, velocity
 
   def update_controllers(self):
     """
