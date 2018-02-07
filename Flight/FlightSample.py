@@ -16,27 +16,24 @@ while True:
     while t.side_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(2)
+    sleep(5)
     print "Going backwards"
     t.pitch_forward_backward(5, -0.5)
     while t.forward_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(2)
+    sleep(5)
     print "Going right"
     t.move_sideways(5, 0.5)
     while t.side_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(2) 
+    sleep(5) 
     print "Going forwards"   
     t.pitch_forward_backward(5, 0.5)
     while t.forward_stop_time > time():
         sleep(0.00)
     t.hover()
-    sleep(2)
+    sleep(5)
     
-
-
-
 sleep(10)

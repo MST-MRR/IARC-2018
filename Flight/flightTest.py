@@ -10,15 +10,15 @@ YAW_MID = 1494
 PITCH_MID = 1494
 ROLL_MID = 1494
 THRUST_LOW = 986.0
-PITCH_P = 10.0
+PITCH_P = 1.8125
 PITCH_I = 0.0
-PITCH_D = 15.0
-ROLL_P = 10.0
-ROLL_I = 0.0
-ROLL_D = 15.0
-YAW_P = 2.0
-YAW_I = 0.0
-YAW_D = 9.0
+PITCH_D = 4.625
+ROLL_P = 1.8125
+ROLL_I = 0.00
+ROLL_D = 4.625
+YAW_P = 0.73
+YAW_I = 0.00
+YAW_D = 8.00
 THROTTLE_P = 15.0
 THROTTLE_I = 0.0
 THROTTLE_D = 10.0
@@ -67,10 +67,10 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
 
     # Initialize Yaw PID Controller
     desired_yaw_angle = get_yaw_radians(desired_yaw_angle)
-    # YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
-    # YawPID.SetPoint = desired_yaw_angle
-    # YawPID.setSampleTime(PID_UPDATE_TIME)
-    # YawPWM = YAW_MID
+    YawPID = PID.PID(YAW_P , YAW_I, YAW_D)
+    YawPID.SetPoint = desired_yaw_angle
+    YawPID.setSampleTime(PID_UPDATE_TIME)
+    YawPWM = YAW_MID
 
     yaw_graph = PID_Graph(desired_yaw_angle, "Yaw")
 
@@ -125,6 +125,7 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 current_roll_velocity)
                 # update graphs
                 roll_graph.update(current_roll_velocity)
+                '''
 
                 # Get drones yaw angle
                 current_yaw_angle = vehicle.attitude.yaw
@@ -135,15 +136,15 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 yaw_graph.update(current_yaw_angle)
 
                 # Output data
-                print("Desired pitch: %s" % desired_pitch_velocity)
-                print("Actual pitch:  %s" % current_pitch_velocity)
-                print("Desired roll:  %s" % desired_roll_velocity)
-                print("Actual roll:   %s" % current_roll_velocity)
+                # print("Desired pitch: %s" % desired_pitch_velocity)
+                # print("Actual pitch:  %s" % current_pitch_velocity)
+                # print("Desired roll:  %s" % desired_roll_velocity)
+                # print("Actual roll:   %s" % current_roll_velocity)
                 print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
                 print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
 
                 os.system('clear')
-                '''
+                
         except KeyboardInterrupt:
             #testRoll(RollPID)
             #test_forwards(desired_alt)
@@ -252,4 +253,4 @@ for x in range(-314, 314):
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 3, 0.0, 0.0, 1.0)
+test_flight(0.3, 3, 0.0, 0.0, 90.0)

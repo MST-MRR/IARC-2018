@@ -301,7 +301,6 @@ class Tower(object):
     else:
       desired_altitude = self.last_hover_altitude
 
-    print desired_vector
     self.pid_flight_controller.send_velocity_vector(desired_vector, desired_altitude = desired_altitude)
     self.STATE = VehicleStates.flying
     self.last_flight_vector = deepcopy(desired_vector)
@@ -417,13 +416,12 @@ class FailsafeController(threading.Thread):
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
-          #print self.atc.forward_stop_time - time.time(), self.atc.pid_flight_controller.Pitch_PID.SetPoint
           if self.atc.forward_stop_time < time.time() and self.atc.moving_forwards:
                 self.atc.pid_flight_controller.update_velocity(0, '2')
                 self.atc.moving_forwards = False
-          if self.atc.side_stop_time < time.time() and self.moving_sideways:
+          if self.atc.side_stop_time < time.time() and self.atc.moving_sideways:
                 self.atc.pid_flight_controller.update_velocity(0, '1')
-                self.moving_sideways = False
+                self.atc.moving_sideways = False
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
