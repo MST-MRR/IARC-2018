@@ -3,12 +3,9 @@ import sys
 import pexpect
 import threading 
 import traceback
+import signal
+import psutil
 import re
-
-try:
-    from Queue import Queue, Empty
-except ImportError:
-    from queue import Queue, Empty  # python 3.x
 
 ARDUCOPTER_DIRECTORY = os.path.expanduser('~/ardupilot/ArduCopter')
 ARDUPILOT_STARTUP_SCRIPT = 'sim_vehicle.py'
@@ -42,6 +39,9 @@ class ArdupilotGazeboMonitor():
         self.speedup = speedup
         self._stop_event = threading.Event()
         self._ready_to_fly = threading.Event()
+        self._gps_glitch = threading.Event()
+        self._exception_lock = threading.Lock()
+        self._exception = None
         self._start(speedup)
     
     def _start(self, speedup):
@@ -66,6 +66,9 @@ class ArdupilotGazeboMonitor():
     def restart(self):
         self.stop()
         self._start(self.speedup)
+
+    def reset(self):
+        self._ready_to_fly.clear()
     
     def ready_to_fly(self, block=False):
         state = False
@@ -87,6 +90,17 @@ class ArdupilotGazeboMonitor():
     def is_alive(self):
         return self._thread.is_alive()
 
+    def update(self):
+        with self._exception_lock:
+            if self._exception is not None:
+                raise self._exception
+        
+    def _raise(self, exception):
+        with self._exception_lock:
+            if self._exception is None:
+                self._exception = exception
+                self._stop_event.set()
+
     def _process(self, line):
         if isinstance(line, tuple):
             line = line[0]
@@ -98,12 +112,16 @@ class ArdupilotGazeboMonitor():
             if READY_TO_FLY_KEYWORDS in line:
                 self._ready_to_fly.set()
             elif CRASH_KEYWORDS in line:
-                self._stop_event.set()
-                raise QuadcopterCrash()
+                self._raise(QuadcopterCrash())
             elif GPS_GLITCH_CLEARED_KEYWORDS in line:
                 self._ready_to_fly.set()
+                self._gps_glitch.clear()
             elif GPS_GLITCH_KEYWORDS in line:
                 self._ready_to_fly.clear()
+                self._gps_glitch.set()
+
+    def wait_for_gps_glitch(self, timeout=1):
+        return self._gps_glitch.wait(timeout=timeout)
     
     def _event_thread(self, process, stop_event):
         try:
@@ -117,8 +135,12 @@ class ArdupilotGazeboMonitor():
                     self._process(process.before)
         
         finally:
-            process.terminate(force=True)
+            process.kill(signal.SIGKILL)
             process.close()
+
+            for proc in psutil.process_iter():
+                if proc.name() == 'xterm':
+                    proc.kill()
         
         if not stop_event.is_set():
-            raise ArdupilotDisconnect(ARDUPILOT_DISCONNECT_ERROR_STRING)
+            self._raise(ArdupilotDisconnect(ARDUPILOT_DISCONNECT_ERROR_STRING))
