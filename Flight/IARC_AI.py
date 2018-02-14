@@ -24,13 +24,11 @@ import logging
 import trollius
 from trollius import From
 from timeit import default_timer as timer
-from xbox_one_controller import XboxOneController
-from ardupilot_gazebo_monitor import ArdupilotGazeboMonitor
-from ardupilot_gazebo_monitor import ArdupilotDisconnect
+from ardupilot_gazebo_monitor import ArdupilotGazeboMonitor, QuadcopterCrash, READY_TO_FLY_TIMEOUT
 
 logging.basicConfig()
 
-DEFAULT_TIMEOUT = 1
+DEFAULT_TIMEOUT = .001
 
 # displays a live stream of footage from the drone in the simulator, set to False for slightly better runtime performance
 _DEBUG = True
@@ -38,9 +36,14 @@ _DEBUG = True
 class ResetSimulatorException(Exception):
     pass
 
+class ArdupilotDisconnect(Exception):
+    pass
+
 class SimpleDroneAI():
     # reset event location
     RESET_EVENT_LOCATION = '/gazebo/default/reset'
+    # gazebo reset complete location
+    RESET_COMPLETE_EVENT_LOCATION = '/gazebo/default/reset_complete'
     # reset event type
     RESET_EVENT_TYPE = 'gazebo.msgs.GzString'
     # camage image message location
@@ -49,6 +52,8 @@ class SimpleDroneAI():
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # altitude to hover at after takeoff in meters
     TAKEOFF_HEIGHT = 1.5
+    # maximum time spent on drone shutdown task
+    DRONE_SHUTDOWN_TASK_TIMEOUT = 7
     # max speed (m/s)
     CRUISING_SPEED = 1
 
@@ -57,54 +62,20 @@ class SimpleDroneAI():
         self._tower.initialize()
         self._ardupilot_connection = ardupilot_connection
 
-        self._hovering = True
         self._lock = threading.Lock()
         self._last_image_retrieved = None
         self._reset_ai = False
 
-    @property
-    def hovering(self):
-        return self._hovering
-
-    @hovering.setter
-    def hovering(self, value):
-        self._hovering = value
-
-        if self.hovering:
-            self._tower.hover()
-
-    def _takeoff(self):
-        """
-        @purpose: Takeoff and hover at an altitude of `SimpleDroneAI.TAKEOFF_HEIGHT` meters
-        @args:
-        @returns:
-        """
-        self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
     
     def _update(self, img):
-        """
-        @purpose: 
-            Event handler which updates relevant state variables and issues commands to the drone
-        @args:
-            img, np.ndarray: An image from the drone's camera.
-        @returns: 
-        """
-
-        self._ardupilot_connection.update()
-
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             cv2.imshow('debug', bgr_img)
             cv2.waitKey(1)
 
+        return self._ardupilot_connection.update()
+
     def _event_handler(self, data):
-        """
-        @purpose: 
-            Event handler which updates relevant state variables
-        @args:
-            data, protobuf: A message containing an image from the drone's camera.
-        @returns: 
-        """
         message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
         h, w = (message.image.height, message.image.width)
         img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
@@ -116,15 +87,15 @@ class SimpleDroneAI():
         self._reset_ai = True
 
     def _failsafe_drone_shutdown(self):
-        self._shutdown_drone_task = threading.Thread(target=self._tower.land)
-        self._shutdown_drone_task.start()
-        self._shutdown_drone_task.join(timeout=DEFAULT_TIMEOUT*10)
+        tasks = []
 
-        if not self._shutdown_drone_task.is_alive():
-            self._tower.disarm_drone()
-            self._tower.shutdown()
-        else: 
-            self._ardupilot_connection.stop()
+        for task in [self._tower.land, self._tower.disarm_drone, self._tower.shutdown]:
+            tasks.append(threading.Thread(target=task))
+            tasks[-1].start()
+            tasks[-1].join(timeout=SimpleDroneAI.DRONE_SHUTDOWN_TASK_TIMEOUT)
+
+        if any([task.is_alive() for task in tasks]):
+            ardupilot_connection.stop(force=True)
 
     def _reset_complete(self, publisher):
         print('Reset command receieved. Resetting AI...')
@@ -132,42 +103,39 @@ class SimpleDroneAI():
 
     @trollius.coroutine
     def run(self):
-        """
-        @purpose: 
-            Gazebo simulator event loop, forwards messages and state information to self._update
-        @args:
-        @returns: 
-        """
-
         manager = yield From(pygazebo.connect()) 
-        publisher = yield From(manager.advertise('/gazebo/default/reset_complete', 'gazebo.msgs.GzString'))
+        publisher = yield From(manager.advertise(SimpleDroneAI.RESET_COMPLETE_EVENT_LOCATION, SimpleDroneAI.RESET_EVENT_TYPE))
 
         subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
         reset_event = manager.subscribe(SimpleDroneAI.RESET_EVENT_LOCATION, SimpleDroneAI.RESET_EVENT_TYPE, self._reset)
 
         try:
             yield From(subscriber.wait_for_connection())
-            self._takeoff()
-            # self._tower.fly(FlightVector(.5, 0, 0))
+            self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT*3)
+            self._tower.fly(FlightVector(3, 0, -5))
 
             while True:
                 if self._reset_ai:
                     raise ResetSimulatorException()
                 if self._last_image_retrieved is not None and self._lock.acquire(False):
                     try:
-                        self._update(self._last_image_retrieved)
+                        if not self._update(self._last_image_retrieved):
+                            raise ArdupilotDisconnect()
                     finally:
                         self._last_image_retrieved = None
                         self._lock.release()
 
                 yield From(trollius.sleep(0.01))
-        except ResetSimulatorException:
+        except (ResetSimulatorException, QuadcopterCrash, ArdupilotDisconnect) as e:
+            if isinstance(e, QuadcopterCrash):
+                print('Quadcopter crash detected! Interpreting as a cue to reset the simulator...')
+        
             exc_type, value, traceback = sys.exc_info()
 
             self._reset_complete(publisher)
 
             message = pygazebo.msg.gz_string_pb2.GzString()
-            message.data = 'ack'
+            message.data = 'crash' if isinstance(e, (QuadcopterCrash, ArdupilotDisconnect)) else 'ack' 
             
             yield From(publisher.publish(message))
             yield From(trollius.sleep(1))
@@ -176,20 +144,27 @@ class SimpleDroneAI():
         finally:
             cv2.destroyAllWindows()
 
-try:
-    ardupilot_connection = ArdupilotGazeboMonitor(speedup=3)
 
+with ArdupilotGazeboMonitor(speedup=3) as ardupilot_connection:
     while True:
         try:
-            if not ardupilot_connection.is_alive():
-                ardupilot_connection.restart()
+            while not ardupilot_connection.is_ready() or not ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT):
+                start = timer()
+
+                while ardupilot_connection.update() and not (start-timer()) >= READY_TO_FLY_TIMEOUT:
+                    if ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT):
+                        break
             
-            while not ardupilot_connection.ready_to_fly():
-                time.sleep(1)
-            
+                if not ardupilot_connection.is_ready() or not ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT):
+                    ardupilot_connection.restart()
+
             ai = SimpleDroneAI(ardupilot_connection)
             loop = trollius.get_event_loop()
             loop.run_until_complete(ai.run())
+        except QuadcopterCrash:
+            ardupilot_connection.flush()
+            ardupilot_connection.reset()
+            ardupilot_connection.restart()
         except ResetSimulatorException:
             if ardupilot_connection.wait_for_gps_glitch(timeout=3):
                 ardupilot_connection.reset()
@@ -197,5 +172,3 @@ try:
             ardupilot_connection.restart()
         except KeyboardInterrupt:
             break
-finally:
-    ardupilot_connection.stop()

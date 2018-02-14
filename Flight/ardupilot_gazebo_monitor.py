@@ -6,6 +6,7 @@ import traceback
 import signal
 import psutil
 import re
+import time
 
 ARDUCOPTER_DIRECTORY = os.path.expanduser('~/ardupilot/ArduCopter')
 ARDUPILOT_STARTUP_SCRIPT = 'sim_vehicle.py'
@@ -19,17 +20,15 @@ READY_TO_FLY_KEYWORDS = 'using GPS'
 GPS_GLITCH_KEYWORDS = 'APM: GPS Glitch'
 GPS_GLITCH_CLEARED_KEYWORDS = 'APM: GPS Glitch cleared'
 CRASH_KEYWORDS = 'Crash: Disarming'
+DISCONNECT_KEYWORDS = 'no link'
+EXCEPTION_KEYWORDS = 'Exception'
 
-ON_POSIX = 'posix' in sys.builtin_module_names
-
-TIMEOUT = .1
+TIMEOUT = .001
+READY_TO_FLY_TIMEOUT = 60
 
 EOL = re.compile('\r\n')
 
 _DEBUG = True
-
-class ArdupilotDisconnect(Exception):
-    pass
 
 class QuadcopterCrash(Exception):
     pass
@@ -37,20 +36,29 @@ class QuadcopterCrash(Exception):
 class ArdupilotGazeboMonitor():
     def __init__(self, speedup=1):
         self.speedup = speedup
-        self._stop_event = threading.Event()
         self._ready_to_fly = threading.Event()
         self._gps_glitch = threading.Event()
-        self._exception_lock = threading.Lock()
-        self._exception = None
-        self._start(speedup)
-    
-    def _start(self, speedup):
-        ardupilot_start_command = ARDUPILOT_START_COMMAND_FMT_STRING % (ARDUPILOT_STARTUP_SCRIPT, speedup)
-        self._proc = pexpect.spawn(ardupilot_start_command, cwd=ARDUCOPTER_DIRECTORY)
+        self._has_reset = False
+        self._stop = False
+        self._proc = None
 
-        self._thread = threading.Thread(target=self._event_thread, args=(self._proc, self._stop_event))
-        self._thread.daemon = True
-        self._thread.start()
+    def __enter__(self):
+        self._start(self.speedup)
+        return self
+    
+    def __exit__(self, *args):
+        self._stop = True
+        self.stop()
+    
+    def _start(self, speedup=None):
+        if speedup is None:
+            speedup = self._speedup
+        else:
+            self._speedup = speedup
+        
+        ardupilot_start_command = ARDUPILOT_START_COMMAND_FMT_STRING % (ARDUPILOT_STARTUP_SCRIPT, self._speedup)
+        self._proc = pexpect.spawn(ardupilot_start_command, cwd=ARDUCOPTER_DIRECTORY)
+        self._has_reset = False
 
     @property
     def speedup(self):
@@ -64,42 +72,48 @@ class ArdupilotGazeboMonitor():
         self._speedup = value
 
     def restart(self):
+        self._stop = True
         self.stop()
         self._start(self.speedup)
 
     def reset(self):
         self._ready_to_fly.clear()
     
-    def ready_to_fly(self, block=False):
-        state = False
-        
-        if not block:
-            state = self._ready_to_fly.is_set()
-        else:
-            self._ready_to_fly.wait()
-            state = True
-        
-        return state
+    def wait_for_ready_to_fly(self, timeout=READY_TO_FLY_TIMEOUT):
+        return self._ready_to_fly.wait(timeout=timeout)
 
-    def stop(self):
-        if self.is_alive():
-            self._stop_event.set()
-            self._thread.join()
-            self._stop_event.clear()
-    
-    def is_alive(self):
-        return self._thread.is_alive()
+    def stop(self, force=False):
+        if force or (not self._has_reset and self._stop and (self._proc is not None and self._proc.isalive())):
+            if self._proc.isalive():
+                self._proc.kill(signal.SIGKILL)
+                self._proc.close()
+
+
+            for proc in psutil.process_iter():
+                try:
+                    if proc.name() in ['xterm', 'mavproxy.py', 'arducopter']:
+                        proc.kill()
+                except:
+                    pass
+
+            self._has_reset = True
+            self._stop = False
+
+    def is_ready(self):
+        return self._ready_to_fly.is_set() or (self._proc is not None and self._proc.isalive() and not self._has_reset and not self._stop)
 
     def update(self):
-        with self._exception_lock:
-            if self._exception is not None:
-                raise self._exception
-        
-    def _raise(self, exception):
-        with self._exception_lock:
-            if self._exception is None:
-                self._exception = exception
-                self._stop_event.set()
+        if self._proc is not None and self._proc.isalive() and not self._has_reset:
+            next_line_of_output = None
+            cases = [EOL, pexpect.TIMEOUT, pexpect.EOF]
+            index = self._proc.expect_list(cases, timeout=TIMEOUT)
+            
+            if not index:
+                self._process(self._proc.before)
+        else:
+            self._ready_to_fly.clear()
+            
+        return self.is_ready()
 
     def _process(self, line):
         if isinstance(line, tuple):
@@ -112,35 +126,47 @@ class ArdupilotGazeboMonitor():
             if READY_TO_FLY_KEYWORDS in line:
                 self._ready_to_fly.set()
             elif CRASH_KEYWORDS in line:
-                self._raise(QuadcopterCrash())
+                raise QuadcopterCrash()
             elif GPS_GLITCH_CLEARED_KEYWORDS in line:
                 self._ready_to_fly.set()
                 self._gps_glitch.clear()
             elif GPS_GLITCH_KEYWORDS in line:
-                self._ready_to_fly.clear()
+                self.reset()
                 self._gps_glitch.set()
+            elif DISCONNECT_KEYWORDS in line:
+                self._stop = True
+                self.reset()
+            elif EXCEPTION_KEYWORDS in line:
+                self._stop = True
+                self.reset()
+    
+    def flush(self):
+        while self.is_ready():
+            try:
+                next_line_of_output = None
+                cases = [EOL, pexpect.TIMEOUT, pexpect.EOF]
+                index = self._proc.expect_list(cases, timeout=TIMEOUT)
+                line = self._proc.before
+
+                if index == 1:
+                    break
+                if line:
+                    self._process(line)
+            except:
+                break
+
+        return self.is_ready()
+            
 
     def wait_for_gps_glitch(self, timeout=1):
         return self._gps_glitch.wait(timeout=timeout)
-    
-    def _event_thread(self, process, stop_event):
-        try:
-            cases = [EOL, pexpect.EOF, pexpect.TIMEOUT]
-            next_line_of_output = None
+
+if __name__ == '__main__':
+    try:
+        with ArdupilotGazeboMonitor() as monitor:
+            while monitor.update():
+                pass
+
+    except KeyboardInterrupt as e:
+        pass
             
-            while process.isalive() and (not stop_event.is_set()):
-                index = process.expect_list(cases, timeout=TIMEOUT)
-
-                if not index:
-                    self._process(process.before)
-        
-        finally:
-            process.kill(signal.SIGKILL)
-            process.close()
-
-            for proc in psutil.process_iter():
-                if proc.name() == 'xterm':
-                    proc.kill()
-        
-        if not stop_event.is_set():
-            self._raise(ArdupilotDisconnect(ARDUPILOT_DISCONNECT_ERROR_STRING))
