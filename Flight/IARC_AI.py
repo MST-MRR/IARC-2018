@@ -55,6 +55,10 @@ class SimpleDroneAI():
     DEPTH_FAR_CLIP_MM = 10000
     # depth near clip
     DEPTH_NEAR_CLIP_MM = 300
+    # color image stream window title
+    COLOR_IMAGE_STREAM_DEBUG_NAME = 'color'
+    # depth image stream window title
+    DEPTH_IMAGE_STREAM_DEBUG_NAME = 'depth'
     # camera message type
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # altitude to hover at after takeoff in meters
@@ -70,14 +74,22 @@ class SimpleDroneAI():
         self._ardupilot_connection = ardupilot_connection
 
         self._lock = threading.Lock()
+        self._depth_image_lock = threading.Lock()
         self._last_image_retrieved = None
+        self._last_depth_image_retrieved = None
         self._reset_ai = False
 
     
-    def _update(self, img):
+    def _update(self, img, depth_img):
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            cv2.imshow('debug', bgr_img)
+            cv2.imshow(SimpleDroneAI.COLOR_IMAGE_STREAM_DEBUG_NAME, bgr_img)
+
+            norm = (depth_img.astype(np.float32)-depth_img.min())/(depth_img.max()-depth_img.min())*255
+            gray = norm.astype(np.uint8)
+            color = cv2.applyColorMap(gray, cv2.COLORMAP_AUTUMN)
+            cv2.imshow(SimpleDroneAI.DEPTH_IMAGE_STREAM_DEBUG_NAME, color)
+
             cv2.waitKey(1)
 
         return self._ardupilot_connection.update()
@@ -86,14 +98,9 @@ class SimpleDroneAI():
         message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
         h, w = (message.image.height, message.image.width)
         img = np.fromstring(message.image.data, dtype=np.uint16).reshape(h, w)
-        maximum = np.ones((h, w), dtype=np.float32)*SimpleDroneAI.DEPTH_COLOR_SCALE_MAX
 
-        if _DEBUG:
-            norm = (img.astype(np.float32)-img.min())/(img.max()-img.min())*255
-            gray = norm.astype(np.uint8)
-            color = cv2.applyColorMap(gray, cv2.COLORMAP_AUTUMN)
-            cv2.imshow('depth', color)
-            cv2.waitKey(1)
+        with self._depth_image_lock:
+            self._last_depth_image_retrieved = img
 
     def _event_handler(self, data):
         message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
@@ -132,18 +139,20 @@ class SimpleDroneAI():
 
         try:
             yield From(subscriber.wait_for_connection())
+            yield From(depth_image_subscriber.wait_for_connection())
             self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
 
             while True:
                 if self._reset_ai:
                     raise ResetSimulatorException()
-                if self._last_image_retrieved is not None and self._lock.acquire(False):
+                if self._last_image_retrieved is not None and self._last_depth_image_retrieved is not None:
                     try:
-                        if not self._update(self._last_image_retrieved):
-                            raise ArdupilotDisconnect()
+                        with self._depth_image_lock as depth_image_lock, self._lock as lock:
+                            if not self._update(self._last_image_retrieved, self._last_depth_image_retrieved):
+                                raise ArdupilotDisconnect()
                     finally:
                         self._last_image_retrieved = None
-                        self._lock.release()
+                        self._last_depth_image_retrieved = None
 
                 yield From(trollius.sleep(0.01))
         except (ResetSimulatorException, QuadcopterCrash, ArdupilotDisconnect) as e:
@@ -172,14 +181,15 @@ if not args.test:
     with ArdupilotGazeboMonitor(speedup=3) as ardupilot_connection:
         while True:
             try:
-                while not ardupilot_connection.is_ready() or not ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT):
+                stopping_condition = lambda: ardupilot_connection.is_ready() and ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT)
+                while not stopping_condition():
                     start = timer()
 
-                    while ardupilot_connection.update() and not (start-timer()) >= READY_TO_FLY_TIMEOUT:
+                    while ardupilot_connection.update() and (timer()-start) <= READY_TO_FLY_TIMEOUT:
                         if ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT):
                             break
                 
-                    if not ardupilot_connection.is_ready() or not ardupilot_connection.wait_for_ready_to_fly(timeout=DEFAULT_TIMEOUT):
+                    if not stopping_condition():
                         ardupilot_connection.restart()
 
                 ai = SimpleDroneAI(ardupilot_connection)
