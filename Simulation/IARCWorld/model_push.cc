@@ -61,7 +61,7 @@ namespace gazebo
   common::Time GetCurrentTime ( )
   {
     physics::WorldPtr world = physics::get_world("default");
-    common::Time CurrentTime = world->GetSimTime();
+    common::Time CurrentTime = world->SimTime();
     return CurrentTime ;
   }
 
@@ -295,7 +295,7 @@ namespace gazebo
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
       physics::WorldPtr world = physics::get_world("default");
-      common::Time cur_time = world->GetSimTime();
+      common::Time cur_time = world->SimTime();
       //std::cout << " cur_time = " << cur_time << std::endl;
       // Apply a small linear velocity to the model.
       //this->model->SetLinearVel(math::Vector3(3, 0, 0));
