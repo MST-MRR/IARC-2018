@@ -79,6 +79,9 @@ class Tower(object):
     self.side_stop_time = 0
     self.moving_forwards = False
     self.moving_sideways = False
+    self.hover_done = threading.Event()
+    self.pitching_done = threading.Event()
+    self.rolling_done = threading.Event()
 
   def initialize(self, should_write_to_file=False):
     """
@@ -368,11 +371,13 @@ class Tower(object):
     #Wait for the vehicle to correct.
     while(desired_angle is not None and not (self.in_range(self.YAW_PID_THRESHOLD, desired_angle, self.get_yaw_deg()))):
       sleep(self.STANDARD_SLEEP_TIME)
+      print "Adjusting?"
+      print abs(desired_angle-self.get_yaw_deg())
     else:
       self.STATE = VehicleStates.hover_yaw_achieved
       sleep(self.STANDARD_SLEEP_TIME) #Wait for AutonomousFlight to query the state.
     self.last_flight_vector = deepcopy(StandardFlightVectors.hover)
-
+    self.hover_done.set()
 
   def land(self, should_stop_vehicle=False):
     """
@@ -419,9 +424,11 @@ class FailsafeController(threading.Thread):
           if self.atc.forward_stop_time < time.time() and self.atc.moving_forwards:
                 self.atc.pid_flight_controller.update_velocity(0, '2')
                 self.atc.moving_forwards = False
+                self.atc.pitching_done.set()
           if self.atc.side_stop_time < time.time() and self.atc.moving_sideways:
                 self.atc.pid_flight_controller.update_velocity(0, '1')
                 self.atc.moving_sideways = False
+                self.atc.rolling_done.set()
           # print(self.atc.pid_flight_controller.get_debug_string())
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 

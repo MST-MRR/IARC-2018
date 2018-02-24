@@ -8,32 +8,16 @@ t = Tower()
 t.initialize()
 
 t.takeoff(2.0)
-sleep(2)
+sleep(5)
 
-while True:
-    print "Going left"
-    t.move_sideways(5, -0.5)
-    while t.side_stop_time > time():
-        sleep(0.00)
-    t.hover()
-    sleep(5)
-    print "Going backwards"
-    t.pitch_forward_backward(5, -0.5)
-    while t.forward_stop_time > time():
-        sleep(0.00)
-    t.hover()
-    sleep(5)
-    print "Going right"
-    t.move_sideways(5, 0.5)
-    while t.side_stop_time > time():
-        sleep(0.00)
-    t.hover()
-    sleep(5) 
-    print "Going forwards"   
-    t.pitch_forward_backward(5, 0.5)
-    while t.forward_stop_time > time():
-        sleep(0.00)
-    t.hover()
-    sleep(5)
-    
-sleep(10)
+t.hover(3, 90)
+sleep(5)
+t.hover(None, 0.0)
+
+# t.pitch_forward_backward(5, 0.5)
+# if not t.pitch_forward_backward
+# print("Done moving forward")
+
+# sleep(10)
+
+t.land()

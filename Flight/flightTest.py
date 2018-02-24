@@ -128,26 +128,27 @@ def test_flight(desired_speed, desired_alt, desired_pitch_velocity,
                 '''
 
                 # Get drones yaw angle
-                current_yaw_angle = vehicle.attitude.yaw
+                # current_yaw_angle = vehicle.attitude.yaw
                 # update vehicles current yaw channel with new yaw
-                vehicle.channels.overrides[YAW_CHANNEL] = YawPID.update(
-                current_yaw_angle)
+                # vehicle.channels.overrides[YAW_CHANNEL] = YawPID.update(
+                # current_yaw_angle)
                 # update graphs
-                yaw_graph.update(current_yaw_angle)
+                # yaw_graph.update(current_yaw_angle)
 
                 # Output data
                 # print("Desired pitch: %s" % desired_pitch_velocity)
                 # print("Actual pitch:  %s" % current_pitch_velocity)
                 # print("Desired roll:  %s" % desired_roll_velocity)
                 # print("Actual roll:   %s" % current_roll_velocity)
-                print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
-                print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
+                # print("Desired yaw:   %s" % math.degrees(desired_yaw_angle))
+                # print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
 
                 os.system('clear')
                 
         except KeyboardInterrupt:
             #testRoll(RollPID)
             #test_forwards(desired_alt)
+            test_yaw(YawPID)
             shutdown(vehicle)
             #display_graphs(graphs_list)
             break
@@ -246,6 +247,25 @@ def test_forwards(highest_alt):
             print("Current pitch %s" % vehicle.velocity[0])
             os.system("clear")
     pass
+
+def test_yaw(YawPID):
+    angles = [10.0, 90.0, 150.0, 30.0, 10.0]
+    for angle in angles:
+        angle = get_yaw_radians(angle)
+        YawPID.SetPoint = angle
+        print "New Setpoint: ", YawPID.SetPoint
+        YawPWM = YAW_MID
+        while abs(vehicle.attitude.yaw-angle) > 0.01:
+            # Get drones yaw angle
+            current_yaw_angle = vehicle.attitude.yaw
+            # update vehicles current yaw channel with new yaw
+            YawPID.update(current_yaw_angle)
+            YawPWM += YawPID.output
+            vehicle.channels.overrides[YAW_CHANNEL] = YawPWM 
+            print("Desired yaw:   %s" % math.degrees(angle))
+            print("Actual yaw:    %s" % math.degrees(current_yaw_angle))
+            time.sleep(0.1)
+
 '''
 for x in range(-314, 314):
     print(getBetterYaw(float(x)/100.0))
@@ -253,4 +273,4 @@ for x in range(-314, 314):
 
 # Alt, Desired alt, Pitch, Roll, Yaw
 # Velocity, Meter, velocity, velocity, angle
-test_flight(0.3, 3, 0.0, 0.0, 90.0)
+test_flight(0.3, 3, 0.0, 0.0, 0.0)
