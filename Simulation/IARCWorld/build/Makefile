@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld
+CMAKE_SOURCE_DIR = /home/daniel/IARC-2018/Simulation/IARCWorld
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build
+CMAKE_BINARY_DIR = /home/daniel/IARC-2018/Simulation/IARCWorld/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -69,8 +69,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/cmake-gui -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles /home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/lucas/Desktop/Programming/IARC-2018/Simulation/IARCWorld/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
