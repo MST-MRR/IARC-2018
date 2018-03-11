@@ -85,7 +85,7 @@ class SimpleDroneAI():
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             cv2.imshow(SimpleDroneAI.COLOR_IMAGE_STREAM_DEBUG_NAME, bgr_img)
 
-            norm = (depth_img.astype(np.float32)-depth_img.min())/(depth_img.max()-depth_img.min())*255
+            norm = (depth_img.astype(np.float32)-depth_img.min())/(depth_img.max()-depth_img.min()+1e-9)*255
             gray = norm.astype(np.uint8)
             color = cv2.applyColorMap(gray, cv2.COLORMAP_AUTUMN)
             cv2.imshow(SimpleDroneAI.DEPTH_IMAGE_STREAM_DEBUG_NAME, color)
