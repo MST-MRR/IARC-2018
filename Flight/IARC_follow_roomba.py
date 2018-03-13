@@ -44,13 +44,6 @@ class SimpleDroneAI():
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
     MAX_LOST_TARGET_TIME = 3
-    # the number of frames with the drone right over a roomba before the AI tries to land/dive -Tanner
-    LAND_CONFIDENCE = 150
-    DIVE_CONFIDENCE = 25
-    # diving just means that the velocity vector is multiplied by this
-    DIVE_FACTOR = 3
-    # the AI considers itself right over a roomba iff it sees a roomba whose distance from the center of the image is less than this ratio times the geometric mean of image width and image height -Tanner
-    RIGHT_OVER_ROOMBA_RATIO = 2 # so "right over roomba" means "sees roomba"
 
 
     def __init__(self):
@@ -61,8 +54,6 @@ class SimpleDroneAI():
         self._hovering = True
         self._lock = threading.RLock()
         self._last_image_retrieved = None
-        self._confidence = 0
-        self._dive_scalar = 1
 
     @property
     def hovering(self):
@@ -114,7 +105,7 @@ class SimpleDroneAI():
             target_idx = np.argmin(np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
             target = roombas[target_idx]
 
-            velocity_vector = self._dive_scalar * self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
+            velocity_vector = self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
 
             self._tower.fly(velocity_vector)
             self.hovering = False
@@ -140,20 +131,9 @@ class SimpleDroneAI():
             roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
             target_idx = np.argmin(np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
             target = roombas[target_idx]
-            if np.sqrt(np.sum((roomba_midpoints[target_idx]-drone_midpoint)**2)) / np.sqrt(h * w) < SimpleDroneAI.RIGHT_OVER_ROOMBA_RATIO:
-                self._confidence = self._confidence + 1
-
-            if self._confidence > SimpleDroneAI.DIVE_CONFIDENCE:
-                self._dive_scalar = SimpleDroneAI.DIVE_FACTOR
-                self._confidence = self._confidence + 1
-            else:
-                self._dive_scalar = 1
-            if self._confidence > SimpleDroneAI.LAND_CONFIDENCE:
-                self._tower.land()
-        if self._tower.STATE == VehicleStates.landed:
-            self._confidence = 0
-            self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
+        
         if _DEBUG:
+            print("TANNER TEST")
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
             for roomba in roombas:
@@ -187,6 +167,7 @@ class SimpleDroneAI():
         """
         self._takeoff()
         manager = yield From(pygazebo.connect())
+        print("TANNER TEST ASDF")
         subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
         yield From(subscriber.wait_for_connection())
 
