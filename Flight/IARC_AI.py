@@ -5,8 +5,7 @@
 # Spring 2018
 # Christopher O'Toole
 
-from AutonomousFlight import FlightVector
-from ATC import Tower
+from ATC import Tower, VehicleStates
 import ATC
 import cv2
 import numpy as np
@@ -70,7 +69,6 @@ class SimpleDroneAI():
 
     def __init__(self, ardupilot_connection):
         self._tower = Tower()
-        self._tower.initialize()
         self._ardupilot_connection = ardupilot_connection
 
         self._lock = threading.Lock()
@@ -79,8 +77,10 @@ class SimpleDroneAI():
         self._last_depth_image_retrieved = None
         self._reset_ai = False
 
-    
     def _update(self, img, depth_img):
+        if self._tower.takeoff_completed.is_set():
+            self._tower.fly(np.array([0, .3, 0]))
+            
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             cv2.imshow(SimpleDroneAI.COLOR_IMAGE_STREAM_DEBUG_NAME, bgr_img)
@@ -116,13 +116,16 @@ class SimpleDroneAI():
     def _failsafe_drone_shutdown(self):
         tasks = []
 
-        for task in [self._tower.land, self._tower.disarm_drone, self._tower.shutdown]:
-            tasks.append(threading.Thread(target=task))
-            tasks[-1].start()
-            tasks[-1].join(timeout=SimpleDroneAI.DRONE_SHUTDOWN_TASK_TIMEOUT)
+        if self._tower.state != VehicleStates.landed:
+            for task in [self._tower.land, self._tower.disarm_drone, self._tower.shutdown]:
+                tasks.append(threading.Thread(target=task))
+                tasks[-1].start()
+                tasks[-1].join(timeout=SimpleDroneAI.DRONE_SHUTDOWN_TASK_TIMEOUT)
+                if task == self._tower.land:
+                    self._tower.land_completed.wait(timeout=SimpleDroneAI.DRONE_SHUTDOWN_TASK_TIMEOUT)
 
-        if any([task.is_alive() for task in tasks]):
-            ardupilot_connection.stop(force=True)
+            if any([task.is_alive() for task in tasks]):
+                ardupilot_connection.stop(force=True)
 
     def _reset_complete(self, publisher):
         print('Reset command receieved. Resetting AI...')
@@ -137,9 +140,12 @@ class SimpleDroneAI():
         depth_image_subscriber = manager.subscribe(SimpleDroneAI.DEPTH_CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._depth_image_handler)
         reset_event = manager.subscribe(SimpleDroneAI.RESET_EVENT_LOCATION, SimpleDroneAI.RESET_EVENT_TYPE, self._reset)
 
+        reset_sim = False
+
         try:
             yield From(subscriber.wait_for_connection())
             yield From(depth_image_subscriber.wait_for_connection())
+            self._tower.connected.wait()
             self._tower.takeoff(SimpleDroneAI.TAKEOFF_HEIGHT)
 
             while True:
@@ -156,6 +162,8 @@ class SimpleDroneAI():
 
                 yield From(trollius.sleep(0.01))
         except (ResetSimulatorException, QuadcopterCrash, ArdupilotDisconnect) as e:
+            reset_sim = True
+
             if isinstance(e, QuadcopterCrash):
                 print('Quadcopter crash detected! Interpreting as a cue to reset the simulator...')
         
@@ -171,7 +179,8 @@ class SimpleDroneAI():
 
             raise exc_type, value, traceback    
         finally:
-            cv2.destroyAllWindows()
+            cv2.destroyAllWindows() 
+            self._failsafe_drone_shutdown()
 
 parser = argparse.ArgumentParser(description='Processes AI settings passed in')
 parser.add_argument('--test', '-T', type=int, help='test experimental features', default=1)
