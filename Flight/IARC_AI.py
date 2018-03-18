@@ -140,8 +140,6 @@ class SimpleDroneAI():
         depth_image_subscriber = manager.subscribe(SimpleDroneAI.DEPTH_CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._depth_image_handler)
         reset_event = manager.subscribe(SimpleDroneAI.RESET_EVENT_LOCATION, SimpleDroneAI.RESET_EVENT_TYPE, self._reset)
 
-        reset_sim = False
-
         try:
             yield From(subscriber.wait_for_connection())
             yield From(depth_image_subscriber.wait_for_connection())
@@ -162,8 +160,6 @@ class SimpleDroneAI():
 
                 yield From(trollius.sleep(0.01))
         except (ResetSimulatorException, QuadcopterCrash, ArdupilotDisconnect) as e:
-            reset_sim = True
-
             if isinstance(e, QuadcopterCrash):
                 print('Quadcopter crash detected! Interpreting as a cue to reset the simulator...')
         
