@@ -39,7 +39,7 @@ class SimpleDroneAI():
     # camera message type
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # speed to follow roombas with in m/s
-    ROOMBA_TRACKING_SPEED = .4
+    ROOMBA_TRACKING_SPEED = .2 # slower than roomba.  But if this is faster, then the drone's position diverges.
     # altitude to hover at after takeoff in meters
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
