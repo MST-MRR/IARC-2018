@@ -1,286 +1,145 @@
-import PID, time, math
+import time
+import math
+import numpy as np
+from PID import PID
 
-class FlightVector(object):
-  def __init__(self, x, y, z):
-    self.x = float(x)
-    self.y = float(y)
-    self.z = float(z)
+class PIDValue():
+  def __init__(self, p, i, d):
+    self.p = p
+    self.i = i
+    self.d = d
 
-  # String representation
-  def __str__(self):
-    return '<%s, %s, %s>' % (self.x, self.y, self.z)
+  @property
+  def p(self):
+    return self._p
 
-  # Produce a copy of itself
-  def __copy(self):
-    return FlightVector(self.x, self.y, self.z)
+  @p.setter
+  def p(self, value):
+    self._p = value
+  
+  @property
+  def i(self):
+    return self._i
+  
+  @i.setter
+  def i(self, value):
+    self._i = value
+  
+  @property
+  def d(self):
+    return self._d
 
-  # Signing
-  def __neg__(self):
-    return FlightVector(-self.x, -self.y, -self.z)
-
-  # Scalar multiplication
-  def __mul__(self, number):
-    return FlightVector(self.x * number, self.y * number, self.z * number)
-
-  def __rmul__(self, number):
-    return self.__mul__(number)
-
-  # Division
-  def __div__(self, number):
-    return self.__copy() * (number**-1)
-
-  # Arithmetic operations
-  def __add__(self, operand):
-    return FlightVector(self.x + operand.x, self.y + operand.y, self.z + operand.z)
-
-  def __sub__(self, operand):
-    return self.__copy() + -operand
-
-  # Cross product
-  # cross = a ** b
-  def __pow__(self, operand):
-    return FlightVector(self.y*operand.z - self.z*operand.y, 
-                      self.z*operand.x - self.x*operand.z, 
-                      self.z*operand.y - self.y*operand.x)
-
-  # Dot product
-  # dp = a & b
-  def __and__(self, operand):
-    return (self.x * operand.x) + \
-            (self.y * operand.y) + \
-            (self.z * operand.z)
-
-  # Operations
-  def normal(self):
-    return self.__copy() / self.magnitude()
-
-  def magnitude(self):
-    return (self.x**2 + self.y**2 + self.z**2)**(.5)
+  @d.setter
+  def d(self, value):
+    self._d = value
 
 class PIDFlightController(object):
   YAW_MID = 1494.0
   PITCH_MID = 1494.0
   ROLL_MID = 1494.0
-  THROTTLE_MID = 1550.0
   THROTTLE_MIN = 982.0
   THROTTLE_MAX = 2006.0
-  ORIGINAL_P = 1.45
-  ORIGINAL = 0.00
-  ORIGINAL_D = 3.70
-  PITCH_P = 1.8125
-  PITCH_I = 0.0
-  PITCH_D = 4.625
-  ROLL_P = 1.8125
-  ROLL_I = 0.00
-  ROLL_D = 4.625
-  YAW_P = 0.73
-  YAW_I = 0.00
-  YAW_D = 8.00
-  THROTTLE_P = 1.8125
-  THROTTLE_I = 0.00
-  THROTTLE_D = 4.625
-  ALTITUDE_P = 0.39
-  ALTITUDE_I = 0.09
-  ALTITUDE_D = 0.05
+  PITCH_PID = PIDValue(1.8125, 0., 4.625)
+  ROLL_PID = PIDValue(1.8125, 0., 4.625)
+  YAW_PID = PIDValue(.73, 0., 8.)
+  THROTTLE_PID = PIDValue(1.8125, 0., 4.625)
+  ALTITUDE_PID = PIDValue(.39, .09, .05)
   ROLL_CHANNEL = '1'
   PITCH_CHANNEL = '2'
   THROTTLE_CHANNEL = '3'
   YAW_CHANNEL = '4'
   PID_SAMPLE_TIME = 0.01
-  YAW_PID_SAMPLE_TIME = 0.00
+  CONTROLLERS = [('pitch', PITCH_PID), ('roll', ROLL_PID), ('yaw', YAW_PID), ('throttle', THROTTLE_PID), ('altitude', ALTITUDE_PID)]
 
   def __init__(self, atc):
     self.atc = atc
-    self.controllers_initialized = False
-    self.alt_hold_enabled = False
 
-    self.Throttle_PID = None
-    self.Altitude_PID = None
-    self.Roll_PID = None
-    self.Pitch_PID = None
-    self.Yaw_PID = None
-    self.Throttle_PWM = self.THROTTLE_MIN
-    self.Altitude_PWM = self.THROTTLE_MIN
-    self.Roll_PWM = self.ROLL_MID
-    self.Pitch_PWM = self.PITCH_MID
-    self.Yaw_PWM = self.YAW_MID
-    self.initialize_controllers()
-
-  def initialize_controllers(self):
-    if not self.controllers_initialized:
-      self.Pitch_PID = PID.PID(self.PITCH_P, self.PITCH_I, self.PITCH_D)
-      self.Pitch_PID.SetPoint = 0.00
-      self.Pitch_PID.setSampleTime(self.PID_SAMPLE_TIME)
-
-      self.Roll_PID = PID.PID(self.ROLL_P, self.ROLL_I, self.ROLL_D)
-      self.Roll_PID.SetPoint = 0.00
-      self.Roll_PID.setSampleTime(self.PID_SAMPLE_TIME)
+    self.throttle_pwm = self.THROTTLE_MIN
+    self.altitude_pwm = self.THROTTLE_MIN
+    self.roll_pwm = self.ROLL_MID
+    self.pitch_pwm = self.PITCH_MID
+    self.yaw_pid = self.YAW_MID
+    
+    for controller_name, pid in PIDFlightController.CONTROLLERS:
+      attribute_name = '%s_pid' % (controller_name,)
+      setattr(self, attribute_name, PID(pid.p, pid.i, pid.d))
       
-      self.Yaw_PID = PID.PID(self.YAW_P , self.YAW_I, self.YAW_D)
-      self.Yaw_PID.SetPoint = 0.00
-      self.Yaw_PID.setSampleTime(self.YAW_PID_SAMPLE_TIME)
+      controller = getattr(self, attribute_name)
+      controller.SetPoint = 0.
+      controller.setSampleTime(self.PID_SAMPLE_TIME)
 
-      self.Throttle_PID = PID.PID(self.THROTTLE_P, self.THROTTLE_I, self.THROTTLE_D)
-      self.Throttle_PID.SetPoint = 0.00
-      self.Throttle_PID.setSampleTime(self.PID_SAMPLE_TIME)
+  @property
+  def target_velocity(self):
+    return np.array([self.pitch_pid.SetPoint, self.roll_pid.SetPoint, self.throttle_pid.SetPoint])
 
-      self.Altitude_PID = PID.PID(self.ALTITUDE_P, self.ALTITUDE_I, self.ALTITUDE_D)
-      self.Altitude_PID.SetPoint = 0.00
-      self.Altitude_PID.setSampleTime(self.PID_SAMPLE_TIME)
+  @target_velocity.setter
+  def target_velocity(self, velocity):
+    self.pitch_pid.SetPoint, self.roll_pid.SetPoint, self.throttle_pid.SetPoint = velocity
 
-      self.controllers_initialized = True
+  @property
+  def target_altitude(self):
+    return self.altitude_pid.SetPoint
 
-  def send_velocity_vector(self, requested_flight_vector, desired_altitude = None, desired_yaw = None):
+  def clear_pitch_controller(self):
+    self.pitch_pid.output = 0.
+    self.pitch_pwm = self.PITCH_MID
+  
+  def clear_roll_controller(self):
+    self.roll_pid.output = 0.
+    self.roll_pwm = self.ROLL_MID
 
-    self.Pitch_PID.SetPoint = requested_flight_vector.x
-    self.Roll_PID.SetPoint = requested_flight_vector.y
-    self.Throttle_PID.SetPoint = requested_flight_vector.z
-
-    if(desired_yaw is not None and 
-      requested_flight_vector.x == 0.00 and 
-      requested_flight_vector.y == 0.00):
-      # By checking the magnitude, we ensure that the vehicle will only yaw while stationary.
-      # There is a similar check below in update_controllers.
-      self.Yaw_PID.SetPoint = self.get_yaw_radians(desired_yaw)
-
-    if(requested_flight_vector.z == 0.00 and desired_altitude):
-      #Only use the altitude controller if the desired_altitude argument is passed and we haven't been given a z velocity.
-      self.Altitude_PID.SetPoint = desired_altitude
-      self.alt_hold_enabled = True
-    elif("TAKEOFF" in self.atc.STATE):
-      #TAKEOFF allows both controllers to run so that the altitude controller can get a stable hover value.
-      self.Altitude_PID.SetPoint = desired_altitude
-      self.alt_hold_enabled = False
-    else:
-      self.alt_hold_enabled = False
+  @target_altitude.setter
+  def target_altitude(self, value):
+    assert value > 0, 'Altitude must be positive'
+    self.altitude_pid.SetPoint = value
 
   def update_controllers(self):
-    vehicle_x_velocity = (self.atc.vehicle.velocity[0])
-    vehicle_y_velocity = (self.atc.vehicle.velocity[1])
-    vehicle_z_velocity = (self.atc.vehicle.velocity[2])
+    x_vel, y_vel, z_vel = self.atc.vehicle.velocity
 
-    if(self.alt_hold_enabled or "TAKEOFF" in self.atc.STATE):
-      #If altitude hold mode is enabled or we're in the takeoff state then allow the altitude controller to run.
-      self.Altitude_PID.update(self.atc.get_altitude())
-      self.Altitude_PWM = self.convert_altitude_to_pwm(self.Altitude_PID.output)
-    elif(not self.atc.in_range(self.atc.VEL_PID_THRESHOLD_THROTTLE, 0.00, vehicle_z_velocity)):
-      #Altitude hold is disabled, we're not in takeoff, and someone gave us a Z vector (the vehicle has some programmatically induced velocity).
-      #The idea then is to basically pause (not update) the altitude controller and continually set it's setpoint to whatever our current altitude is.
-      #This will always keep the altitude controller paused at the last value needed to hover the vehicle.
-      #We use a more smaller velocity threshold here so that the setpoint is updated more often and therefore more in line with the vehicle's current altitude.
-      self.Altitude_PID.SetPoint = self.atc.get_altitude()
+    self.altitude_pid.update(self.atc.altitude)
+    self.altitude_pwm = self.convert_altitude_to_pwm(self.altitude_pid.output)
+    
+    if self.target_velocity[2] and 'TAKEOFF' not in self.atc.state:
+      self.altitude_pid.SetPoint = self.atc.altitude
+    
+    self.throttle_pid.update(z_vel)
+    self.throttle_pwm += self.throttle_pid.output
 
-    self.Throttle_PID.update(vehicle_z_velocity)
-    self.Throttle_PWM += self.Throttle_PID.output
+    if math.pi/2 <= np.abs(self.atc.vehicle.attitude.yaw % (2*math.pi)) <= 3*math.pi/2:
+      x_vel, y_vel = (-x_vel, -y_vel)
 
-    # #This flips the velocity readings so that they are relative to the vehicle and not the world.
-    if(math.cos(self.atc.vehicle.attitude.yaw) <= 0.0):
-      vehicle_x_velocity *=-1.0
-      vehicle_y_velocity *=-1.0
-
-    #TODO Figure out why VehicleStates can't be imported here.
-
-    if("HOVER" in self.atc.STATE):
-      #The vehicle will drift if the other (Pitch and Roll) controllers are on in hover.
-      #This is likely caused by too much noise in accelerometer data.
-      self.Pitch_PID.output = 0.0
-      self.Roll_PID.output = 0.0
-      self.Pitch_PWM = self.PITCH_MID
-      self.Roll_PWM = self.ROLL_MID
-      self.Yaw_PID.update(self.atc.vehicle.attitude.yaw)                
-      self.Yaw_PWM += self.Yaw_PID.output
-      if("(Yaw Achieved)" in self.atc.STATE):
-        self.Yaw_PID.output = 0.0
-        self.Yaw_PWM = self.YAW_MID
-    elif("FLYING" in self.atc.STATE):
-      if(self.Pitch_PID.SetPoint == 0.00):
-        self.Pitch_PID.output = 0.0
-        self.Pitch_PWM = self.PITCH_MID
+    if "HOVER" in self.atc.state:
+      self.clear_pitch_controller()
+      self.clear_roll_controller()
+    elif "FLYING" in self.atc.state:
+      if not self.pitch_pid.SetPoint:
+        self.clear_pitch_controller()
       else:
-        self.Pitch_PID.update(vehicle_x_velocity)
-        self.Pitch_PWM -= self.Pitch_PID.output
-      if(self.Roll_PID.SetPoint == 0.00):
-        self.Roll_PID.output = 0.0
-        self.Roll_PWM = self.ROLL_MID
+        self.pitch_pid.update(x_vel)
+        self.pitch_pwm -= self.pitch_pid.output
+      
+      if not self.roll_pid.SetPoint:
+        self.clear_roll_controller()
       else:
-        self.Roll_PID.update(vehicle_y_velocity)
-        self.Roll_PWM += self.Roll_PID.output
-
-    self.Pitch_PWM = self.constrain_rc_values(self.Pitch_PWM)
-    self.Roll_PWM = self.constrain_rc_values(self.Roll_PWM)
-    self.Yaw_PWM = self.constrain_rc_values(self.Yaw_PWM)
-    self.Throttle_PWM = self.constrain_rc_values(self.Throttle_PWM)
+        self.roll_pid.update(y_vel)
+        self.roll_pwm += self.roll_pid.output
 
   def write_to_rc_channels(self, should_flush_channels=False):
-    
-    if(should_flush_channels):
-      self.Roll_PWM = self.ROLL_MID
-      self.Pitch_PWM = self.PITCH_MID
-      self.Yaw_PWM = self.YAW_MID
-      self.Throttle_PWM = self.THROTTLE_MIN
-      self.Altitude_PWM = self.THROTTLE_MIN
+    if should_flush_channels:
+      self.roll_pwm = self.ROLL_MID
+      self.pitch_pwm = self.PITCH_MID
+      self.yaw_pwm = self.YAW_MID
+      self.throttle_pwm = self.THROTTLE_MIN
+      self.altitude_pwm = self.THROTTLE_MIN
 
-    self.atc.vehicle.channels.overrides[self.PITCH_CHANNEL] = self.Pitch_PWM
-    self.atc.vehicle.channels.overrides[self.ROLL_CHANNEL] = self.Roll_PWM
-    self.atc.vehicle.channels.overrides[self.YAW_CHANNEL] = self.Yaw_PWM
-
-    if(self.alt_hold_enabled):
-      self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Altitude_PWM
-    else:
-      self.atc.vehicle.channels.overrides[self.THROTTLE_CHANNEL] = self.Throttle_PWM
-
-  def get_yaw_radians(self, angle):
-    if angle < 180.0:
-        if angle == 0.0:
-            angle = 0.01
-        return math.radians(angle)
-    else:
-        if angle == 180.0:
-            angle = 179.9
-            return math.radians(angle)
-        return math.radians(angle-180.0) - math.pi
+    fourth_channel_name = 'altitude' if 'TAKEOFF' not in self.atc.state else 'throttle'
+    channels = zip(('pitch', 'roll', 'yaw', fourth_channel_name), (self.PITCH_CHANNEL, self.ROLL_CHANNEL, self.YAW_CHANNEL, self.THROTTLE_CHANNEL))
+    for name, channel in channels:
+        self.atc.vehicle.channels.overrides[channel] = self.constrain_rc_values(getattr(self, '%s_pwm' % (name,)))
 
   def convert_altitude_to_pwm(self, desired_altitude):
     rc_out =  340.0 * desired_altitude + 986.0
-    if(rc_out < self.THROTTLE_MIN):
-      rc_out = self.THROTTLE_MIN
-    elif(rc_out > self.THROTTLE_MAX):
-      rc_out = self.THROTTLE_MAX
-    return rc_out
+    return min(max(self.THROTTLE_MIN, rc_out), self.THROTTLE_MAX)
 
   def constrain_rc_values(self, rc_out):
-    if(rc_out < self.THROTTLE_MIN):
-      rc_out = self.THROTTLE_MIN
-    elif(rc_out > self.THROTTLE_MAX):
-      rc_out = self.THROTTLE_MAX
-    return rc_out
-
-  def get_debug_string(self):
-    vehicle_x_velocity = (self.atc.vehicle.velocity[0])
-    vehicle_y_velocity = (self.atc.vehicle.velocity[1])
-
-    debug_string = ("Vehicle State: " + self.atc.STATE + 
-    # "\n\nZ Velocity Controller Out: " + str(self.Throttle_PID.output) + 
-    "\n\nZ Velocity RC Out: " + str(self.Throttle_PWM) + 
-    "\nVehicle Z Velocity: " + str(self.atc.vehicle.velocity[2]) + 
-    "\nTarget Z Velocity: " + str(self.Throttle_PID.SetPoint) + 
-    # "\n\nAltitude Controller Out: " + str(self.Altitude_PID.output) + 
-    "\n\nAltitude RC Out: " + str(self.Altitude_PWM) + 
-    "\nVehicle Altitude: " + str(self.atc.get_altitude()) + 
-    "\nTarget Altitude: " + str(self.Altitude_PID.SetPoint) + 
-    "\n\nAltitude Hold Enabled: " + str(self.alt_hold_enabled) + 
-    # "\nWithin Alt Threshold: " + str(self.atc.in_range(self.atc.ALT_PID_THRESHOLD, self.Altitude_PID.SetPoint, self.atc.get_altitude())) +
-    # "\n\nPitch Controller Out: " + str(self.Pitch_PID.output) + 
-    "\n\nPitch RC Out: " + str(self.Pitch_PWM) + 
-    "\nVehicle X Velocity: " + str(vehicle_x_velocity) + 
-    "\nTarget X Velocity: " + str(self.Pitch_PID.SetPoint) + 
-    # "\n\nRoll Controller Out: " + str(self.Roll_PID.output) + 
-    "\n\nRoll RC Out: " + str(self.Roll_PWM) + 
-    "\nVehicle Y Velocity: " + str(vehicle_y_velocity) + 
-    "\nTarget Y Velocity: " + str(self.Roll_PID.SetPoint) + 
-    # "\n\nYaw Controller Out: " + str(self.Yaw_PID.output) + 
-    # "\nYaw RC Out: " + str(self.Yaw_PWM) + 
-    "\n\nVehicle Yaw: " + str(self.atc.get_yaw_deg()))
-    # "\nTarget Yaw: " + str(math.degrees(self.Yaw_PID.SetPoint)) +
-    # "\nWithin Yaw Threshold: " + str(self.atc.in_range(self.atc.YAW_PID_THRESHOLD, math.degrees(self.Yaw_PID.SetPoint), self.atc.get_yaw_deg())))
-    return debug_string
+    return min(max(self.THROTTLE_MIN, rc_out), self.THROTTLE_MAX)
