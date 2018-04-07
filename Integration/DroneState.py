@@ -2,6 +2,7 @@ class DroneState:
     x = 0
     y = 0
     z = 0
+    min_z = 0
     state = "undefined"
 
     def init(self):
@@ -12,6 +13,7 @@ class DroneState:
             'x':self.x,
             'y':self.y,
             'z':self.z,
+            'min_z':self.min_z,
             'state':self.state
         }
     
@@ -22,5 +24,7 @@ class DroneState:
             y = val
         elif(var == "z"):
             z = val
+        elif(var == "min_z"):
+            min_z = val
         else:
             state = val

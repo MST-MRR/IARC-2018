@@ -2,11 +2,13 @@ from time import sleep
 from altscan import LIDAR
 import dronekit
 import RPi.GPIO as GPIO
+import StateSync as Sync
 
 HIGH_ALT = 2.5
 MED_ALT = 2.0
 LOW_ALT = 1.5
 
+stateSync = Sync.StateSync("collision")
 
 #vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
 class Sonar:
@@ -68,9 +70,6 @@ def alt_determinate(distance, sector):
     else:
       return HIGH_ALT
 
-
-
-
 def send_lidar_message(min_dist, max_dist, current_dist, sector):
     print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
     message = vehicle.message_factory.distance_sensor_encode(
@@ -100,7 +99,7 @@ def send_distance_message(distance_to_ground):
         0                                              # covariance, not used
     )
     self.vehicle.send_mavlink(message)
-    self.vehicle.commands.upload() '''
+    self.vehicle.commands.upload() 
 
     
 sleep(0.1)
@@ -117,9 +116,13 @@ while(1):   #constantly grab data
         print "\nFor sector " + (str)(secval)
         endVal = min(10, len(sector))
         if (endVal >= 5):
+            height = 0
             for val in range(0,endVal):
+                det_height = alt_determinate(sector[val][0], sector[val][2])
+                height = max(height, det_height)
                 print "Sending message"
-                send_lidar_message(10, 300, sector[val][0], sector[val][2]) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
+                stateSync.sendCollision(height)
+                #send_lidar_message(10, 300, sector[val][0], sector[val][2]) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
         secval += 1
         sleep(0.000001)
     send_distance_message(downward_sonar.get_distance())

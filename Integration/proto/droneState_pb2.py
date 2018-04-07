@@ -18,7 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='droneState.proto',
   package='MRRDTProto',
-  serialized_pb=_b('\n\x10\x64roneState.proto\x12\nMRRDTProto\"A\n\nDroneState\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\t\n\x01z\x18\x03 \x01(\x02\x12\x12\n\ndroneState\x18\x04 \x01(\t')
+  serialized_pb=_b('\n\x10\x64roneState.proto\x12\nMRRDTProto\"a\n\nDroneState\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\t\n\x01z\x18\x03 \x01(\x02\x12\r\n\x05min_z\x18\x04 \x01(\x02\x12\x12\n\ndroneState\x18\x05 \x01(\t\x12\x0f\n\x07\x63leared\x18\x06 \x01(\x08')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -54,9 +54,23 @@ _DRONESTATE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='droneState', full_name='MRRDTProto.DroneState.droneState', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='min_z', full_name='MRRDTProto.DroneState.min_z', index=3,
+      number=4, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='droneState', full_name='MRRDTProto.DroneState.droneState', index=4,
+      number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='cleared', full_name='MRRDTProto.DroneState.cleared', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -72,7 +86,7 @@ _DRONESTATE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=32,
-  serialized_end=97,
+  serialized_end=129,
 )
 
 DESCRIPTOR.message_types_by_name['DroneState'] = _DRONESTATE

@@ -1,0 +1,37 @@
+import StateSync as sync
+import json
+from time import sleep
+
+col = sync.StateSync("collision")
+vis = sync.StateSync("vision")
+fli = sync.StateSync("flight")
+
+vis.sendVision(10, 3)
+sleep(0.1)
+fli.getState(True)
+fli.printCoord()
+sleep(0.1)
+col.sendCollision(4)
+sleep(0.1)
+fli.getState(True)
+sleep(0.1)
+vis.sendVision(1,1,1)
+sleep(0.1)
+fli.getState(True)
+sleep(0.1)
+col.sendCollision(0)
+sleep(0.1)
+vis.sendVision(12,13,5)
+sleep(0.1)
+fli.getState(True)
+vis.sendVision(-10,34)
+fli.getState(True)
+col.sendCollision(10)
+fli.getState(True)
+vis.sendVision(1,1,1)
+fli.getState(True)
+col.sendCollision(0)
+vis.sendVision(1,1,1)
+fli.getState(True)
+
+print("done")
