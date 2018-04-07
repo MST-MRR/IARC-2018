@@ -9,7 +9,7 @@
 A simple quadcopter AI which follows the nearest roomba in an IARC arena simulated by Gazebo
 '''
 
-from AutonomousFlight import FlightVector
+#from AutonomousFlight import FlightVector
 from ATC import Tower, VehicleStates
 import cv2
 import numpy as np
@@ -48,7 +48,7 @@ class SimpleDroneAI():
 
     def __init__(self):
         self._tower = Tower()
-        self._tower.initialize()
+        #self._tower.initialize()
         self._detector = RoombaDetector()
         self._time_since_last_roomba = 0
         self._hovering = True
@@ -85,11 +85,11 @@ class SimpleDroneAI():
             goal, np.array: 2D position vector corresponding to the destination point
             speed, float: speed limit in m/s
         @returns:
-            A FlightVector pointed in the direction of `goal` with speed less than or equal to `speed`.
+            A Numpy array pointed in the direction of `goal` with speed less than or equal to `speed`.
         """
         dist = np.sqrt(np.sum((goal-start)**2))
         x_vel, y_vel = min(dist, SimpleDroneAI.ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
-        return FlightVector(-y_vel, x_vel, 0)
+        return np.array([-y_vel, x_vel, 0])
 
     def _follow_nearest_roomba(self, roombas, drone_midpoint):
         """
@@ -106,7 +106,7 @@ class SimpleDroneAI():
             target = roombas[target_idx]
 
             velocity_vector = self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
-
+            
             self._tower.fly(velocity_vector)
             self.hovering = False
             self._time_since_last_roomba = timer()
@@ -170,7 +170,9 @@ class SimpleDroneAI():
         print("TANNER TEST ASDF")
         subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
         yield From(subscriber.wait_for_connection())
-
+        while not self._tower.takeoff_completed.is_set():
+            print("TANNER TEST ZXCV")
+            yield From(trollius.sleep(0.01))
         while True:
             with self._lock:
                 if self._last_image_retrieved is not None:
