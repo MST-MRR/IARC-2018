@@ -39,7 +39,7 @@ class SimpleDroneAI():
     # camera message type
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # speed to follow roombas with in m/s
-    ROOMBA_TRACKING_SPEED = .2 # slower than roomba.  But if this is faster, then the drone's position diverges.
+    ROOMBA_TRACKING_SPEED = 0.4
     # altitude to hover at after takeoff in meters
     TAKEOFF_HEIGHT = 1.5
     # time in seconds we can go without finding a roomba before going into hover mode
@@ -54,6 +54,8 @@ class SimpleDroneAI():
         self._hovering = True
         self._lock = threading.RLock()
         self._last_image_retrieved = None
+        self._image_height = 0
+        self._image_width = 0
 
     @property
     def hovering(self):
@@ -88,7 +90,7 @@ class SimpleDroneAI():
             A Numpy array pointed in the direction of `goal` with speed less than or equal to `speed`.
         """
         dist = np.sqrt(np.sum((goal-start)**2))
-        x_vel, y_vel = min(dist, SimpleDroneAI.ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
+        x_vel, y_vel = min(SimpleDroneAI.ROOMBA_TRACKING_SPEED * 2 * dist/(np.sqrt(self._image_height * self._image_width)), SimpleDroneAI.ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
         return np.array([-y_vel, x_vel, 0])
 
     def _follow_nearest_roomba(self, roombas, drone_midpoint):
@@ -107,6 +109,7 @@ class SimpleDroneAI():
 
             velocity_vector = self._get_velocity_vector2d(drone_midpoint, roomba_midpoints[target_idx], SimpleDroneAI.ROOMBA_TRACKING_SPEED)
             
+            print(velocity_vector)
             self._tower.fly(velocity_vector)
             self.hovering = False
             self._time_since_last_roomba = timer()
@@ -121,10 +124,10 @@ class SimpleDroneAI():
             img, np.ndarray: An image from the drone's camera.
         @returns:
         """
-        h, w = img.shape[:2]
+        self._image_height, self._image_width = img.shape[:2]
         roombas = self._detector.detect(img)
 
-        drone_midpoint = np.asarray([w/2, h/2])
+        drone_midpoint = np.asarray([self._image_width/2, self._image_height/2])
         self._follow_nearest_roomba(roombas, drone_midpoint)
 
         if roombas:
@@ -133,7 +136,6 @@ class SimpleDroneAI():
             target = roombas[target_idx]
         
         if _DEBUG:
-            print("TANNER TEST")
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
             for roomba in roombas:
@@ -151,8 +153,8 @@ class SimpleDroneAI():
         @returns:
         """
         message = pygazebo.msg.image_stamped_pb2.ImageStamped.FromString(data)
-        h, w = (message.image.height, message.image.width)
-        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(h, w, 3)
+        self._image_height, self._image_width = (message.image.height, message.image.width)
+        img = np.fromstring(message.image.data, dtype=np.uint8).reshape(self._image_height, self._image_width, 3)
 
         with self._lock:
             self._last_image_retrieved = img
@@ -167,11 +169,9 @@ class SimpleDroneAI():
         """
         self._takeoff()
         manager = yield From(pygazebo.connect())
-        print("TANNER TEST ASDF")
         subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
         yield From(subscriber.wait_for_connection())
         while not self._tower.takeoff_completed.is_set():
-            print("TANNER TEST ZXCV")
             yield From(trollius.sleep(0.01))
         while True:
             with self._lock:
