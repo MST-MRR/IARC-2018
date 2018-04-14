@@ -22,16 +22,40 @@ class StateSync:
     pos_z = 0
 
     def __init__(self, sender):
-        self.send = sender
+        self.sender = sender
 
     def printCoord(self):
         print("Current coordinates:")
         print("x: " + str(self.pos_x))
         print("y: " + str(self.pos_y))
         print("z: " + str(self.pos_z))
+"""
+    #sends messages depending on sender
+    def send(self, x, y, z)
+        s_time = time.time()
+        if(self.sender == VISION):
+            z = 0
+        else:
+            x = 0
+            y = 0
+        text = {
+            "x":x,
+            "y":y,
+            "z":z
+        }
+        if(self.sender == VISION):
+            r = requests.post(EndPoint.VISION, data = json.dumps(text))
+        else:
+            r = requests.post(EndPoint.COLLISION, data = json.dumps(text))        
+        if((time.time() - s_time) > (1.0/30)):
+            print("Sync too slow!")
+        if(self.sender == COLLISION):
+            self.last = r
+            return r
+"""
 
     #Send a message to the API as vision
-    def sendVision(self, x, y, z=0):
+    def sendVision(self, x, y, z):
         s_time = time.time()
         text = {
             "x":x,
@@ -71,8 +95,8 @@ class StateSync:
         self.last = r
         return r
 
-    def send(self, msg):
-        pass
+    #def send(self, msg):
+     #   pass
 
     def getLast(self):
         return requests.get(EndPoint.CURRENT)
