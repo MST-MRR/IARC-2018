@@ -11,8 +11,8 @@ class LIDAR():
   QUADRANT_SIZE = 45.0
 
   def __init__(self):
-    self.lidar_sensor = "/dev/cu.usbserial-DO00867Q" #this is for Mac OS X 
-    #self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
+   # self.lidar_sensor = "/dev/cu.usbserial-DO00867Q" #this is for Mac OS X 
+    self.lidar_sensor = "/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DO00867Q-if00-port0" #this is for Linux
     self.sweep = Sweep(self.lidar_sensor)
     print "SCANSE INIT"
     self.sweep = None
