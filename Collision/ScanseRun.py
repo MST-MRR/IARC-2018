@@ -1,3 +1,8 @@
+#This is the main code to send lidar messages directly to the Drone
+#For this to work params needed are:
+  #AVOID_ENABLE : UseProximitySensor = true, StopAtFence = false
+  #AVOID_MARGIN : Set to desired distance, default to 2
+  #PRX_TYPE = 2 : This enables the use of a Proximity sensor through mavlink
 from time import sleep
 from altscan import LIDAR
 import dronekit
