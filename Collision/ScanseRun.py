@@ -1,55 +1,8 @@
 from time import sleep
 from altscan import LIDAR
 import dronekit
-import RPi.GPIO as GPIO
 
 vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
-class Sonar:
-
-    #default constructor
-    #trigger, echo, and side are passes through and set accordingly
-    def __init__(self, trigger, echo):
-        self.trigger = trigger
-        self.echo = echo
-        #set GPIO direction (IN / OUT)
-        GPIO.setup(self.trigger, GPIO.OUT)
-        GPIO.setup(self.echo, GPIO.IN)
-
-    #performs operations to get the approximate distance
-    #returns distance to calling function
-    def get_distance(self):
-        GPIO.output(self.trigger, True)
-
-        # set Trigger after 0.01ms to LOW
-        time.sleep(0.00001)
-        GPIO.output(self.trigger, False)
-
-        self.startTime = time.time()
-        self.stopTime = time.time()
-
-        # save StartTime
-        while GPIO.input(self.echo) == 0:
-            self.startTime = time.time()
-
-        # save time of arrival
-        while GPIO.input(self.echo) == 1:
-            self.stopTime = time.time()
-
-        # time difference between start and arrival
-        self.timePassed = self.stopTime - self.startTime
-        # multiply with the sonic speed (34300 cm/s)
-        # and divide by 2, because there and back
-        self.distance = (self.timePassed * 34300) / 2
-
-        return self.distance
-    
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-MIN_SONAR_DISTANCE = 3
-MAX_SONAR_DISTANCE = 4000
-TRIG_PIN = 2
-ECHO_PIN = 3
 
 def send_lidar_message(min_dist, max_dist, current_dist, sector):
     print("Distance :" + str(current_dist) + " Quad: " + str(sector))
@@ -66,23 +19,6 @@ def send_lidar_message(min_dist, max_dist, current_dist, sector):
     vehicle.send_mavlink(message)
     vehicle.commands.upload()
     
-def send_distance_message(distance_to_ground):
-    message = self.vehicle.message_factory.distance_sensor_encode(
-        0,                                             # time since system boot, not used
-        MIN_SONAR_DISTANCE,                            # min distance cm
-        MAX_SONAR_DISTANCE,                            # max distance cm
-        distance_to_ground,                            # current distance, must be int
-        0,                                             # type = laser
-        0,                                             # onboard id, not used
-        MAV_SENSOR_ROTATION_PITCH_270,                 # Downward facing range sensor.
-        0                                              # covariance, not used
-    )
-    self.vehicle.send_mavlink(message)
-    self.vehicle.commands.upload()
-    
-sleep(0.1)
-
-downward_sonar = Sonar(TRIG_PIN, ECHO_PIN)
 lidar = LIDAR()
 lidar.connect_to_lidar()
 
@@ -97,8 +33,5 @@ while(1):   #constantly grab data
             for val in range(0,endVal):
                 print "Sending message"
                 send_lidar_message(10, 300, sector[val][0], ((sector[val][2]))) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
-        secval += 1
         sleep(0.000001)
-    send_distance_message(downward_sonar.get_distance())
-
     
