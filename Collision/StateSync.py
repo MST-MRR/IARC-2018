@@ -55,9 +55,6 @@ class StateSync:
         self.last = r
         return r
 
-    def sendCollMsg(self, msg = {}):
-        pass
-
     #Get drone state
     def getState(self, clearBuf = False):
         s_time = time.time()
@@ -69,7 +66,6 @@ class StateSync:
         self.pos_x += resp_t['x']
         self.pos_y += resp_t['y']
         self.pos_z = resp_t['z']
-
         self.coll_msg = resp_t['coll_msg']
         
         if((time.time() - s_time) > (1.0/30)):
