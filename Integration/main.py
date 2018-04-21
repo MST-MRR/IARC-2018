@@ -15,6 +15,7 @@ def printState():
     print ("x: " + str(droneState.x))
     print ("y: " + str(droneState.y))
     print ("z: " + str(droneState.z))
+    print ("coll_msg" + str(droneState.coll_msg))
 
 class currentHandler:
     def on_get(self, req, resp):
@@ -50,11 +51,21 @@ class visionHandler:
 class collisionHandler:
     #Collision updates the drone state variables: z
     def on_post(self, req, resp):
+        print "Collision"
         req_text = json.loads(req.stream.read().decode('utf-8'))
         if('z' in req_text):
             droneState.min_z = req_text['z']
             if(droneState.min_z > droneState.z):
                 droneState.z = droneState.min_z
+        if(bool(req_text['coll_msg'])):
+            print "Got args"
+            coll = {}
+            coll['first'] = req_text['coll_msg']['first']
+            coll['second'] = req_text['coll_msg']['second']
+            coll['third'] = req_text['coll_msg']['third']
+            coll['fourth'] = req_text['coll_msg']['fourth']
+            droneState.coll_msg = coll
+        printState()
 
 class stateHandler():
     #Flight should read variables from the drone state to get new flight vectors
@@ -62,15 +73,18 @@ class stateHandler():
         text = {
             "x":droneState.x,
             "y":droneState.y,
-            "z":droneState.z
+            "z":droneState.z,
+            "coll_msg":droneState.coll_msg
         }
         resp.body = json.dumps(text)
         req_text = req.stream.read().decode('utf-8')
         if('clear' in req_text):    #Was clearing buffer requested?
+            print "Clearing buffer"
             lastState = droneState
             droneState.x = 0
             droneState.y = 0
             droneState.z = 0
+            droneState.coll_msg = {}
             droneState.cleared = True
         printState()
 

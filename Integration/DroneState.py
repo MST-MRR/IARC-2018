@@ -3,9 +3,10 @@ class DroneState:
     y = 0
     z = 0
     min_z = 0
+    coll_msg = {}
     state = "undefined"
 
-    def init(self):
+    def __init__(self):
         pass
     
     def getState(self):
@@ -14,7 +15,8 @@ class DroneState:
             'y':self.y,
             'z':self.z,
             'min_z':self.min_z,
-            'state':self.state
+            'state':self.state,
+            'coll_msg':self.coll_msg
         }
     
     def update(self, var, val):

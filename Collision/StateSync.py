@@ -20,6 +20,7 @@ class StateSync:
     pos_x = 0
     pos_y = 0
     pos_z = 0
+    coll_msg = {}
 
     def __init__(self, sender):
         self.send = sender
@@ -43,15 +44,19 @@ class StateSync:
             print("Sync too slow!")
 
     #Send a message to the API as collision
-    def sendCollision(self, z):
+    def sendCollision(self, z, msg = {}):
         s_time = time.time()
-        text = {'z':z}
+        text = {'z':z, 'coll_msg':msg}
+            
         r = requests.post(EndPoint.COLLISION, data = json.dumps(text))
 
         if((time.time() - s_time) > (1.0/30)):
             print("Sync too slow!")
         self.last = r
         return r
+
+    def sendCollMsg(self, msg = {}):
+        pass
 
     #Get drone state
     def getState(self, clearBuf = False):
@@ -64,6 +69,8 @@ class StateSync:
         self.pos_x += resp_t['x']
         self.pos_y += resp_t['y']
         self.pos_z = resp_t['z']
+
+        self.coll_msg = resp_t['coll_msg']
         
         if((time.time() - s_time) > (1.0/30)):
             print("Sync too slow!")

@@ -19,4 +19,3 @@ while(time.time() - start_time < 1):
 
 print("done")
 print("Time: " + str( time.time() - start_time))
-print("Requests handled: " + str(i))
