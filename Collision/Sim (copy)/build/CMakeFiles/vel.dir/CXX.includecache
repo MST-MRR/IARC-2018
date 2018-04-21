@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/daniel/IARC-2018/Collision/Sim/vel.cc
+gazebo/gazebo_config.h
+-
+gazebo/transport/transport.hh
+-
+gazebo/msgs/msgs.hh
+-
+gazebo/gazebo.hh
+-
+gazebo/gazebo_client.hh
+-
+

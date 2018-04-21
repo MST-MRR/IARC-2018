@@ -1,0 +1,4 @@
+/home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/rebuild_cache.dir
+/home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/ObstacleControl.dir
+/home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/edit_cache.dir
+/home/daniel/IARC-2018/Simulation/IARCWorld/build/CMakeFiles/model_push.dir

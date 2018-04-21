@@ -1,0 +1,1 @@
+/usr/lib/ccache/c++  -fPIC  -std=c++11  -shared -Wl,-soname,libLIDAR_plugin.so -o libLIDAR_plugin.so CMakeFiles/LIDAR_plugin.dir/LIDAR_plugin.cc.o  -L/usr/lib/x86_64-linux-gnu/gazebo-8/plugins 

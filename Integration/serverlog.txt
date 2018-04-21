@@ -1,0 +1,3246 @@
+Initial DroneState:
+x: 0
+y: 0
+z: 0
+min_z: 0
+cleared: True
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 0
+cleared: False
+Vision message received
+{u'y': 1, u'x': 1, u'z': 5}
+1
+1
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+x: 1
+y: 1
+z: 5
+min_z: 0
+cleared: False
+Collision message received
+x: 1
+y: 1
+z: 10
+min_z: 10
+cleared: False

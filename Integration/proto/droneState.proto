@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package MRRDTProto;
+
+message DroneState
+{
+    required float dx = 1;
+    required float dy = 2;
+    required float z = 3;
+    required float min_z = 4;
+    optional string droneState = 5;
+    optional bool cleared = 6;
+}

@@ -19,6 +19,7 @@ import math
 import os
 import time
 import threading
+import LIDARCollisionAvoidance
 
 import AutonomousFlight
 
@@ -83,7 +84,7 @@ class Tower(object):
     self.pitching_done = threading.Event()
     self.rolling_done = threading.Event()
 
-  def initialize(self, should_write_to_file=False):
+  def initialize(self, should_write_to_file=False, should_enable_LIDAR=False):
     """
     @purpose: Connect to the flight controller, start the failsafe
               thread, switch to GUIDED_NOGPS, and open a file to
@@ -133,6 +134,9 @@ class Tower(object):
       self.flight_log.close()
     self.vehicle_initialized = False
     self.start_time = 0
+    if(self.LIDAR_enabled):
+      self.LIDAR_instance.shutdown()
+      self.LIDAR_instance = None
 
   def arm_drone(self):
     """
