@@ -13,6 +13,7 @@ from os import system
 from time import sleep
 from copy import deepcopy
 from sys import stdout, exit
+from Integration import StateSync 
 
 import dronekit
 import math
@@ -61,6 +62,7 @@ class Tower(object):
     @args:
     @returns:
     """
+    self.stateSync = StateSync.StateSync("flight")
     self.start_time = 0
     self.flight_log = None
     self.last_hover_altitude = 0
@@ -188,6 +190,21 @@ class Tower(object):
       self.STATE != VehicleStates.avoidance and 
       self.STATE != VehicleStates.unknown)
 
+    def send_lidar_message(min_dist, max_dist, current_dist, sector):
+      #print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
+      message = self.vehicle.message_factory.distance_sensor_encode(
+      0,                                             # time since system boot, not used
+      min_dist,                                      # min distance cm
+      max_dist,                                      # max distance cm
+      current_dist,                                  # current distance, must be int
+      0,                                             # type = laser
+      0,                                             # onboard id, not used
+      sector,                                        # sensor rotation
+      0                                              # covariance, not used
+      )
+      vehicle.send_mavlink(message)
+      vehicle.commands.upload()
+
   def get_uptime(self):
     """
     @purpose: Get up time of this object.
@@ -312,6 +329,12 @@ class Tower(object):
     self.STATE = VehicleStates.flying
     self.last_flight_vector = deepcopy(desired_vector)
      
+  def check_state(self):
+      self.stateSync.getState(True)
+      collision_message = self.stateSync.coll_msg)
+      print(collision_message)
+      send_lidar_message(collision_message["first"], collision_message["second"], collision_message["third"], collision_message["fourth"])
+
   def hover(self, desired_altitude=None, desired_angle=None):
     """
     @purpose: Hover/stop the vehicle in the air. Can also be used to Yaw.
@@ -434,6 +457,7 @@ class FailsafeController(threading.Thread):
                 self.atc.moving_sideways = False
                 self.atc.rolling_done.set()
           # print(self.atc.pid_flight_controller.get_debug_string())
+          self.atc.check_state()
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):
