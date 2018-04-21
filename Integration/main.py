@@ -59,7 +59,7 @@ class collisionHandler:
                 droneState.z = droneState.min_z
         if(bool(req_text['coll_msg'])):
             print "Got args"
-            coll = {}
+            coll = {"empty":False}
             coll['first'] = req_text['coll_msg']['first']
             coll['second'] = req_text['coll_msg']['second']
             coll['third'] = req_text['coll_msg']['third']
@@ -84,7 +84,9 @@ class stateHandler():
             droneState.x = 0
             droneState.y = 0
             droneState.z = 0
-            droneState.coll_msg = {}
+            droneState.coll_msg = {
+                "empty":"True"
+            }
             droneState.cleared = True
         printState()
 

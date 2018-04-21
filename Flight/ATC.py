@@ -12,7 +12,10 @@ from datetime import datetime, timedelta
 from os import system
 from time import sleep
 from copy import deepcopy
-from sys import stdout, exit
+from sys import stdout
+import os
+import sys
+sys.path.append("..")
 from Integration import StateSync 
 
 import dronekit
@@ -102,7 +105,7 @@ class Tower(object):
       
       try:
         print("\nConnecting to vehicle...")        
-        self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
+        self.vehicle = dronekit.connect(self.USB, wait_ready=True)
       except:
         print("\nUnable to connect to vehicle.")
         exit()
@@ -190,20 +193,20 @@ class Tower(object):
       self.STATE != VehicleStates.avoidance and 
       self.STATE != VehicleStates.unknown)
 
-    def send_lidar_message(min_dist, max_dist, current_dist, sector):
-      #print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
-      message = self.vehicle.message_factory.distance_sensor_encode(
-      0,                                             # time since system boot, not used
-      min_dist,                                      # min distance cm
-      max_dist,                                      # max distance cm
-      current_dist,                                  # current distance, must be int
-      0,                                             # type = laser
-      0,                                             # onboard id, not used
-      sector,                                        # sensor rotation
-      0                                              # covariance, not used
-      )
-      vehicle.send_mavlink(message)
-      vehicle.commands.upload()
+  def send_lidar_message(self, min_dist, max_dist, current_dist, sector):
+    #print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
+    message = self.vehicle.message_factory.distance_sensor_encode(
+    0,                                             # time since system boot, not used
+    min_dist,                                      # min distance cm
+    max_dist,                                      # max distance cm
+    current_dist,                                  # current distance, must be int
+    0,                                             # type = laser
+    0,                                             # onboard id, not used
+    sector,                                        # sensor rotation
+    0                                              # covariance, not used
+    )
+    self.vehicle.send_mavlink(message)
+    self.vehicle.commands.upload()
 
   def get_uptime(self):
     """
@@ -331,9 +334,10 @@ class Tower(object):
      
   def check_state(self):
       self.stateSync.getState(True)
-      collision_message = self.stateSync.coll_msg)
+      collision_message = self.stateSync.coll_msg
       print(collision_message)
-      send_lidar_message(collision_message["first"], collision_message["second"], collision_message["third"], collision_message["fourth"])
+      if(collision_message["empty"] == False):
+        self.send_lidar_message(collision_message["first"], collision_message["second"], collision_message["third"], collision_message["fourth"])
 
   def hover(self, desired_altitude=None, desired_angle=None):
     """

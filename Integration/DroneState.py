@@ -3,7 +3,7 @@ class DroneState:
     y = 0
     z = 0
     min_z = 0
-    coll_msg = {}
+    coll_msg = {"empty":"True"}
     state = "undefined"
 
     def __init__(self):
