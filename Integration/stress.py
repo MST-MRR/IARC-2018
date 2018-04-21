@@ -12,7 +12,7 @@ x = False
 print start_time
 while(time.time() - start_time < 1):
     a.sendVision(1,1,5)
-    b.getState()
+    b.getState(True)
     c.sendCollision(10 * int(x))
     i += 1
     x = not x
