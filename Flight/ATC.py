@@ -151,6 +151,8 @@ class Tower(object):
     """
     self.vehicle.armed = True
     while(not self.vehicle.armed):
+      self.check_state()
+      self.vehicle.armed = True
       sleep(self.STANDARD_SLEEP_TIME)
 
   def disarm_drone(self):
@@ -335,7 +337,7 @@ class Tower(object):
   def check_state(self):
       self.stateSync.getState(True)
       collision_message = self.stateSync.coll_msg
-      print(collision_message)
+      #print(collision_message)
       if(collision_message["empty"] == False):
         self.send_lidar_message(collision_message["first"], collision_message["second"], collision_message["third"], collision_message["fourth"])
 
@@ -449,6 +451,7 @@ class FailsafeController(threading.Thread):
     while not self.stoprequest.isSet():
       if self.atc.flight_prereqs_clear():
         self.atc.pid_flight_controller.update_controllers()
+        self.atc.check_state()
         if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
           # self.atc.check_battery_voltage()
           self.atc.pid_flight_controller.write_to_rc_channels()
@@ -461,7 +464,6 @@ class FailsafeController(threading.Thread):
                 self.atc.moving_sideways = False
                 self.atc.rolling_done.set()
           # print(self.atc.pid_flight_controller.get_debug_string())
-          self.atc.check_state()
       sleep(self.atc.STANDARD_SLEEP_TIME) 
 
   def join(self, timeout=None):
