@@ -14,6 +14,7 @@ from time import sleep
 from copy import deepcopy
 from sys import stdout
 from AutonomousFlight import PIDFlightController
+from SerialSync import serialSync as gimbal
 
 import dronekit
 import math
@@ -95,6 +96,10 @@ class Tower(object):
     self._assert_vehicle_is_connected()
     self.vehicle.armed = True
   
+  def send_gimbal_message(self):
+    gimbal.send(105 - self.vehicle.attitude.pitch)
+
+
   @property
   def is_armed(self):
     return self.vehicle.armed
@@ -192,5 +197,6 @@ class FailsafeController(threading.Thread):
       
       if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
         self.atc.pid_flight_controller.write_to_rc_channels()
+        self.atc.send_gimbal_message()
     
       sleep(.01)
