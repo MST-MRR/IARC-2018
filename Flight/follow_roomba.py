@@ -1,6 +1,6 @@
 from Realsense import Realsense
 from time import sleep
-from ATC import Tower
+from ATC import Tower, VehicleStates
 import cv2
 import numpy as np
 import sys 
@@ -25,6 +25,7 @@ LAND_CHANGE_SPEED = 0.6
 ROOMBA_TRACKING_SPEED = 0.5
 image_height = 0
 image_width = 0
+hovering = False
 
 def GetTrueDroneVelocity () :
     DroneVelocity = t.vehicle.velocity
@@ -90,8 +91,8 @@ def follow_nearest_roomba(roombas, drone_midpoint , XStay , YStay , RoombaPrevX 
     """
     
     # Uncomment when in python2
-    # if self . DroneTooFast ( ) :
-    #     self._tower.hover()
+    # if DroneTooFast ( ) :
+    #     t.hover()
     if roombas:
 
         roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
@@ -104,8 +105,8 @@ def follow_nearest_roomba(roombas, drone_midpoint , XStay , YStay , RoombaPrevX 
         # DroneSpeed = GetRealSpeedXY ( )
 
         print(velocity_vector)
-        # self._tower.fly(velocity_vector)
-        # self.hovering = False
+        t.fly(velocity_vector)
+        hovering = False
 
     # elif timer() - self._time_since_last_roomba >= SimpleDroneAI.MAX_LOST_TARGET_TIME:
     #     # self._tower.hover()
@@ -125,8 +126,10 @@ with Realsense((640, 480)) as realsense:
     try:
         t = Tower()
         # Uncomment for python2 threading
-        # t.connected.wait()
-        # print("Good")
+        t.connected.wait()
+        t.takeoff(1.5)
+        t.takeoff_completed.wait()
+        print("Good")
         dronex = 0
         droney = 0
         roombaprevx = 0
