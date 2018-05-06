@@ -195,7 +195,7 @@ class FailsafeController(threading.Thread):
   def run(self):
     while not self.stop.is_set():
       self.atc.pid_flight_controller.update_controllers()
-      print self.atc.last_gimbal_angle, int(math.degrees(self.atc.vehicle.attitude.pitch))
+      # print self.atc.last_gimbal_angle, int(math.degrees(self.atc.vehicle.attitude.pitch))
       if (105 + int(math.degrees(self.atc.vehicle.attitude.pitch))) != self.atc.last_gimbal_angle:
           self.atc.send_gimbal_message()
       if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
