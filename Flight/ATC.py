@@ -44,6 +44,7 @@ class Tower(object):
   ASCEND_VELOCITY = np.array([0., 0., .3])
 
   def __init__(self):
+    self.last_gimbal_angle = 105
     self.state = VehicleStates.landed
     self.stop = threading.Event()
     self.takeoff_completed = threading.Event()
@@ -97,8 +98,8 @@ class Tower(object):
     self.vehicle.armed = True
   
   def send_gimbal_message(self):
-    gimbal.send(105 - self.vehicle.attitude.pitch)
-
+    gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
+    self.last_gimbal_angle = 105 + int(math.degrees(self.vehicle.attitude.pitch))
 
   @property
   def is_armed(self):
@@ -194,9 +195,11 @@ class FailsafeController(threading.Thread):
   def run(self):
     while not self.stop.is_set():
       self.atc.pid_flight_controller.update_controllers()
-      
+      print self.atc.last_gimbal_angle, int(math.degrees(self.atc.vehicle.attitude.pitch))
+      if (105 + int(math.degrees(self.atc.vehicle.attitude.pitch))) != self.atc.last_gimbal_angle:
+          self.atc.send_gimbal_message()
       if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
         self.atc.pid_flight_controller.write_to_rc_channels()
-        self.atc.send_gimbal_message()
+        
     
       sleep(.01)
