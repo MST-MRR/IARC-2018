@@ -22,8 +22,7 @@ Y_ROOMBA_CHANGE_DIV = ROOMBA_CHANGE_DIV
 ROOMBA_CHANGE_COMPE = True
 
 ATTEMPT_LAND = True
-LAND_CHANGE_SPEED = 0.6
-ROOMBA_TRACKING_SPEED = 0.6
+ROOMBA_TRACKING_SPEED = 0.45
 SPEED_CHECK_PLUS = 0.00
 MAX_LOST_TARGET_TIME = 0
 IsRoombaLastImage = False
@@ -104,6 +103,7 @@ def get_velocity_vector2d(start, goal, speed, XStay, YStay, RoombaPrevX, RoombaP
 
     MetersPerPixel = GetMetersPerPixel()
     dist = float(np.sqrt(np.sum((goal-start)**2)))*MetersPerPixel
+    dist = dist*2.2
     print('distance', dist)
     DroneVel = min(dist if dist > .1 else 0, speed) * \
                    normalize((goal-start).reshape(-1, 1))
@@ -183,7 +183,7 @@ def update(image, roombas , XStay, YStay, RoombaPrevX, RoombaPrevY):
 
 with Realsense((640, 480)) as realsense:
     try:
-        roomba_detector = RoombaDetector(threshold=.99)
+        roomba_detector = RoombaDetector(threshold=.7)
         # cv2.namedWindow("REALSENSE_STREAM_WINDOW", cv2.WINDOW_AUTOSIZE)
         t = Tower()
         # Uncomment for python2 threading
