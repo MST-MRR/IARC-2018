@@ -101,31 +101,31 @@ def get_velocity_vector2d(start, goal, speed, XStay, YStay, RoombaPrevX, RoombaP
         A Numpy array pointed in the direction of `goal` with speed less than or equal to `speed`.
     """
 
-    MetersPerPixel = GetMetersPerPixel()
-    dist = float(np.sqrt(np.sum((goal-start)**2)))*MetersPerPixel
-    dist = dist*2.2
-    print('distance', dist)
-    DroneVel = min(dist if dist > .1 else 0, speed) * \
-                   normalize((goal-start).reshape(-1, 1))
-    x_vel, y_vel = DroneVel
+    #MetersPerPixel = GetMetersPerPixel()
+    #dist = float(np.sqrt(np.sum((goal-start)**2)))*MetersPerPixel
+    #dist = dist*2.2
+    #print('distance', dist)
+    #DroneVel = min(dist if dist > .1 else 0, speed) * \
+    #               normalize((goal-start).reshape(-1, 1))
+    #x_vel, y_vel = DroneVel
 
-    return np.array([y_vel,-x_vel, 0]), XStay, YStay, RoombaPrevX, RoombaPrevY
+    #return np.array([y_vel,-x_vel, 0]), XStay, YStay, RoombaPrevX, RoombaPrevY
 
-    # dist = np.sqrt(np.sum((goal-start)**2))
-    # x_vel, y_vel = min(ROOMBA_TRACKING_SPEED * 2 * 1.2 * dist/(np.sqrt(image_height * image_width)), ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
-    # if ROOMBA_CHANGE_COMPE == True :
-    #     OldX = x_vel
-    #     OldY = y_vel
-    #     x_vel = RoombaCompensate ( RoombaPrevX , x_vel , X_ROOMBA_CHANGE_DIV )
-    #     y_vel = RoombaCompensate ( RoombaPrevY , y_vel , Y_ROOMBA_CHANGE_DIV )
-    #     RoombaPrevX = OldX
-    #     RoombaPrevY = OldY
-    # if GRADIENT_SPEED_CHANGE == True :
-    #     x_vel = GetNewSpeed ( XStay , x_vel , X_SPEED_CHANGE_DIV )
-    #     y_vel = GetNewSpeed ( YStay , y_vel , Y_SPEED_CHANGE_DIV )
-    #     XStay = x_vel
-    #     YStay = y_vel
-    # return np.array([-y_vel, x_vel, 0]) , XStay , YStay , RoombaPrevX , RoombaPrevY
+    dist = np.sqrt(np.sum((goal-start)**2))
+    x_vel, y_vel = min(ROOMBA_TRACKING_SPEED * 2 * 1.2 * dist/(np.sqrt(image_height * image_width)), ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
+    if ROOMBA_CHANGE_COMPE == True :
+        OldX = x_vel
+        OldY = y_vel
+        x_vel = RoombaCompensate ( RoombaPrevX , x_vel , X_ROOMBA_CHANGE_DIV )
+        y_vel = RoombaCompensate ( RoombaPrevY , y_vel , Y_ROOMBA_CHANGE_DIV )
+        RoombaPrevX = OldX
+        RoombaPrevY = OldY
+    if GRADIENT_SPEED_CHANGE == True :
+        x_vel = GetNewSpeed ( XStay , x_vel , X_SPEED_CHANGE_DIV )
+        y_vel = GetNewSpeed ( YStay , y_vel , Y_SPEED_CHANGE_DIV )
+        XStay = x_vel
+        YStay = y_vel
+    return np.array([y_vel, -x_vel, 0]) , XStay , YStay , RoombaPrevX , RoombaPrevY
 
 
 def follow_nearest_roomba(roombas, drone_midpoint, XStay, YStay, RoombaPrevX, RoombaPrevY):
@@ -199,12 +199,13 @@ with Realsense((640, 480)) as realsense:
         while True:
             status, color, depth = realsense.next()
             if status:
+                print(t.altitude)
                 roombas = roomba_detector.detect(color)
                 # if roombas:
                 #     for roomba in roombas:
                 #         roomba.draw(color)
                 # realsense.render(color, depth)
                 dronex, droney, roombaprevx, roombaprevy = update(color, roombas, dronex, droney, roombaprevx, roombaprevy)
-                time.sleep(0.01)
+                time.sleep(0.1)
     except KeyboardInterrupt as e:
         print('Quitting...')
