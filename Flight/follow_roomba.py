@@ -23,13 +23,13 @@ ROOMBA_CHANGE_COMPE = True
 
 ATTEMPT_LAND = True
 LAND_CHANGE_SPEED = 0.6
-ROOMBA_TRACKING_SPEED = 0.5
+ROOMBA_TRACKING_SPEED = 0.6
 SPEED_CHECK_PLUS = 0.00
 MAX_LOST_TARGET_TIME = 0
 IsRoombaLastImage = False
 image_height = 640
 image_width = 480
-hovering = False
+is_hovering = False
 time_since_last_roomba = 0
 
 
@@ -44,7 +44,7 @@ def GetTrueAltitude(debug=False):
 def GetMetersPerPixel():
     ImageWidthInMeters = 2 * \
         math.tan(math.radians(CAMERA_FIELD_OF_VIEW / 2.0)) * \
-                 GetTrueAltitude(debug=True)
+                 GetTrueAltitude(debug=False)
     MetersPerPixel = ImageWidthInMeters / image_width
     return MetersPerPixel
 
@@ -109,7 +109,7 @@ def get_velocity_vector2d(start, goal, speed, XStay, YStay, RoombaPrevX, RoombaP
                    normalize((goal-start).reshape(-1, 1))
     x_vel, y_vel = DroneVel
 
-    return np.array([-y_vel, x_vel, 0]), XStay, YStay, RoombaPrevX, RoombaPrevY
+    return np.array([y_vel,-x_vel, 0]), XStay, YStay, RoombaPrevX, RoombaPrevY
 
     # dist = np.sqrt(np.sum((goal-start)**2))
     # x_vel, y_vel = min(ROOMBA_TRACKING_SPEED * 2 * 1.2 * dist/(np.sqrt(image_height * image_width)), ROOMBA_TRACKING_SPEED)*normalize((goal - start).reshape(-1, 1))
@@ -137,11 +137,10 @@ def follow_nearest_roomba(roombas, drone_midpoint, XStay, YStay, RoombaPrevX, Ro
         drone_midpoint, np.array: Midpoint of the drone, we navigate relative to this point
     @returns:
     """
-
     # Uncomment when in python2
-    # if DroneTooFast () :
-    #     t.hover()
-    if roombas:
+    if DroneTooFast () :
+        t.hover()
+    elif roombas:
         roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
         target_idx = np.argmin(
             np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
@@ -150,14 +149,11 @@ def follow_nearest_roomba(roombas, drone_midpoint, XStay, YStay, RoombaPrevX, Ro
             drone_midpoint, roomba_midpoints[target_idx], ROOMBA_TRACKING_SPEED, XStay, YStay, RoombaPrevX, RoombaPrevY)
 
         print("Roomba found: ", velocity_vector)
-        # t.fly(velocity_vector)
-        hovering = False
+        t.fly(velocity_vector)
         time_since_last_roomba = timer()
 
     else:
-        # t.hover()
-        hovering = True
-        print ( "hovering" )
+        print("No Roombas")
 
     return XStay , YStay , RoombaPrevX , RoombaPrevY
 
@@ -189,12 +185,12 @@ with Realsense((640, 480)) as realsense:
     try:
         roomba_detector = RoombaDetector(threshold=.99)
         # cv2.namedWindow("REALSENSE_STREAM_WINDOW", cv2.WINDOW_AUTOSIZE)
-        # t = Tower()
+        t = Tower()
         # Uncomment for python2 threading
-        # t.connected.wait()
+        t.connected.wait()
         print("Taking off")
-        # t.takeoff(1.0)
-        # t.takeoff_completed.wait()
+        t.takeoff(1.0)
+        t.takeoff_completed.wait()
         print("Done taking off")
         dronex = 0
         droney = 0
@@ -204,10 +200,11 @@ with Realsense((640, 480)) as realsense:
             status, color, depth = realsense.next()
             if status:
                 roombas = roomba_detector.detect(color)
-                if roombas:
-                    for roomba in roombas:
-                        roomba.draw(color)
+                # if roombas:
+                #     for roomba in roombas:
+                #         roomba.draw(color)
                 # realsense.render(color, depth)
                 dronex, droney, roombaprevx, roombaprevy = update(color, roombas, dronex, droney, roombaprevx, roombaprevy)
+                time.sleep(0.01)
     except KeyboardInterrupt as e:
         print('Quitting...')
