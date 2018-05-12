@@ -114,7 +114,7 @@
           <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
           <div style="text-align: left;">
-            Vehicle Altitude: {{ vehicle_data.altitude.toFixed(2) }} (m)
+            Altitude: {{ vehicle_data.altitude.toFixed(2) }} (m)
             <br>              
             Target Altitude: {{ vehicle_data.pid.target_alt.toFixed(2) }} (m)
             <br>         
@@ -136,9 +136,9 @@
 
           <div style="text-align: left;">
             
-            Vehicle Y Velocity: {{ vehicle_data.velocity.y.toFixed(2) }} (m/s)
+            Y Vel: {{ vehicle_data.velocity.y.toFixed(2) }} (m/s)
             <br>
-            Target Y Velocity: {{ vehicle_data.pid.target_roll_vel.toFixed(2) }} (m/s)
+            Target Y Vel: {{ vehicle_data.pid.target_roll_vel.toFixed(2) }} (m/s)
 
             <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
@@ -157,9 +157,9 @@
 
           <div style="text-align: left;">
 
-            Vehicle X Velocity: {{ vehicle_data.velocity.x.toFixed(2) }} (m/s)
+            X Vel: {{ vehicle_data.velocity.x.toFixed(2) }} (m/s)
             <br>
-            Target X Velocity: {{ vehicle_data.pid.target_pitch_vel.toFixed(2) }} (m/s)
+            Target X Vel: {{ vehicle_data.pid.target_pitch_vel.toFixed(2) }} (m/s)
 
             <hr style="margin-top: 10px; margin-bottom: 10px; height: 2px;">
 
@@ -178,7 +178,7 @@
 
           <div style="text-align: left;">
 
-            Vehicle Yaw: {{ vehicle_data.attitude.yaw.toFixed(2) }} &deg;
+            Yaw: {{ vehicle_data.attitude.yaw.toFixed(2) }} &deg;
             <br>
             Target Yaw: {{ vehicle_data.pid.target_yaw.toFixed(2) }} &deg;
 
