@@ -1,9 +1,20 @@
+
+#include <stdio.h>
+#include <string>
+#include <map>
+
 #include <boost/bind.hpp>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
-#include <stdio.h>
 #include <gazebo/sensors/sensors.hh>
+#include <gazebo/msgs/msgs.hh>
+#include <gazebo/transport/transport.hh>
+
+using namespace std;
+using namespace gazebo;
+
+const string ROOMBA_TOUCHED_EVENT_TOPIC_NAME = "~/roomba_touched";
 
 const double ROOMBA_TIME_BETWEEN_180 = 20 ;
 const double ROOMBA_TIME_BETWEEN_NOISE = 5 ;
@@ -30,6 +41,8 @@ const unsigned int MOVEMENT_STATE_45_ROTATE = 3 ;
 const bool ROTATE_RIGHT = true ;
 const bool ROTATE_LEFT = false ;
 
+const string DRONE_NAME = "Sentinel";
+
 namespace gazebo
 {
 
@@ -48,7 +61,7 @@ namespace gazebo
   common::Time GetCurrentTime ( )
   {
     physics::WorldPtr world = physics::get_world("default");
-    common::Time CurrentTime = world->GetSimTime();
+    common::Time CurrentTime = world->SimTime();
     return CurrentTime ;
   }
 
@@ -98,6 +111,10 @@ namespace gazebo
   class ModelPush : public ModelPlugin
   {
     private: RoombaState MyState ;
+    private: string roomba_touched_topic_name;
+    private: transport::PublisherPtr roomba_touched_event_publisher;
+    private: transport::NodePtr node;
+    private: msgs::GzString roomba_name;
 
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
     {
@@ -105,6 +122,11 @@ namespace gazebo
 
       // Store the pointer to the model
       this->model = _parent;
+      this->roomba_touched_topic_name = ROOMBA_TOUCHED_EVENT_TOPIC_NAME;
+      this->node = transport::NodePtr(new transport::Node());
+      this->node->Init("default");
+      this->roomba_touched_event_publisher = this->node->Advertise<gazebo::msgs::GzString>(this->roomba_touched_topic_name);
+      this->roomba_name.set_data(this->model->GetName());
 
       //this->model->SetAngularVel(math::Vector3(0, 0, -3));
 
@@ -179,6 +201,36 @@ namespace gazebo
           contacts = contactSensor->Contacts();
           if ( contacts.contact_size() > 0 )
           {
+            bool touched_drone = false;
+
+            for (int i = 0; i < contacts.contact_size() && !touched_drone; ++i)
+            {
+              std::map<std::string, physics::Contact> collision_one_contacts = contactSensor->Contacts(contacts.contact(i).collision1());
+              std::map<std::string, physics::Contact> collision_two_contacts = contactSensor->Contacts(contacts.contact(i).collision2());
+
+              for (auto const& element : collision_one_contacts)
+              {
+                if (element.second.collision1->GetModel()->GetName() == DRONE_NAME || element.second.collision2->GetModel()->GetName() == DRONE_NAME)
+                {
+                  touched_drone = true;
+                  break;
+                }
+              }
+
+              if (!touched_drone)
+                for (auto const& element : collision_two_contacts)
+                {
+                  if (element.second.collision1->GetModel()->GetName() == DRONE_NAME || element.second.collision2->GetModel()->GetName() == DRONE_NAME)
+                  {
+                    touched_drone = true;
+                    break;
+                  }
+                }
+            }
+
+            if (touched_drone)
+              this->roomba_touched_event_publisher->Publish(this->roomba_name);
+
             Output = true ;
           }
         }
@@ -202,6 +254,36 @@ namespace gazebo
           contacts = contactSensor->Contacts();
           if ( contacts.contact_size() > 0 )
           {
+            bool touched_drone = false;
+
+            for (int i = 0; i < contacts.contact_size() && !touched_drone; ++i)
+            {
+              std::map<std::string, physics::Contact> collision_one_contacts = contactSensor->Contacts(contacts.contact(i).collision1());
+              std::map<std::string, physics::Contact> collision_two_contacts = contactSensor->Contacts(contacts.contact(i).collision2());
+
+              for (auto const& element : collision_one_contacts)
+              {
+                if (element.second.collision1->GetModel()->GetName() == DRONE_NAME || element.second.collision2->GetModel()->GetName() == DRONE_NAME)
+                {
+                  touched_drone = true;
+                  break;
+                }
+              }
+
+              if (!touched_drone)
+                for (auto const& element : collision_two_contacts)
+                {
+                  if (element.second.collision1->GetModel()->GetName() == DRONE_NAME || element.second.collision2->GetModel()->GetName() == DRONE_NAME)
+                  {
+                    touched_drone = true;
+                    break;
+                  }
+                }
+            }
+
+            if (touched_drone)
+              this->roomba_touched_event_publisher->Publish(this->roomba_name);
+                        
             Output = true ;
           }
         }
@@ -213,7 +295,7 @@ namespace gazebo
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
       physics::WorldPtr world = physics::get_world("default");
-      common::Time cur_time = world->GetSimTime();
+      common::Time cur_time = world->SimTime();
       //std::cout << " cur_time = " << cur_time << std::endl;
       // Apply a small linear velocity to the model.
       //this->model->SetLinearVel(math::Vector3(3, 0, 0));

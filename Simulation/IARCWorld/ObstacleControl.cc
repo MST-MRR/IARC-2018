@@ -64,7 +64,7 @@ namespace gazebo
       
       IsWaiting = false ;
       physics::WorldPtr world = physics::get_world("default");
-      LastBumpTime = world->GetSimTime();
+      LastBumpTime = world->SimTime();
     }
     
     bool GetFrontTouchSensorState ( )
@@ -95,7 +95,7 @@ namespace gazebo
     {
       
       physics::WorldPtr world = physics::get_world("default");
-      common::Time cur_time = world->GetSimTime();
+      common::Time cur_time = world->SimTime();
       
       if ( IsWaiting == true )
       {

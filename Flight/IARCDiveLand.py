@@ -35,7 +35,7 @@ _DEBUG = True
 
 class SimpleDroneAI():
     # camage image message location
-    CAMERA_MSG_LOCATION = '/gazebo/default/iris/iris_demo/gimbal_small_2d/tilt_link/camera/image'
+    CAMERA_MSG_LOCATION = '/gazebo/default/realsense_camera/rs/stream/color'
     # camera message type
     CAMERA_MSG_TYPE = 'gazebo.msgs.ImageStamped'
     # speed to follow roombas with in m/s
@@ -187,7 +187,6 @@ class SimpleDroneAI():
         """
         self._takeoff()
         manager = yield From(pygazebo.connect())
-
         subscriber = manager.subscribe(SimpleDroneAI.CAMERA_MSG_LOCATION, SimpleDroneAI.CAMERA_MSG_TYPE, self._event_handler)
         yield From(subscriber.wait_for_connection())
 

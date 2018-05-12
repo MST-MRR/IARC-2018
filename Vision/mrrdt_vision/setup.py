@@ -10,7 +10,7 @@ from setuptools import find_packages
 from setuptools import setup
 from mrrdt_vision.__init__ import __version__
 
-REQUIRED_PACKAGES = ['opencv-python>=3.3.0', 'scikit-learn>=0.19.1', 'numpy>=1.13.3']
+REQUIRED_PACKAGES = ['scikit-learn>=0.19.1', 'numpy>=1.13.3']
 PACKAGE_NAME = 'mrrdt_vision'
 
 setup(
