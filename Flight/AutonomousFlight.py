@@ -1,6 +1,8 @@
 import time
 import math
 import numpy as np
+import threading
+
 from PID import PID
 
 class PIDValue():
@@ -74,7 +76,12 @@ class PIDFlightController(object):
 
   @target_velocity.setter
   def target_velocity(self, velocity):
-    self.pitch_pid.SetPoint, self.roll_pid.SetPoint, self.throttle_pid.SetPoint = velocity
+    x_vel, y_vel, z_vel = velocity
+    # yaw_angle = self.atc.vehicle.attitude.yaw
+    # cos, sin = (math.cos(-yaw_angle), math.sin(-yaw_angle))
+    # x_vel, y_vel = (x_vel*cos-y_vel*sin, y_vel*cos+x_vel*sin)
+    print(self.atc.vehicle.velocity)
+    self.pitch_pid.SetPoint, self.roll_pid.SetPoint, self.throttle_pid.SetPoint = (x_vel, y_vel, z_vel)
 
   @property
   def target_altitude(self):
@@ -105,9 +112,10 @@ class PIDFlightController(object):
     self.throttle_pid.update(z_vel)
     self.throttle_pwm += self.throttle_pid.output
 
-    if math.pi/2 <= np.abs(self.atc.vehicle.attitude.yaw % (2*math.pi)) <= 3*math.pi/2:
-      x_vel, y_vel = (-x_vel, -y_vel)
-
+    # # yaw_angle = self.atc.vehicle.attitude.yaw
+    # # cos, sin = (math.cos(-yaw_angle), math.sin(-yaw_angle))
+    # # x_vel, y_vel = (x_vel*cos - y_vel*sin, y_vel*cos+x_vel*sin)
+    # print(yaw_angle)
     if "HOVER" in self.atc.state:
       self.clear_pitch_controller()
       self.clear_roll_controller()

@@ -13,6 +13,7 @@ from os import system
 from time import sleep
 from copy import deepcopy
 from sys import stdout
+from marshmallow import Schema, fields, pprint
 from AutonomousFlight import PIDFlightController
 
 import dronekit
@@ -49,8 +50,47 @@ class Tower(object):
     self.land_completed = threading.Event()
     self.failsafe_controller = None
     self.connected = threading.Event()
+    self.ready_for_serialization = threading.Event()
     self.connect()
+
+  def _get_fields(self):
+    return {
+      'altitude': self.altitude,
+      'airspeed': self.vehicle.airspeed,
+      'velocity_x': self.vehicle.velocity[0],
+      'velocity_y': self.vehicle.velocity[1],
+      'velocity_z': self.vehicle.velocity[2],
+      'voltage': self.vehicle.battery.voltage,
+      'state': self.state,
+      'mode': self.vehicle.mode.name,
+      'armed': self.vehicle.armed,
+      'roll': self.vehicle.attitude.roll,
+      'pitch': self.vehicle.attitude.pitch,
+      'yaw': self.vehicle.attitude.yaw,
+      'altitude_controller_output': self.pid_flight_controller.altitude_pid.output,
+      'altitude_rc_output': self.pid_flight_controller.altitude_pwm,
+      'target_altitude': self.pid_flight_controller.target_altitude,
+      'pitch_controller_output': self.pid_flight_controller.pitch_pid.output,
+      'pitch_rc_output': self.pid_flight_controller.pitch_pwm,
+      'target_pitch_velocity': self.pid_flight_controller.pitch_pid.SetPoint,
+      'roll_controller_output': self.pid_flight_controller.roll_pid.output,
+      'roll_rc_output': self.pid_flight_controller.roll_pwm,
+      'target_roll_velocity': self.pid_flight_controller.roll_pid.SetPoint,
+      'yaw_controller_output': self.pid_flight_controller.yaw_pid.output,
+      'yaw_rc_output': self.pid_flight_controller.yaw_pwm,
+      'target_yaw': self.pid_flight_controller.yaw_pid.SetPoint
+    }
+  
+  @property
+  def json(self):
+    ignore=('mode', 'altitude', 'state')
+
+    for name, value in self._get_fields().items():
+      if name not in ignore:
+        setattr(self, name, value)
     
+    return self.schema.dump(self)
+
   def connect(self):
     def attempt_to_connect():
       connected = False
@@ -72,6 +112,14 @@ class Tower(object):
             self.failsafe_controller = FailsafeController(self)
             self.failsafe_controller.daemon = True
             self.failsafe_controller.start()
+  
+            def to_marshmellow_field(v):
+              print(v)
+              cast = {str: fields.Str(), float: fields.Float(), int: fields.Integer(), bool: fields.Boolean()}
+              return cast[type(v)]
+
+            self.schema = type('ATC_Schema', (Schema,), {k: to_marshmellow_field(v) for k, v in self._get_fields().items()})()
+            self.ready_for_serialization.set()
             
     
     connection_thread = threading.Thread(target=attempt_to_connect)

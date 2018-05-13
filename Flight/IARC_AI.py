@@ -5,6 +5,11 @@
 # Spring 2018
 # Christopher O'Toole
 
+import eventlet
+eventlet.monkey_patch(socket=True)
+
+from flask_socketio import SocketIO
+
 from ATC import Tower, VehicleStates
 import ATC
 import cv2
@@ -76,10 +81,15 @@ class SimpleDroneAI():
         self._last_image_retrieved = None
         self._last_depth_image_retrieved = None
         self._reset_ai = False
+        self.socketio = SocketIO(message_queue='redis://localhost:6379/0', async_mode='eventlet')
 
     def _update(self, img, depth_img):
+        if self._tower.ready_for_serialization.is_set():
+            self.socketio.emit('tower', self._tower.json, namespace='/comms')
+            print('emitted')
         if self._tower.takeoff_completed.is_set():
-            self._tower.fly(np.array([0, .3, 0]))
+            pass
+            #self._tower.fly(np.array([.3, 0, 0]))
             
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
