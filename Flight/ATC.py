@@ -180,7 +180,7 @@ class Tower(object):
   @property
   def altitude(self):
     self._assert_vehicle_is_connected()
-    return self.vehicle.location.global_relative_frame.alt
+    return self.vehicle.rangefinder.distance
 
   def in_range(self, threshold, base_value, num):
     return np.abs(base_value-num) <= threshold
