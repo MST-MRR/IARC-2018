@@ -43,7 +43,8 @@ class Tower(object):
 
   ASCEND_VELOCITY = np.array([0., 0., .3])
 
-  def __init__(self):
+  def __init__(self, in_simulator=True):
+    self.connection_str = self.SIM if in_simulator else self.USB
     self.state = VehicleStates.landed
     self.stop = threading.Event()
     self.takeoff_completed = threading.Event()
@@ -89,14 +90,14 @@ class Tower(object):
       if name not in ignore:
         setattr(self, name, value)
     
-    return self.schema.dump(self)
+    return self.schema.dumps(self)
 
   def connect(self):
     def attempt_to_connect():
       connected = False
       while not connected and not self.stop.is_set():
         try:
-          self.vehicle = dronekit.connect(self.SIM, wait_ready=True)
+          self.vehicle = dronekit.connect(self.connection_str, wait_ready=True)
         except:
           pass
         else:

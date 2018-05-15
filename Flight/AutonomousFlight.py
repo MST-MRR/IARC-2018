@@ -45,7 +45,7 @@ class PIDFlightController(object):
   ROLL_PID = PIDValue(2.331794, 0.046289, 3.907261)
   YAW_PID = PIDValue(.73, 0., 8.)
   THROTTLE_PID = PIDValue(1.8125, 0., 4.625)
-  ALTITUDE_PID = PIDValue(0.470068, 0.103482, 0.068198)
+  ALTITUDE_PID = PIDValue(0.39, 0.09, 0.05)
   ROLL_CHANNEL = '1'
   PITCH_CHANNEL = '2'
   THROTTLE_CHANNEL = '3'
@@ -77,9 +77,9 @@ class PIDFlightController(object):
   @target_velocity.setter
   def target_velocity(self, velocity):
     x_vel, y_vel, z_vel = velocity
-    # yaw_angle = self.atc.vehicle.attitude.yaw
-    # cos, sin = (math.cos(-yaw_angle), math.sin(-yaw_angle))
-    # x_vel, y_vel = (x_vel*cos-y_vel*sin, y_vel*cos+x_vel*sin)
+    yaw_angle = self.atc.vehicle.attitude.yaw
+    cos, sin = (math.cos(-yaw_angle), math.sin(-yaw_angle))
+    x_vel, y_vel = (x_vel*cos-y_vel*sin, y_vel*cos+x_vel*sin)
     print(self.atc.vehicle.velocity)
     self.pitch_pid.SetPoint, self.roll_pid.SetPoint, self.throttle_pid.SetPoint = (x_vel, y_vel, z_vel)
 
@@ -111,11 +111,7 @@ class PIDFlightController(object):
     
     self.throttle_pid.update(z_vel)
     self.throttle_pwm += self.throttle_pid.output
-
-    # # yaw_angle = self.atc.vehicle.attitude.yaw
-    # # cos, sin = (math.cos(-yaw_angle), math.sin(-yaw_angle))
-    # # x_vel, y_vel = (x_vel*cos - y_vel*sin, y_vel*cos+x_vel*sin)
-    # print(yaw_angle)
+    
     if "HOVER" in self.atc.state:
       self.clear_pitch_controller()
       self.clear_roll_controller()

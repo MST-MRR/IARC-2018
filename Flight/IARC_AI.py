@@ -5,11 +5,7 @@
 # Spring 2018
 # Christopher O'Toole
 
-import eventlet
-eventlet.monkey_patch(socket=True)
-
-from flask_socketio import SocketIO
-
+import math
 from ATC import Tower, VehicleStates
 import ATC
 import cv2
@@ -18,7 +14,9 @@ import time
 import sys
 import threading
 import multiprocessing
-import pygame
+from mrrdt_vision.obj_detect.roomba_cnn import RoombaDetector
+from timeit import default_timer as timer
+from sklearn.preprocessing import normalize
 from sklearn.preprocessing import normalize
 
 import pygazebo
@@ -59,6 +57,8 @@ class SimpleDroneAI():
     DEPTH_FAR_CLIP_MM = 10000
     # depth near clip
     DEPTH_NEAR_CLIP_MM = 300
+    # camera fov
+    CAMERA_FIELD_OF_VIEW = 60
     # color image stream window title
     COLOR_IMAGE_STREAM_DEBUG_NAME = 'color'
     # depth image stream window title
@@ -71,6 +71,16 @@ class SimpleDroneAI():
     DRONE_SHUTDOWN_TASK_TIMEOUT = 7
     # max speed (m/s)
     CRUISING_SPEED = 1
+    # roomba speed (m/s)
+    ROOMBA_SPEED = .33
+    # speed to follow roombas at normally
+    ROOMBA_TRACKING_SPEED = .33
+    # hover if drone goes beyond this speed
+    DRONE_HARD_SPEED_LIMIT = 1.2*ROOMBA_TRACKING_SPEED
+    # stop when we are this many meters away from the roomba
+    ROOMBA_DISTANCE_THRESHOLD = .1
+    # hover after losing the roomba for this much time in seconds
+    MAX_LOST_TARGET_TIME = 10
 
     def __init__(self, ardupilot_connection):
         self._tower = Tower()
@@ -80,19 +90,54 @@ class SimpleDroneAI():
         self._depth_image_lock = threading.Lock()
         self._last_image_retrieved = None
         self._last_depth_image_retrieved = None
+        self._roomba_detector = RoombaDetector(threshold=.7)
         self._reset_ai = False
-        self.socketio = SocketIO(message_queue='redis://localhost:6379/0', async_mode='eventlet')
+        self._time_since_last_roomba = 0
+
+    def get_altitude(self):
+        return self._tower.altitude
+
+    def is_drone_above_speed_limit(self):
+        return self._tower.vehicle.airspeed > self.DRONE_HARD_SPEED_LIMIT
+    
+    def get_meters_per_pixel(self, img):
+        image_width = img.shape[1]
+        image_width_in_meters = 2*math.tan(math.radians(self.CAMERA_FIELD_OF_VIEW/2.)) * self.get_altitude()
+        return image_width_in_meters / image_width
+
+    def get_velocity_vector2d(self, img, start, goal, speed):
+        dist = float(np.sqrt(np.sum((goal-start)**2)))*self.get_meters_per_pixel(img)
+        x_vel, y_vel = min(dist if dist > self.ROOMBA_DISTANCE_THRESHOLD else 0, speed)*normalize((goal-start).reshape(-1, 1), axis=1)
+        return np.array([-y_vel, x_vel, 0])
 
     def _update(self, img, depth_img):
-        if self._tower.ready_for_serialization.is_set():
-            self.socketio.emit('tower', self._tower.json, namespace='/comms')
-            print('emitted')
+        roombas = None
+
         if self._tower.takeoff_completed.is_set():
-            pass
-            #self._tower.fly(np.array([.3, 0, 0]))
+            h, w = img.shape[:2]
+            drone_midpoint = np.asarray([w/2, h/2])
+            roombas = self._roomba_detector.detect(img)
+
+            if self.is_drone_above_speed_limit():
+               self._tower.hover()
+            
+            if roombas:
+                roomba_midpoints = np.asarray([roomba.center for roomba in roombas])
+                target_idx = np.argmin(np.sum((roomba_midpoints-drone_midpoint)**2, axis=1))
+                target = roombas[target_idx]
+                velocity = self.get_velocity_vector2d(img, drone_midpoint, roomba_midpoints[target_idx], self.ROOMBA_TRACKING_SPEED)
+                self._tower.fly(velocity)
+                self._time_since_last_roomba = timer()
+            elif timer() - self._time_since_last_roomba >= self.MAX_LOST_TARGET_TIME:
+                self._tower.hover()
             
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+            if roombas is not None:
+                for roomba in roombas:
+                    roomba.draw(bgr_img)
+            
             cv2.imshow(SimpleDroneAI.COLOR_IMAGE_STREAM_DEBUG_NAME, bgr_img)
 
             norm = (depth_img.astype(np.float32)-depth_img.min())/(depth_img.max()-depth_img.min()+1e-9)*255
