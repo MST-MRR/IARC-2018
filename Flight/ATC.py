@@ -46,6 +46,7 @@ class Tower(object):
 
   def __init__(self, in_simulator=True):
     self.last_gimbal_angle = 105
+    self.speed = 0.00
     self.connection_str = self.SIM if in_simulator else self.USB
     self.state = VehicleStates.landed
     self.stop = threading.Event()
@@ -249,6 +250,6 @@ class FailsafeController(threading.Thread):
           self.atc.send_gimbal_message()
       if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
         self.atc.pid_flight_controller.write_to_rc_channels()
-        
-    
+        self.atc.speed = np.sqrt(np.sum(self.atc.vehicle.velocity**2, axis=1))
+
       sleep(.01)

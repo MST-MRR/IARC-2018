@@ -31,7 +31,7 @@ class SimpleDroneAI():
         self._time_since_last_roomba = 0
 
     def is_drone_above_speed_limit(self):
-        return self._tower.vehicle.airspeed > self.DRONE_HARD_SPEED_LIMIT
+        return self._tower.speed > self.DRONE_HARD_SPEED_LIMIT
 
     def get_meters_per_pixel(self, img):
         image_width = img.shape[1]
