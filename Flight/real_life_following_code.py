@@ -17,7 +17,7 @@ class SimpleDroneAI():
     # speed to follow roombas at normally
     ROOMBA_TRACKING_SPEED = .4
     # hover if drone goes beyond this speed
-    DRONE_HARD_SPEED_LIMIT = 1.2*ROOMBA_TRACKING_SPEED
+    DRONE_HARD_SPEED_LIMIT = 1.5*ROOMBA_TRACKING_SPEED
     # stop when we are this many meters away from the roomba
     ROOMBA_DISTANCE_THRESHOLD = .1
     # hover after losing the roomba for this much time in seconds
