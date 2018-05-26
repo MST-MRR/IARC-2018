@@ -147,7 +147,7 @@ class Tower(object):
     self.vehicle.armed = True
   
   def send_gimbal_message(self):
-        gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
+     gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
     self.last_gimbal_angle = 105 + int(math.degrees(self.vehicle.attitude.pitch))
 
   @property
