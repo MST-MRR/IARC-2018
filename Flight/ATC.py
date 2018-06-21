@@ -117,7 +117,7 @@ class Tower(object):
             self.failsafe_controller.daemon = True
             self.failsafe_controller.start()
 
-            self.goal_angle = self.vehicle.attitude.yaw
+            self.goal_angle = math.degrees(self.vehicle.attitude.yaw)
   
             def to_marshmellow_field(v):
               print(v)
@@ -190,28 +190,9 @@ class Tower(object):
     return np.sqrt(np.sum(self.vehicle.velocity**2, axis=1))
 
   @property
-  def goal_direction(self):
-    yaw_angle = math.degrees(self.vehicle.attitude.yaw)
-    if yaw_angle <= 90:
-      if in_range(10, 45, yaw_angle):
-        return "North East"
-      else:
-        return "North"
-    elif yaw_angle <= 180:
-      if in_range(10, 135, yaw_angle):
-        return "South East"
-      else:
-        return "East"
-    elif yaw_angle <= 270:
-      if in_range(10, 225, yaw_angle):
-        return "South West"
-      else:
-        return "South"
-    else:
-      if in_range(10, 315, yaw_angle):
-        return "North West"
-      else:
-        return "West" 
+  def angle_from_goal(self):
+    current_yaw_angle = math.degrees(self.vehicle.attitude.yaw)
+    return abs(self.goal_angle - current_yaw_angle)
 
   def in_range(self, threshold, base_value, num):
     return np.abs(base_value-num) <= threshold
