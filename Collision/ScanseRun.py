@@ -10,7 +10,7 @@ minimum_height = 0
 coll_msg = {}
 lidar_connected = False
 
-#vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
+vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
 
 def determine_alt(distance, sector):
     if ((distance > 1.0 and distance < 1.5) and (sector == 2 or sector == 3 or sector == 4 or sector == 5)):
@@ -24,20 +24,21 @@ def determine_alt(distance, sector):
     else:
       return HIGH_ALT
 
-''' def send_lidar_message(min_dist, max_dist, current_dist, sector):
-    print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
+def send_lidar_message(min_dist, max_dist, current_dist, sector):
+    print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel))
+    
     message = vehicle.message_factory.distance_sensor_encode(
-    0,                                             # time since system boot, not used
-    min_dist,                                      # min distance cm
-    max_dist,                                      # max distance cm
-    current_dist,                                  # current distance, must be int
-    0,                                             # type = laser
-    0,                                             # onboard id, not used
-    sector,                                        # sensor rotation
-    0                                              # covariance, not used
+      0,                                             # time since system boot, not used
+      min_dist,                                      # min distance cm
+      max_dist,                                      # max distance cm
+      current_dist,                                  # current distance, must be int
+      0,                                             # type = laser
+      0,                                             # onboard id, not used
+      sector,                                        # sensor rotation
+      0                                              # covariance, not used
     )
     vehicle.send_mavlink(message)
-    vehicle.commands.upload()'''
+    vehicle.commands.upload()
 
 def collision():
 
@@ -69,6 +70,6 @@ def collision():
                     'fourth':sector[val][2]
                 }
                 # stateSync.sendCollision(height, coll_msg)
-                # send_lidar_message(10, 300, sector[val][0], sector[val][2]) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
+                send_lidar_message(10, 300, sector[val][0], sector[val][2]) #((8 - sector[val][2] % 8)) -- This is now implemented in altScan.py
         secval += 1
         sleep(0.05)
