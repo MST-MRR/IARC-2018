@@ -23,6 +23,7 @@ import os
 import time
 import threading
 import numpy as np
+import Collision.ScanseRun
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -125,11 +126,14 @@ class Tower(object):
 
             #self.schema = type('ATC_Schema', (Schema,), {k: to_marshmellow_field(v) for k, v in self._get_fields().items()})()
             #self.ready_for_serialization.set()
-            
+
     
     connection_thread = threading.Thread(target=attempt_to_connect)
     connection_thread.daemon = True
     connection_thread.start()
+    collision_thread = threading.Thread(target=collision)
+    collision_thread.daemon = True
+    collision_thread.start()
 
   def _assert_vehicle_is_connected(self):
     assert self.connected.is_set(), 'Not yet connected to vehicle'
@@ -151,6 +155,21 @@ class Tower(object):
   def send_gimbal_message(self):
     gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
     self.last_gimbal_angle = 105 + int(math.degrees(self.vehicle.attitude.pitch))
+
+  def send_lidar_message(self, min_dist, max_dist, current_dist, sector):
+    # print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
+    message = self.vehicle.message_factory.distance_sensor_encode(
+    0,                                             # time since system boot, not used
+    min_dist,                                      # min distance cm
+    max_dist,                                      # max distance cm
+    current_dist,                                  # current distance, must be int
+    0,                                             # type = laser
+    0,                                             # onboard id, not used
+    sector,                                        # sensor rotation
+    0                                              # covariance, not used
+    )
+    self.vehicle.send_mavlink(message)
+    self.vehicle.commands.upload()
 
   @property
   def is_armed(self):
@@ -258,7 +277,9 @@ class FailsafeController(threading.Thread):
     super(FailsafeController, self).__init__()
 
   def run(self):
+    global coll_msg
     while not self.stop.is_set():
+      self.send_lidar_message(coll_msg["first"], coll_msg["second"], coll_msg["third"], coll_msg["fourth"])
       self.atc.pid_flight_controller.update_controllers()
       # print self.atc.last_gimbal_angle, int(math.degrees(self.atc.vehicle.attitude.pitch))
       if (105 + int(math.degrees(self.atc.vehicle.attitude.pitch))) != self.atc.last_gimbal_angle:
