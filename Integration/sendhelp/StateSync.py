@@ -20,6 +20,7 @@ class StateSync:
         s_time = time.time()
         text = {'z':z, 'coll_msg':msg}
             
+        self.sock.connect("tcp://127.0.0.1:5678")
         # r = requests.post(EndPoint.COLLISION, data = json.dumps(text))
         self.sock.send(json.dumps(text))
 

@@ -8,7 +8,12 @@ MED_ALT = 2.0
 LOW_ALT = 1.5
 
 height = 0
-coll_msg = {}
+coll_msg = {
+  'first':300,
+  'second':300,
+  'third':sector[val][0],
+  'fourth':sector[val][2]
+  }
 lidar_connected = False
 
 #vehicle = dronekit.connect("/dev/serial/by-id/usb-3D_Robotics_PX4_FMU_v2.x_0-if00", wait_ready=True)
@@ -41,7 +46,6 @@ def determine_alt(distance, sector):
     vehicle.commands.upload()'''
 
 def collision():
-
   lidar = LIDAR()
   print("Connecting to LIDAR")
   lidar.connect_to_lidar()
@@ -60,6 +64,7 @@ def collision():
               for val in range(0,endVal):
                   det_height = determine_alt(sector[val][0], sector[val][2])
                   global height
+                  global coll_msg
                   height = max(height, det_height)
                   print "Sending message"
                   coll_msg = {
