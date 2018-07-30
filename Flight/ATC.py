@@ -44,9 +44,10 @@ class Tower(object):
 
   ASCEND_VELOCITY = np.array([0., 0., .3])
 
-  def __init__(self, in_simulator=True):
+  def __init__(self, in_simulator=False):
     self.last_gimbal_angle = 105
     self.connection_str = self.SIM if in_simulator else self.USB
+    self.goal_angle = 0.0
     self.state = VehicleStates.landed
     self.stop = threading.Event()
     self.takeoff_completed = threading.Event()
@@ -115,14 +116,15 @@ class Tower(object):
             self.failsafe_controller = FailsafeController(self)
             self.failsafe_controller.daemon = True
             self.failsafe_controller.start()
-  
+
+            self.goal_angle= float(math.degrees(self.vehicle.attitude.yaw)) + 180 
             def to_marshmellow_field(v):
               print(v)
               cast = {str: fields.Str(), float: fields.Float(), int: fields.Integer(), bool: fields.Boolean()}
               return cast[type(v)]
 
-            self.schema = type('ATC_Schema', (Schema,), {k: to_marshmellow_field(v) for k, v in self._get_fields().items()})()
-            self.ready_for_serialization.set()
+            #self.schema = type('ATC_Schema', (Schema,), {k: to_marshmellow_field(v) for k, v in self._get_fields().items()})()
+            #self.ready_for_serialization.set()
             
     
     connection_thread = threading.Thread(target=attempt_to_connect)
@@ -147,7 +149,7 @@ class Tower(object):
     self.vehicle.armed = True
   
   def send_gimbal_message(self):
-        gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
+    gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
     self.last_gimbal_angle = 105 + int(math.degrees(self.vehicle.attitude.pitch))
 
   @property
@@ -184,8 +186,18 @@ class Tower(object):
 
   @property
   def speed(self):
-    return np.sqrt(np.sum(self.vehicle.velocity**2, axis=1))
+    return np.sqrt(np.sum(np.asarray(self.vehicle.velocity)**2))
 
+  def angle_from_goal(self):
+    current_yaw_angle=float(math.degrees(self.vehicle.attitude.yaw))
+    if current_yaw_angle > self.goal_angle:
+    	return (-float(self.goal_angle) +(current_yaw_angle))
+    else:
+	return (-float(self.goal_angle) + (current_yaw_angle)+360)
+
+
+  def drone_yaw_angle(self):
+	return (math.degrees(self.vehicle.attitude.yaw) + 180)
   def in_range(self, threshold, base_value, num):
     return np.abs(base_value-num) <= threshold
 

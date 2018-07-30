@@ -1,0 +1,19 @@
+import numpy as np
+from ATC import Tower
+import math 
+import time 
+
+T = Tower(in_simulator=False)
+T.connected.wait() 
+x=10
+while x==10:
+	i = 0
+	current_drone_velocity =np.array([T.vehicle.velocity[1],T.vehicle.velocity[0]])
+	for dimensions in current_drone_velocity:
+		if np.abs(dimensions) <= .05:
+			current_drone_velocity[i] = 0
+		i = i + 1
+	print(current_drone_velocity)
+	time.sleep(.01)
+
+
