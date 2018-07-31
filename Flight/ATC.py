@@ -23,7 +23,7 @@ import os
 import time
 import threading
 import numpy as np
-import Collision.ScanseRun
+# import Collision.ScanseRun
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -131,9 +131,9 @@ class Tower(object):
     connection_thread = threading.Thread(target=attempt_to_connect)
     connection_thread.daemon = True
     connection_thread.start()
-    collision_thread = threading.Thread(target=collision)
+    ''' collision_thread = threading.Thread(target=collision)
     collision_thread.daemon = True
-    collision_thread.start()
+    collision_thread.start() '''
 
   def _assert_vehicle_is_connected(self):
     assert self.connected.is_set(), 'Not yet connected to vehicle'
@@ -156,7 +156,7 @@ class Tower(object):
     gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
     self.last_gimbal_angle = 105 + int(math.degrees(self.vehicle.attitude.pitch))
 
-  def send_lidar_message(self, min_dist, max_dist, current_dist, sector):
+  ''' def send_lidar_message(self, min_dist, max_dist, current_dist, sector):
     # print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
     message = self.vehicle.message_factory.distance_sensor_encode(
     0,                                             # time since system boot, not used
@@ -169,7 +169,7 @@ class Tower(object):
     0                                              # covariance, not used
     )
     self.vehicle.send_mavlink(message)
-    self.vehicle.commands.upload()
+    self.vehicle.commands.upload() '''
 
   @property
   def is_armed(self):
@@ -279,7 +279,7 @@ class FailsafeController(threading.Thread):
   def run(self):
     global coll_msg
     while not self.stop.is_set():
-      self.send_lidar_message(coll_msg["first"], coll_msg["second"], coll_msg["third"], coll_msg["fourth"])
+      # self.send_lidar_message(coll_msg["first"], coll_msg["second"], coll_msg["third"], coll_msg["fourth"])
       self.atc.pid_flight_controller.update_controllers()
       # print self.atc.last_gimbal_angle, int(math.degrees(self.atc.vehicle.attitude.pitch))
       if (105 + int(math.degrees(self.atc.vehicle.attitude.pitch))) != self.atc.last_gimbal_angle:
