@@ -68,7 +68,7 @@ class Tower(object):
   def _get_fields(self):
     return {
       'altitude': self.altitude,
-      'airspeed': self.vehicle.airspeed,
+      'airspeed': self._format3f(self.vehicle.airspeed),
       'velocity_x': self._format3f(self.vehicle.velocity[0]),
       'velocity_y': self._format3f(self.vehicle.velocity[1]),
       'velocity_z': self._format3f(self.vehicle.velocity[2]),
