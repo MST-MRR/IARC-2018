@@ -25,9 +25,12 @@ class Window():
     Parameters
     ----------
     name: str
-        Used as both the title and the name of the created window.
+        Used as both the title and the name of the created
+        window.
     window_type: int, optional
-        One or more OpenCV big flags specifying the appearance of the created window, defaults to `cv2.WINDOW_AUTOSIZE`.
+        One or more OpenCV big flags specifying the 
+        appearance of the created window, defaults 
+        to `cv2.WINDOW_AUTOSIZE`.
 
     Notes
     ----------
@@ -219,8 +222,13 @@ class VideoReader():
         if not self.cap.isOpened():
             raise StopIteration
 
-        return self.cap.read()[1]
+        frame = self.cap.read()[1]
 
+        if frame is None:
+            raise StopIteration
+        
+        return frame
+    
     # here for compatibility with Python 2
     def next(self):
         '''See `VideoReader.next` for this function's documentation'''

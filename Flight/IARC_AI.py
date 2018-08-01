@@ -17,7 +17,7 @@ import multiprocessing
 from mrrdt_vision.obj_detect.roomba_cnn import RoombaDetector
 from timeit import default_timer as timer
 from sklearn.preprocessing import normalize
-from sklearn.preprocessing import normalize
+from Client import send_message
 
 import pygazebo
 import pygazebo.msg.image_stamped_pb2
@@ -130,7 +130,7 @@ class SimpleDroneAI():
                 self._time_since_last_roomba = timer()
             elif timer() - self._time_since_last_roomba >= self.MAX_LOST_TARGET_TIME:
                 self._tower.hover()
-            
+
         if _DEBUG:
             bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -138,14 +138,14 @@ class SimpleDroneAI():
                 for roomba in roombas:
                     roomba.draw(bgr_img)
             
-            cv2.imshow(SimpleDroneAI.COLOR_IMAGE_STREAM_DEBUG_NAME, bgr_img)
-
             norm = (depth_img.astype(np.float32)-depth_img.min())/(depth_img.max()-depth_img.min()+1e-9)*255
             gray = norm.astype(np.uint8)
             color = cv2.applyColorMap(gray, cv2.COLORMAP_AUTUMN)
-            cv2.imshow(SimpleDroneAI.DEPTH_IMAGE_STREAM_DEBUG_NAME, color)
 
-            cv2.waitKey(1)
+            if self._tower.ready_for_serialization.is_set():
+                self._tower.color_image = bgr_img
+                self._tower.depth_image = color
+                send_message(self._tower.json)
 
         return self._ardupilot_connection.update()
 

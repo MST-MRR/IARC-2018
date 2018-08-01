@@ -26,7 +26,7 @@ ARROW_THICKNESS = 3
 # key to quit
 QUIT_KEY = 'q'
 # image(s) for this file's unit test
-TEST_VIDEO_PATH = '../data/IARC.mp4'
+TEST_VIDEO_PATH = '../data/20180531_101929.mp4'
 
 CWD_PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = 'ssd'

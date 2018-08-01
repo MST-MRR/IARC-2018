@@ -15,13 +15,19 @@ from copy import deepcopy
 from sys import stdout
 from marshmallow import Schema, fields, pprint
 from AutonomousFlight import PIDFlightController
+from Client import run_client_async, stop_client_async, send_message
 
 import dronekit
 import math
 import os
+import cv2
+from base64 import b64encode
 import time
 import threading
 import numpy as np
+
+def encode_image(img):
+  return b64encode(cv2.imencode('.jpeg', img)[1].tostring())
 
 class VehicleStates(object):
   hover = "HOVER"
@@ -44,6 +50,7 @@ class Tower(object):
   ASCEND_VELOCITY = np.array([0., 0., .3])
 
   def __init__(self, in_simulator=True):
+    run_client_async()
     self.connection_str = self.SIM if in_simulator else self.USB
     self.state = VehicleStates.landed
     self.stop = threading.Event()
@@ -53,21 +60,25 @@ class Tower(object):
     self.connected = threading.Event()
     self.ready_for_serialization = threading.Event()
     self.connect()
+    self._color_image = ''
+    self._depth_image = ''
+  
+  def _format3f(self, num): return '%.3f' % (num,)
 
   def _get_fields(self):
     return {
       'altitude': self.altitude,
       'airspeed': self.vehicle.airspeed,
-      'velocity_x': self.vehicle.velocity[0],
-      'velocity_y': self.vehicle.velocity[1],
-      'velocity_z': self.vehicle.velocity[2],
+      'velocity_x': self._format3f(self.vehicle.velocity[0]),
+      'velocity_y': self._format3f(self.vehicle.velocity[1]),
+      'velocity_z': self._format3f(self.vehicle.velocity[2]),
       'voltage': self.vehicle.battery.voltage,
       'state': self.state,
       'mode': self.vehicle.mode.name,
       'armed': self.vehicle.armed,
-      'roll': self.vehicle.attitude.roll,
-      'pitch': self.vehicle.attitude.pitch,
-      'yaw': self.vehicle.attitude.yaw,
+      'roll': self._format3f(math.degrees(self.vehicle.attitude.roll)),
+      'pitch': self._format3f(math.degrees(self.vehicle.attitude.pitch)),
+      'yaw': self._format3f(math.degrees(self.vehicle.attitude.yaw)),
       'altitude_controller_output': self.pid_flight_controller.altitude_pid.output,
       'altitude_rc_output': self.pid_flight_controller.altitude_pwm,
       'target_altitude': self.pid_flight_controller.target_altitude,
@@ -79,12 +90,14 @@ class Tower(object):
       'target_roll_velocity': self.pid_flight_controller.roll_pid.SetPoint,
       'yaw_controller_output': self.pid_flight_controller.yaw_pid.output,
       'yaw_rc_output': self.pid_flight_controller.yaw_pwm,
-      'target_yaw': self.pid_flight_controller.yaw_pid.SetPoint
+      'target_yaw': self.pid_flight_controller.yaw_pid.SetPoint,
+      'color_image': self.color_image,
+      'depth_image': self.depth_image
     }
   
   @property
   def json(self):
-    ignore=('mode', 'altitude', 'state')
+    ignore=('mode', 'altitude', 'state', 'color_image', 'depth_image')
 
     for name, value in self._get_fields().items():
       if name not in ignore:
@@ -92,6 +105,22 @@ class Tower(object):
     
     return self.schema.dumps(self)
 
+  @property 
+  def color_image(self):
+    return self._color_image
+  
+  @property
+  def depth_image(self):
+    return self._depth_image
+
+  @color_image.setter
+  def color_image(self, value):
+    self._color_image = encode_image(value)
+  
+  @depth_image.setter
+  def depth_image(self, value):
+    self._depth_image = encode_image(value)
+  
   def connect(self):
     def attempt_to_connect():
       connected = False
@@ -121,7 +150,6 @@ class Tower(object):
 
             self.schema = type('ATC_Schema', (Schema,), {k: to_marshmellow_field(v) for k, v in self._get_fields().items()})()
             self.ready_for_serialization.set()
-            
     
     connection_thread = threading.Thread(target=attempt_to_connect)
     connection_thread.daemon = True
@@ -139,6 +167,7 @@ class Tower(object):
     self.connected.clear()
     self.takeoff_completed.clear()
     self.land_completed.clear()
+    stop_client_async()
 
   def arm_drone(self):
     self._assert_vehicle_is_connected()
@@ -238,7 +267,7 @@ class FailsafeController(threading.Thread):
   def run(self):
     while not self.stop.is_set():
       self.atc.pid_flight_controller.update_controllers()
-      
+
       if self.atc.vehicle.armed and self.atc.vehicle.mode.name == "LOITER":
         self.atc.pid_flight_controller.write_to_rc_channels()
     
