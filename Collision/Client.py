@@ -1,13 +1,19 @@
+import os
 import asyncore
 import logging
 import socket
+import cv2
+import json
+from base64 import b64encode
 from multiprocessing import Process, JoinableQueue, Event
 from multiprocessing.queues import Empty
 
-logging.basicConfig(format='[%(levelname)s][thread %(thread)d at %(asctime)s]: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='[%(levelname)s][thread %(thread)d at %(asctime)s]: %(message)s', level=logging.INFO)
 
 HOST = '127.0.0.1'
 PORT = 8765
+
+TEST_VIDEO_PATH = os.path.join(os.getcwd(), 'ricky.mp4')
 
 class Client(asyncore.dispatcher):
     def __init__(self, queue, client_running, stop_event, host=HOST, port=PORT, chunk_size=8192):
@@ -49,13 +55,11 @@ class Client(asyncore.dispatcher):
                     continue
                 else:
                     break
-                
-            if len(self._buffer) <= 1: return
 
-        self._queue.task_done()
         sent = self.send(self._buffer[:self._chunk_size])
         self._buffer = self._buffer[sent:]
-
+        if not bool(self._buffer):
+            self._queue.task_done()
 
 queue = JoinableQueue()
 client_running = Event()
@@ -88,9 +92,18 @@ def send_message(msg):
         queue.join()
 
 if __name__ == '__main__':
+    cap = cv2.VideoCapture(TEST_VIDEO_PATH)
     run_client_async(queue, client_running, stop_event)
-    logging.debug('Started client.')
-    for i in range(100):
-        logging.debug('Attempting to send message (%d/100)' % (i,))
-        send_message('Hello world!')
+
+    try:
+        while True:
+            ret, frame = cap.read()
+            if (frame is None): break
+            json_message = json.dumps([{'img': b64encode(cv2.imencode('.jpeg', frame)[1].tostring())}])
+            send_message(json_message)
+            
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
+
     stop_client_async()

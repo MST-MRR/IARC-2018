@@ -156,7 +156,7 @@ class Tower(object):
     gimbal.send(105 + int(math.degrees(self.vehicle.attitude.pitch)))
     self.last_gimbal_angle = 105 + int(math.degrees(self.vehicle.attitude.pitch))
 
-  ''' def send_lidar_message(self, min_dist, max_dist, current_dist, sector):
+  def send_lidar_message(self, min_dist, max_dist, current_dist, sector):
     # print("Distance :" + str(current_dist) + " Quad: " + str(sector) + "Speed" + str(vel)
     message = self.vehicle.message_factory.distance_sensor_encode(
     0,                                             # time since system boot, not used
@@ -169,7 +169,7 @@ class Tower(object):
     0                                              # covariance, not used
     )
     self.vehicle.send_mavlink(message)
-    self.vehicle.commands.upload() '''
+    self.vehicle.commands.upload()
 
   @property
   def is_armed(self):
@@ -279,7 +279,7 @@ class FailsafeController(threading.Thread):
   def run(self):
     global coll_msg
     while not self.stop.is_set():
-      # self.send_lidar_message(coll_msg["first"], coll_msg["second"], coll_msg["third"], coll_msg["fourth"])
+      # self.send_lidar_message(coll_msg["min_dist"], coll_msg["max_dist"], coll_msg["current_dist"], coll_msg["sector"])
       self.atc.pid_flight_controller.update_controllers()
       # print self.atc.last_gimbal_angle, int(math.degrees(self.atc.vehicle.attitude.pitch))
       if (105 + int(math.degrees(self.atc.vehicle.attitude.pitch))) != self.atc.last_gimbal_angle:
